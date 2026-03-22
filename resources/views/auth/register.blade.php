@@ -1,52 +1,107 @@
-<x-guest-layout>
-    <form method="POST" action="{{ route('register') }}">
-        @csrf
+<!DOCTYPE html>
+<html lang="id">
 
-        <!-- Name -->
-        <div>
-            <x-input-label for="name" :value="__('Name')" />
-            <x-text-input id="name" class="block mt-1 w-full" type="text" name="name" :value="old('name')" required autofocus autocomplete="name" />
-            <x-input-error :messages="$errors->get('name')" class="mt-2" />
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Daftar - CPSS Dispora</title>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes gradient-move {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .animate-bg {
+            background-size: 200% 200%;
+            animation: gradient-move 12s ease infinite;
+        }
+    </style>
+</head>
+
+<body
+    class="antialiased font-sans animate-bg bg-gradient-to-br from-teal-700 via-emerald-600 to-teal-900 min-h-screen flex justify-center items-center p-4 relative overflow-hidden">
+
+    <div
+        class="absolute top-1/4 left-1/4 w-96 h-96 bg-teal-400 rounded-full mix-blend-multiply filter blur-[100px] opacity-60 animate-pulse">
+    </div>
+    <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-emerald-500 rounded-full mix-blend-multiply filter blur-[100px] opacity-60 animate-pulse"
+        style="animation-delay: 2s;"></div>
+
+    <div
+        class="bg-white rounded-[2rem] shadow-2xl w-full max-w-md overflow-hidden relative z-10 p-8 max-h-[95vh] overflow-y-auto">
+        <div class="text-center mb-6">
+            <div
+                class="w-16 h-16 bg-gradient-to-tr from-teal-400 to-emerald-300 rounded-2xl shadow-lg flex items-center justify-center text-white font-bold text-3xl mx-auto mb-4">
+                C</div>
+            <h3 class="text-2xl font-black text-teal-700 mb-1">Daftar Relawan CPSS</h3>
+            <p class="text-gray-500 text-sm">Bergabunglah menjadi agen perubahan.</p>
         </div>
 
-        <!-- Email Address -->
-        <div class="mt-4">
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
-        </div>
+        @if ($errors->any())
+            <div class="mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm border border-red-200">
+                Mohon periksa kembali isian Anda.
+            </div>
+        @endif
 
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
+        <form method="POST" action="{{ route('register') }}" class="space-y-4">
+            @csrf
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Nama Lengkap</label>
+                <div class="relative">
+                    <i class="fas fa-user absolute left-4 top-3.5 text-gray-400"></i>
+                    <input type="text" name="name" value="{{ old('name') }}" required autofocus
+                        class="w-full pl-11 pr-4 py-3 rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all">
+                </div>
+            </div>
 
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="new-password" />
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Email Aktif</label>
+                <div class="relative">
+                    <i class="fas fa-envelope absolute left-4 top-3.5 text-gray-400"></i>
+                    <input type="email" name="email" value="{{ old('email') }}" required
+                        class="w-full pl-11 pr-4 py-3 rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all">
+                </div>
+            </div>
 
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Kata Sandi</label>
+                <div class="relative">
+                    <i class="fas fa-lock absolute left-4 top-3.5 text-gray-400"></i>
+                    <input type="password" name="password" required
+                        class="w-full pl-11 pr-4 py-3 rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all">
+                </div>
+            </div>
 
-        <!-- Confirm Password -->
-        <div class="mt-4">
-            <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Konfirmasi Sandi</label>
+                <div class="relative">
+                    <i class="fas fa-check-double absolute left-4 top-3.5 text-gray-400"></i>
+                    <input type="password" name="password_confirmation" required
+                        class="w-full pl-11 pr-4 py-3 rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all">
+                </div>
+            </div>
 
-            <x-text-input id="password_confirmation" class="block mt-1 w-full"
-                            type="password"
-                            name="password_confirmation" required autocomplete="new-password" />
+            <button type="submit"
+                class="w-full py-3.5 mt-2 bg-gradient-to-r from-teal-500 to-emerald-500 text-white font-bold rounded-xl hover:from-teal-600 hover:to-emerald-600 shadow-lg hover:shadow-teal-500/30 transition-all active:scale-95">
+                Daftar & Langsung Masuk
+            </button>
+        </form>
 
-            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
-        </div>
+        <p class="mt-6 text-center text-sm text-gray-500">
+            Kembali ke <a href="{{ url('/') }}" class="text-teal-600 font-bold hover:underline">Halaman Utama</a>
+        </p>
+    </div>
+</body>
 
-        <div class="flex items-center justify-end mt-4">
-            <a class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800" href="{{ route('login') }}">
-                {{ __('Already registered?') }}
-            </a>
-
-            <x-primary-button class="ms-4">
-                {{ __('Register') }}
-            </x-primary-button>
-        </div>
-    </form>
-</x-guest-layout>
+</html>

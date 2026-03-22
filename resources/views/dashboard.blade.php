@@ -17,7 +17,7 @@
             <div
                 class="w-10 h-10 bg-gradient-to-tr from-teal-400 to-emerald-300 rounded-xl shadow-lg flex items-center justify-center text-indigo-900 font-bold text-xl mr-3">
                 C</div>
-            <span class="font-bold text-xl tracking-wider">CPSS DOD</span>
+            <span class="font-bold text-xl tracking-wider">CPSS</span>
         </div>
 
         <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
@@ -93,7 +93,8 @@
                     <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
                         <div
                             class="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center text-2xl">
-                            <i class="fas fa-map-marker-alt"></i></div>
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
                         <div>
                             <p class="text-sm text-gray-500 font-semibold">Fasilitas Dipetakan</p>
                             <h4 class="text-3xl font-black text-gray-800">124 <span
@@ -104,7 +105,8 @@
                     <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
                         <div
                             class="w-14 h-14 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center text-2xl">
-                            <i class="fas fa-users"></i></div>
+                            <i class="fas fa-users"></i>
+                        </div>
                         <div>
                             <p class="text-sm text-gray-500 font-semibold">Total Partisipasi Warga</p>
                             <h4 class="text-3xl font-black text-gray-800">5,430 <span
@@ -115,7 +117,8 @@
                     <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
                         <div
                             class="w-14 h-14 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center text-2xl">
-                            <i class="fas fa-hands-helping"></i></div>
+                            <i class="fas fa-hands-helping"></i>
+                        </div>
                         <div>
                             <p class="text-sm text-gray-500 font-semibold">Relawan Aktif</p>
                             <h4 class="text-3xl font-black text-gray-800">42 <span
@@ -150,7 +153,8 @@
                         <div class="relative z-10">
                             <div
                                 class="w-12 h-12 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center text-xl mb-4">
-                                <i class="fas fa-running"></i></div>
+                                <i class="fas fa-running"></i>
+                            </div>
                             <h4 class="text-lg font-bold text-gray-800 mb-1">Pilar 1: Partisipasi</h4>
                             <p class="text-gray-500 text-sm mb-6">Pelaporan cek-in masyarakat dan pelajar aktif
                                 berolahraga.</p>
@@ -166,7 +170,8 @@
                             <div class="relative z-10">
                                 <div
                                     class="w-12 h-12 bg-indigo-600 text-white rounded-xl flex items-center justify-center text-xl mb-4">
-                                    <i class="fas fa-trophy"></i></div>
+                                    <i class="fas fa-trophy"></i>
+                                </div>
                                 <div class="flex justify-between items-start">
                                     <h4 class="text-lg font-bold text-indigo-900 mb-1">Pilar 2: Talenta Muda</h4>
                                     <span
@@ -187,7 +192,8 @@
                             <div class="relative z-10">
                                 <div
                                     class="w-12 h-12 bg-slate-800 text-white rounded-xl flex items-center justify-center text-xl mb-4">
-                                    <i class="fas fa-chalkboard-teacher"></i></div>
+                                    <i class="fas fa-chalkboard-teacher"></i>
+                                </div>
                                 <div class="flex justify-between items-start">
                                     <h4 class="text-lg font-bold text-slate-900 mb-1">Pilar 3: Tenaga Ahli</h4>
                                     <span
@@ -206,7 +212,8 @@
                         <div class="relative z-10">
                             <div
                                 class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center text-xl mb-4">
-                                <i class="fas fa-futbol"></i></div>
+                                <i class="fas fa-futbol"></i>
+                            </div>
                             <h4 class="text-lg font-bold text-gray-800 mb-1">Pilar 4: Prasarana</h4>
                             <p class="text-gray-500 text-sm mb-6">Pemetaan kelayakan fasilitas, lantai, dan
                                 aksesibilitas.</p>
@@ -221,7 +228,8 @@
                         <div class="relative z-10">
                             <div
                                 class="w-12 h-12 bg-orange-100 text-orange-600 rounded-xl flex items-center justify-center text-xl mb-4">
-                                <i class="fas fa-bullhorn"></i></div>
+                                <i class="fas fa-bullhorn"></i>
+                            </div>
                             <h4 class="text-lg font-bold text-gray-800 mb-1">Pilar 5: Wisata & Event</h4>
                             <p class="text-gray-500 text-sm mb-6">Laporan event Tarkam, festival tradisional, wisata
                                 olahraga.</p>
