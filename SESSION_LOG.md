@@ -370,75 +370,165 @@ resources/views/prasarana/show.blade.php
 
 ---
 
-## Notes for Future Development
-
-1. **Prasarana Views** need to be updated to support new rating system (1-5) instead of old enum (Baik/Sedang/Rusak)
-2. **Club integration** with Prasarana is working (dropdown selection)
-3. **Chart.js** CDN is loaded in app.blade.php layout
-4. **Alpine.js** is used for sidebar toggle and dropdowns
-5. All forms include proper validation and error handling
-
----
-
-## 11. Baseline Survey Analysis (Juni 2026)
+## 11. Baseline Survey Analysis (Juni 2026) — Revisi Berdasarkan Dokumen Resmi
 
 ### Overview
-Pada Mei–Juni 2026, dilakukan survei baseline terhadap **~40 responden** Tenaga Penggerak Olahraga Nasional (TPON) dari berbagai daerah Indonesia (Papua, Maluku, NTT, Lombok, Jawa, Sumatera). Hasil survei digunakan untuk menyelaraskan fitur CPSS dengan kebutuhan riil di lapangan.
+Pada Mei–Juni 2026, dilakukan survei baseline terhadap **476 responden** Tenaga Penggerak Olahraga Nasional (TPON) dari berbagai wilayah di Indonesia. Data dikumpulkan melalui kuesioner daring (19 item skala Likert + 4 pertanyaan terbuka). Tiga dokumen hasil kajian resmi telah diterbitkan:
+1. **Interpretasi_Hasil_Survei_TPON.docx** — Analisis tematik 476 jawaban.
+2. **Kajian_Prioritas_Implementasi_CPSS.docx** — Kriteria penyaringan kebutuhan dan rancangan gamifikasi NMIPS.
+3. **PRD_Addendum_Gamifikasi_CPSS.docx** — Spesifikasi teknis modul gamifikasi, struktur wilayah, dan akses publik.
 
-### Profil Responden
-| Kategori | Distribusi |
-|----------|------------|
-| Pelatih | ~30% |
-| Tenaga Penggerak Olahraga | ~40% |
-| Relawan | ~15% |
-| Lainnya | ~15% |
-| Pengalaman >3 thn | ~60% |
-| Pengalaman 1–3 thn | ~30% |
-| Pengalaman <1 thn | ~10% |
+> **Koreksi penting:** Analisis awal pada sesi sebelumnya salah membaca sampel sebagai ~40 responden (berasal dari pratinjau parsial file HTML). Jumlah responden valid sebenarnya adalah **476** dari dua berkas ekspor terpisah dengan overlap jawaban terbuka <1%.
 
-### Skor Rata-rata Indikator Utama (1–5)
-| Indikator | Skor | Catatan |
-|-----------|------|---------|
-| Pencatatan masih manual | 4.2 | Mayoritas masih pakai kertas/Excel/WA |
-| Butuh sistem digital | 4.8 | Hampir semua sangat setuju |
-| Sistem harus mudah digunakan | 4.9 | **Prioritas tertinggi** |
-| Harus bisa diakses via smartphone | 4.7 | Mobile-first adalah keharusan |
-| Butuh fitur monitoring | 4.6 | Dashboard/visualisasi penting |
-| Butuh real-time | 4.5 | Sinkronisasi cepat diharapkan |
-| Siap pakai sistem baru | 4.6 | Adopsi tidak menjadi hambatan |
-| Data tidak terdokumentasi baik | 3.8 | Masalah nyata |
-| Tidak ada sistem terintegrasi | 3.5 | Fragmentasi data tinggi |
+### Profil Responden (476 orang)
+| Peran | Jumlah | Persentase |
+|-------|--------|------------|
+| Pelatih | 176 | 37,0% |
+| Tenaga penggerak olahraga | 150 | 31,5% |
+| Lainnya | 95 | 20,0% |
+| Relawan | 55 | 11,6% |
 
-### Top 5 Kendala Lapangan
-1. **Pencatatan manual** — data peserta, absensi, evaluasi masih di kertas/grup WA. Rawan hilang dan sulit direkap.
-2. **Tidak ada sistem terintegrasi** — data tersebar, tidak ada pusat data tunggal.
-3. **Sulit memantau perkembangan** — tidak bisa melacak retention rate dan demografi peserta.
-4. **Keterbatasan SDM & waktu** — panitia sukarela butuh sistem yang mengurangi beban admin.
-5. **Tidak ada laporan otomatis** — rekap ke RT/Kelurahan masih manual.
+| Lama Pengalaman | Jumlah | Persentase |
+|-----------------|--------|------------|
+| > 3 tahun | 240 | 50,4% |
+| < 1 tahun | 120 | 25,2% |
+| 1–3 tahun | 116 | 24,4% |
 
-### Top 10 Fitur yang Paling Diminta
-| Rank | Fitur | Frekuensi | Status di CPSS |
-|------|-------|-----------|----------------|
-| 1 | Absensi Digital / Kehadiran | ~85% | ❌ BELUM ADA |
-| 2 | Dashboard Visual / Grafik | ~80% | ✅ SUDAH ADA |
-| 3 | Jadwal & Pengingat Otomatis | ~75% | ❌ BELUM ADA |
-| 4 | Export Laporan (PDF/Excel) | ~70% | ❌ BELUM ADA |
-| 5 | Dokumentasi Foto/Video | ~65% | ❌ BELUM ADA |
-| 6 | Database Peserta (Demografi) | ~60% | ❌ BELUM ADA |
-| 7 | Feedback / Survei Kepuasan | ~55% | ❌ BELUM ADA |
-| 8 | Pemetaan GIS / Peta | ~50% | ❌ BELUM ADA |
-| 9 | Manajemen Prasarana Detail | ~45% | ✅ SUDAH ADA |
-| 10 | Manajemen Klub/Komunitas | ~40% | ✅ SUDAH ADA |
+### Kondisi Eksisting (Rerata Skala Likert)
+| Item | Rerata | % Setuju (4–5) |
+|------|--------|----------------|
+| Pencatatan aktivitas rutin | 3,98 | 71,8% |
+| Pencatatan masih manual | 3,51 | 56,1% |
+| Menggunakan aplikasi digital | 3,49 | 52,1% |
+| Data terdokumentasi baik | 3,90 | 65,5% |
+| Mudah mengakses kembali data | 3,85 | 65,5% |
+| Kesulitan mencatat aktivitas | 2,66 | 28,2% |
+| Data sering tidak terdokumentasi baik | 2,74 | 30,3% |
+| Tidak ada sistem terintegrasi | 3,05 | 39,1% |
+| Kesulitan memantau perkembangan | 2,79 | 31,9% |
+| Pengambilan keputusan belum berbasis data akurat | — | 42,4% |
 
-### Insight Kualitatif Menarik
-- **"Potret dan Suguhan"**: Penggerak olahraga tidak hanya butuh alat administrasi, tapi juga **media untuk memotret dan menunjukkan manfaat olahraga** ke masyarakat (foto/video before-after, testimoni, kebersamaan).
-- **Inklusivitas**: Banyak yang menekankan olahraga untuk semua kalangan — lansia, disabilitas, anak-anak, ibu-ibu. Bukan hanya atlet/prestasi.
-- **Budaya Lokal**: Permainan tradisional, gotong royong, dan kearifan lokal perlu diintegrasikan.
-- **Offline Needs**: Responden dari Maluku dan Papua secara eksplisit meminta kemampuan semi-offline karena internet tidak stabil.
-- **WhatsApp Integration**: Banyak yang menyebut WA sebagai kanal utama komunikasi. Integrasi notifikasi/reminder ke WA sangat diharapkan.
+**Interpretasi:** Masalah utama bukan pada ketidakmampuan individu mencatat, melainkan pada **fragmentasi** — setiap penggerak mencatat secara terpisah tanpa muara data bersama.
 
-### Kesimpulan untuk CPSS
-**Fondasi CPSS sudah kuat** (RBAC, Audit Log, Dashboard, Prasarana, Club, Event, Talenta). Namun, **kesenjangan terbesar ada pada operasional lapangan**: absensi individu, database peserta, export laporan, dokumentasi visual, dan feedback mekanisme. **Fase 1 Roadmap harus fokus pada 5 fitur tersebut** sebelum melanjutkan ke fitur lanjutan seperti GIS, LMS, atau AI.
+### Kesiapan Adopsi (Rerata Sangat Tinggi)
+| Item | Rerata | % Setuju |
+|------|--------|----------|
+| Butuh sistem digital | 4,49 | 87,2% |
+| Sistem harus mudah digunakan | 4,74 | 95,2% |
+| Harus bisa diakses via smartphone | 4,77 | 95,8% |
+| Butuh fitur monitoring | 4,68 | 93,9% |
+| Butuh real-time | 4,70 | 94,3% |
+| Terbiasa pakai smartphone | 4,68 | 92,4% |
+| Mampu pakai aplikasi digital | 4,73 | 94,7% |
+| Siap pakai sistem baru | 4,76 | 96,2% |
+| Akses internet memadai | 4,68 | 93,3% |
+
+### Tematik Pertanyaan Terbuka (Frekuensi dari 476 jawaban)
+
+#### Kendala Terbesar
+- Sistem lebih mudah/sederhana: **71**
+- Pelaporan tidak praktis/manual: **65**
+- Penjadwalan tidak tertata: **52**
+- Ketiadaan integrasi antar pencatatan: **37** (+27 "terintegrasi")
+- Ketiadaan fitur monitoring: **22**
+- Ketiadaan absensi terstruktur: **19**
+- Keterbatasan jaringan/kuota: **8**
+
+#### Sistem yang Diharapkan
+- Kemudahan penggunaan (mudah/sederhana): **363 / 153**
+- Fitur jadwal: **134**
+- Fitur pelaporan: **119**
+- Integrasi data: **102 / 88**
+- Fitur absensi: **59**
+- Dashboard/grafik: **32 / 20**
+- Konteks desa/wilayah: **23**
+- Mode luring/offline: **20**
+- Verifikasi lokasi via QR: **19**
+- Notifikasi: **18**
+
+#### Fitur Paling Dibutuhkan
+- Pelaporan: **185**
+- Jadwal/kalender: **177** (+14 "kalender")
+- Kemudahan penggunaan: **173**
+- Absensi: **92**
+- Notifikasi: **66**
+- Monitoring: **52**
+- Grafik/statistik: **50 / 18**
+- Foto: **44**
+- Dashboard: **40**
+- Video: **39**
+- Komunitas/komunikasi: **34 / 33**
+- Real-time: **29**
+- Verifikasi lokasi via QR: **22**
+
+#### Konten Promotif (Yang Ingin Disuguhkan ke Masyarakat)
+- Kemudahan/kesederhanaan penyajian: **132 / 96**
+- Profil komunitas/klub: **54**
+- Dokumentasi foto: **43**
+- Dokumentasi video: **32**
+- Konten ringan (mudah diakses): **24**
+
+### Kajian Prioritas Implementasi (4 Kriteria)
+Kebutuhan disaring menggunakan empat kriteria dari **Kajian_Prioritas_Implementasi_CPSS.docx**:
+1. Keterkaitan langsung dengan tiga variabel data Bab I (kelayakan fasilitas, partisipasi masyarakat, aksesibilitas disabilitas).
+2. Keterkaitan langsung dengan pengujian hipotesis (H1: kesesuaian data CPSS dengan data pakar; H2: efisiensi waktu pendataan).
+3. Kelayakan teknis untuk dikerjakan dalam skala dan waktu penelitian.
+4. Tingkat urgensi empiris (kemunculan tema >=30 kali atau tingkat persetujuan >=80%).
+
+### Hasil Penyaringan: Prioritas Prototipe vs Pengembangan Lanjutan
+
+#### Prioritas Prototipe (Masuk Lingkup Disertasi)
+| Fitur | Justifikasi |
+|-------|-------------|
+| **Modul Gamifikasi** (poin, leaderboard, lencana) | Mengoperasionalkan Pilar Rekayasa Perilaku NMIPS yang dijanjikan Bab III |
+| **Struktur Wilayah Administratif** (desa/kecamatan/kabupaten) | Prasyarat agregasi data untuk uji H1 pada lokasi sampel yang sama dengan tim pakar |
+| **Akses Publik Tanpa Login** | Biaya implementasi rendah, dampak besar terhadap Facilitating Conditions (UTAUT) |
+| **Presensi Sederhana pada Partisipasi** | Permintaan eksplisit tertinggi ke-4 (92 kemunculan); pemicu poin observasi berulang |
+
+#### Pengembangan Lanjutan (Di Luar Lingkup Prototipe)
+| Fitur | Alasan Penyaringan |
+|-------|-------------------|
+| Notifikasi dalam aplikasi | Bukan prasyarat H1/H2; dapat digantikan sementara oleh tampilan status dashboard |
+| Verifikasi lokasi via QR | Geolokasi GPS pada Prasarana sudah mencukupi kebutuhan validasi lokasi prototipe |
+| Unggah video | Foto kondisi sudah memadai untuk validasi pakar; video menambah beban penyimpanan |
+| Forum/komunikasi komunitas | Bersifat engagement jangka panjang, di luar cakupan pengujian dua bulan |
+| PWA / mode luring (offline) | 93,3% responden menyatakan akses internet memadai; urgensi empiris rendah |
+| Integrasi NIK / Satu Data Indonesia | Kompleksitas legal tidak proporsional dengan skala uji prototipe |
+| Backend big data (Kafka/Storm/HBase) | Relevan sebagai arsitektur konseptual skala nasional, bukan syarat validasi mekanisme inti |
+
+### Rancangan Modul Gamifikasi (Ringkasan dari PRD Addendum)
+**Filosofi:** NMIPS + Self-Determination Theory (otonomi, mastery, relatedness).
+
+**Kategori Poin:**
+| Entitas | Aksi | Poin | Batas |
+|---------|------|------|-------|
+| Prasarana baru | Laporan awal lengkap | 50 | 1x per fasilitas |
+| Prasarana | Update kondisi | 15 | 1x per fasilitas, min 30 hari |
+| Klub baru | Laporan awal lengkap | 40 | 1x per klub |
+| Klub | Update info | 10 | 1x per klub |
+| Event | Laporan event | 20 | Tidak dibatasi |
+| Partisipasi | Laporan valid | 3 | 1x per lokasi+tanggal |
+
+**Lencana:**
+- Sensor Warga Aktif: laporan pertama tervalidasi
+- Penjaga Sarpras: >=5 prasarana unik tervalidasi
+- Pemantau Konsisten: partisipasi pada >=4 minggu kalender berbeda
+- Pahlawan Data Olahraga: total poin >=500 ATAU kontribusi valid pada keempat kategori
+
+**Leaderboard:**
+- Papan mingguan (reset tiap minggu)
+- Papan bulanan (reset tiap bulan)
+- Papan akumulasi total program
+- Relawan bisa lihat peringkat pribadi meski di luar 10 besar
+
+### Kesimpulan untuk CPSS (Revisi)
+**Fondasi CPSS sudah kuat** (RBAC, Audit Log, Dashboard, Prasarana, Club, Event, Talenta). Berdasarkan kajian prioritas resmi, **Fase 1 Roadmap harus fokus pada 4 fitur Prioritas Prototipe:**
+1. Modul Gamifikasi (poin, leaderboard, lencana)
+2. Struktur Wilayah Administratif (desa/kecamatan/kabupaten)
+3. Akses Publik Tanpa Login (index/show Prasarana, Clubs, Events)
+4. Presensi Sederhana pada Partisipasi (absensi individu sebagai pelengkap estimasi)
+
+Fitur-fitur lain seperti notifikasi, QR, video, forum, PWA, NIK, dan big data backend dicadangkan sebagai **Pengembangan Lanjutan** pada Bab V (Saran) disertasi.
 
 ---
 
@@ -451,13 +541,18 @@ Pada Mei–Juni 2026, dilakukan survei baseline terhadap **~40 responden** Tenag
 - Club system (CRUD + schedule)
 - Prasarana rating system
 - MySQL compatibility fixes
-- Baseline survey analysis & gap analysis documented
+- Baseline survey analysis REVISED with 3 official documents
+- PRD.md updated to v2.1 with gamification, wilayah, and public access specs
 
 ️ Pending:
 - Update Prasarana create/edit forms to use rating 1-5
 - Update Prasarana show page to display rating stars
 - Run migrations on production
-- Implement Phase 1 features (Master Peserta, Absensi, Export)
+- **Fase 1 Prototipe Disertasi:**
+  - Implementasi Struktur Wilayah (kolom desa/kecamatan/kabupaten)
+  - Implementasi Akses Publik (routes tanpa login)
+  - Implementasi Presensi Sederhana pada Partisipasi
+  - Implementasi Modul Gamifikasi (point_transactions, badges, user_badges, leaderboard, lencana)
 
 ---
 
