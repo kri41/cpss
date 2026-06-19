@@ -1,308 +1,356 @@
-<!DOCTYPE html>
-<html lang="id">
-
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Dasbor CPSS - Dispora</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
-
-<body class="bg-gray-100 font-sans antialiased text-gray-900 flex h-screen overflow-hidden">
-
-    <aside class="w-64 bg-indigo-900 text-white flex flex-col hidden md:flex shadow-2xl relative z-20">
-        <div class="h-20 flex items-center px-6 border-b border-indigo-800/50">
-            <div
-                class="w-10 h-10 bg-gradient-to-tr from-teal-400 to-emerald-300 rounded-xl shadow-lg flex items-center justify-center text-indigo-900 font-bold text-xl mr-3">
-                C</div>
-            <span class="font-bold text-xl tracking-wider">CPSS</span>
-        </div>
-
-        <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
-            <a href="#"
-                class="flex items-center px-4 py-3 bg-indigo-800/50 text-white rounded-xl shadow-inner border border-indigo-700/50 transition">
-                <i class="fas fa-chart-pie w-6"></i>
-                <span class="font-semibold">Statistik Utama</span>
-            </a>
-
-            @if (in_array(Auth::user()->role, ['admin', 'super_admin']))
-                <div class="pt-4 pb-2">
-                    <p class="px-4 text-xs font-bold text-indigo-400 uppercase tracking-wider">Menu Khusus Dinas</p>
-                </div>
-                <a href="#"
-                    class="flex items-center px-4 py-3 text-indigo-200 hover:bg-indigo-800 hover:text-white rounded-xl transition">
-                    <i class="fas fa-file-export w-6"></i>
-                    <span class="font-semibold">Ekspor Laporan DOD</span>
-                </a>
-                <a href="#"
-                    class="flex items-center px-4 py-3 text-indigo-200 hover:bg-indigo-800 hover:text-white rounded-xl transition">
-                    <i class="fas fa-users-cog w-6"></i>
-                    <span class="font-semibold">Kelola Pengguna</span>
-                </a>
-            @endif
-        </nav>
-
-        <div class="p-4 border-t border-indigo-800/50 bg-indigo-950/30">
-            <div class="flex items-center gap-3">
-                <div
-                    class="w-10 h-10 rounded-full bg-teal-500 flex items-center justify-center text-white font-bold border-2 border-indigo-300">
-                    {{ substr(Auth::user()->name, 0, 1) }}
-                </div>
-                <div class="flex-1 min-w-0">
-                    <p class="text-sm font-bold text-white truncate">{{ Auth::user()->name }}</p>
-                    <p class="text-xs text-indigo-300 truncate uppercase font-semibold tracking-wider">
-                        {{ str_replace('_', ' ', Auth::user()->role) }}
-                    </p>
-                </div>
-            </div>
-            <form method="POST" action="{{ route('logout') }}" class="mt-3">
-                @csrf
-                <button type="submit"
-                    class="w-full text-left text-xs text-red-400 hover:text-red-300 flex items-center gap-2">
-                    <i class="fas fa-sign-out-alt"></i> Keluar Sistem
-                </button>
-            </form>
-        </div>
-    </aside>
-
-    <main class="flex-1 flex flex-col h-screen overflow-y-auto bg-gray-50 relative">
-
-        <header
-            class="h-20 bg-white/80 backdrop-blur-md border-b border-gray-200 flex items-center justify-between px-8 sticky top-0 z-10 shadow-sm">
-            <h2 class="font-extrabold text-2xl text-indigo-950">Command Center</h2>
-            <div class="flex items-center gap-4">
-                <span class="relative flex h-3 w-3">
-                    <span
-                        class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
-                </span>
-                <span class="text-sm font-bold text-gray-500">Status: <span class="text-emerald-600">Terhubung ke
-                        Cloud</span></span>
-            </div>
-        </header>
-
-        <div class="p-8 max-w-7xl mx-auto w-full space-y-8">
-
+<x-app-layout>
+    <x-slot name="header">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-                <h3 class="text-gray-500 font-medium">Ringkasan Data Masuk</h3>
-                <p class="text-2xl font-black text-gray-800 mt-1 mb-4">Capaian Sains Warga Bulan Ini</p>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
-                        <div
-                            class="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center text-2xl">
-                            <i class="fas fa-map-marker-alt"></i>
-                        </div>
-                        <div>
-                            <p class="text-sm text-gray-500 font-semibold">Fasilitas Dipetakan</p>
-                            <h4 class="text-3xl font-black text-gray-800">124 <span
-                                    class="text-sm font-normal text-emerald-500"><i class="fas fa-arrow-up"></i>
-                                    12%</span></h4>
-                        </div>
-                    </div>
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
-                        <div
-                            class="w-14 h-14 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center text-2xl">
-                            <i class="fas fa-users"></i>
-                        </div>
-                        <div>
-                            <p class="text-sm text-gray-500 font-semibold">Total Partisipasi Warga</p>
-                            <h4 class="text-3xl font-black text-gray-800">5,430 <span
-                                    class="text-sm font-normal text-purple-500"><i class="fas fa-arrow-up"></i>
-                                    8%</span></h4>
-                        </div>
-                    </div>
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
-                        <div
-                            class="w-14 h-14 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center text-2xl">
-                            <i class="fas fa-hands-helping"></i>
-                        </div>
-                        <div>
-                            <p class="text-sm text-gray-500 font-semibold">Relawan Aktif</p>
-                            <h4 class="text-3xl font-black text-gray-800">42 <span
-                                    class="text-sm font-normal text-gray-400">Orang</span></h4>
-                        </div>
-                    </div>
-                </div>
+                <h2 class="text-2xl font-bold text-gray-900">Dashboard</h2>
+                <p class="text-sm text-gray-500 mt-1">Selamat datang kembali, {{ Auth::user()->name }}</p>
             </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                    <h4 class="font-bold text-gray-800 mb-4">Kondisi Prasarana Olahraga Daerah (Pilar 4)</h4>
-                    <div class="relative h-64 w-full">
-                        <canvas id="kondisiChart"></canvas>
-                    </div>
-                </div>
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                    <h4 class="font-bold text-gray-800 mb-4">Tren Partisipasi Mingguan (Pilar 1)</h4>
-                    <div class="relative h-64 w-full">
-                        <canvas id="partisipasiChart"></canvas>
-                    </div>
-                </div>
+            <div class="flex items-center space-x-3">
+                <span class="text-sm text-gray-500">{{ now()->locale('id')->isoFormat('dddd, D MMMM YYYY') }}</span>
             </div>
-
-            <div class="mt-8 pt-8 border-t border-gray-200">
-                <h3 class="text-gray-500 font-medium">Panel Kontribusi Data</h3>
-                <p class="text-2xl font-black text-gray-800 mt-1 mb-6">Pilih Sektor Input DOD</p>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr">
-                    <div
-                        class="bg-white rounded-[1.5rem] p-6 shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 hover:border-purple-200 transition-all duration-300 group flex flex-col justify-between relative overflow-hidden">
-                        <div class="relative z-10">
-                            <div
-                                class="w-12 h-12 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center text-xl mb-4">
-                                <i class="fas fa-running"></i>
-                            </div>
-                            <h4 class="text-lg font-bold text-gray-800 mb-1">Pilar 1: Partisipasi</h4>
-                            <p class="text-gray-500 text-sm mb-6">Pelaporan cek-in masyarakat dan pelajar aktif
-                                berolahraga.</p>
-                        </div>
-                        <button
-                            class="w-full py-2.5 bg-purple-50 text-purple-700 font-bold rounded-lg group-hover:bg-purple-600 group-hover:text-white transition relative z-10 border border-purple-100">Input
-                            Partisipasi</button>
-                    </div>
-
-                    @if (in_array(Auth::user()->role, ['admin', 'super_admin']))
-                        <div
-                            class="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-[1.5rem] p-6 shadow-sm border border-indigo-100 hover:shadow-xl hover:-translate-y-1 hover:border-indigo-300 transition-all duration-300 group flex flex-col justify-between relative overflow-hidden">
-                            <div class="relative z-10">
-                                <div
-                                    class="w-12 h-12 bg-indigo-600 text-white rounded-xl flex items-center justify-center text-xl mb-4">
-                                    <i class="fas fa-trophy"></i>
-                                </div>
-                                <div class="flex justify-between items-start">
-                                    <h4 class="text-lg font-bold text-indigo-900 mb-1">Pilar 2: Talenta Muda</h4>
-                                    <span
-                                        class="text-[10px] font-bold bg-indigo-200 text-indigo-800 px-2 py-1 rounded uppercase">Internal</span>
-                                </div>
-                                <p class="text-indigo-700/70 text-sm mb-6">Pusat data kompetisi, kelas olahraga, dan
-                                    beasiswa.</p>
-                            </div>
-                            <button
-                                class="w-full py-2.5 bg-indigo-600 text-white font-bold rounded-lg shadow-md hover:bg-indigo-700 transition relative z-10">Kelola
-                                Database Talenta</button>
-                        </div>
-                    @endif
-
-                    @if (in_array(Auth::user()->role, ['admin', 'super_admin']))
-                        <div
-                            class="bg-gradient-to-br from-slate-50 to-gray-100 rounded-[1.5rem] p-6 shadow-sm border border-slate-200 hover:shadow-xl hover:-translate-y-1 hover:border-slate-400 transition-all duration-300 group flex flex-col justify-between relative overflow-hidden">
-                            <div class="relative z-10">
-                                <div
-                                    class="w-12 h-12 bg-slate-800 text-white rounded-xl flex items-center justify-center text-xl mb-4">
-                                    <i class="fas fa-chalkboard-teacher"></i>
-                                </div>
-                                <div class="flex justify-between items-start">
-                                    <h4 class="text-lg font-bold text-slate-900 mb-1">Pilar 3: Tenaga Ahli</h4>
-                                    <span
-                                        class="text-[10px] font-bold bg-slate-300 text-slate-800 px-2 py-1 rounded uppercase">Internal</span>
-                                </div>
-                                <p class="text-slate-600 text-sm mb-6">Data fasilitator, instruktur, dan guru PJOK.</p>
-                            </div>
-                            <button
-                                class="w-full py-2.5 bg-slate-800 text-white font-bold rounded-lg shadow-md hover:bg-slate-900 transition relative z-10">Monitor
-                                Sertifikasi</button>
-                        </div>
-                    @endif
-
-                    <div
-                        class="bg-white rounded-[1.5rem] p-6 shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 hover:border-emerald-200 transition-all duration-300 group flex flex-col justify-between relative overflow-hidden">
-                        <div class="relative z-10">
-                            <div
-                                class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center text-xl mb-4">
-                                <i class="fas fa-futbol"></i>
-                            </div>
-                            <h4 class="text-lg font-bold text-gray-800 mb-1">Pilar 4: Prasarana</h4>
-                            <p class="text-gray-500 text-sm mb-6">Pemetaan kelayakan fasilitas, lantai, dan
-                                aksesibilitas.</p>
-                        </div>
-                        <button
-                            class="w-full py-2.5 bg-emerald-50 text-emerald-700 font-bold rounded-lg group-hover:bg-emerald-600 group-hover:text-white transition relative z-10 border border-emerald-100">Input
-                            Lapangan Baru</button>
-                    </div>
-
-                    <div
-                        class="bg-white rounded-[1.5rem] p-6 shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 hover:border-orange-200 transition-all duration-300 group flex flex-col justify-between relative overflow-hidden">
-                        <div class="relative z-10">
-                            <div
-                                class="w-12 h-12 bg-orange-100 text-orange-600 rounded-xl flex items-center justify-center text-xl mb-4">
-                                <i class="fas fa-bullhorn"></i>
-                            </div>
-                            <h4 class="text-lg font-bold text-gray-800 mb-1">Pilar 5: Wisata & Event</h4>
-                            <p class="text-gray-500 text-sm mb-6">Laporan event Tarkam, festival tradisional, wisata
-                                olahraga.</p>
-                        </div>
-                        <button
-                            class="w-full py-2.5 bg-orange-50 text-orange-700 font-bold rounded-lg group-hover:bg-orange-600 group-hover:text-white transition relative z-10 border border-orange-100">Lapor
-                            Event Lokal</button>
-                    </div>
-                </div>
-            </div>
-
         </div>
-    </main>
+    </x-slot>
 
+    <div class="py-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <!-- Welcome Banner -->
+            <div class="mb-8 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl p-6 sm:p-8 text-white shadow-lg">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between">
+                    <div>
+                        <h3 class="text-2xl sm:text-3xl font-bold mb-2">Club & Prasarana Sekolah</h3>
+                        <p class="text-indigo-100 max-w-2xl">Sistem manajemen terpadu untuk monitoring club, prasarana olahraga, talenta, dan event sekolah.</p>
+                    </div>
+                    <div class="mt-4 sm:mt-0">
+                        <a href="{{ route('prasarana.create') }}" class="inline-flex items-center px-4 py-2 bg-white text-indigo-600 rounded-xl font-medium hover:bg-indigo-50 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                            </svg>
+                            Tambah Data
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistik Cards -->
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+                <!-- Prasarana -->
+                <a href="{{ route('prasarana.index') }}" class="group bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md hover:border-indigo-200 transition-all">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="p-2 bg-blue-100 rounded-lg group-hover:bg-blue-200 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                            </svg>
+                        </div>
+                        <span class="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded-full">{{ $stats['total_prasarana'] }}</span>
+                    </div>
+                    <p class="text-sm font-medium text-gray-600">Prasarana</p>
+                </a>
+
+                <!-- Clubs -->
+                <a href="{{ route('clubs.index') }}" class="group bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md hover:border-purple-200 transition-all">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="p-2 bg-purple-100 rounded-lg group-hover:bg-purple-200 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                        </div>
+                        <span class="text-xs font-medium text-purple-600 bg-purple-50 px-2 py-1 rounded-full">{{ $stats['total_clubs'] ?? 0 }}</span>
+                    </div>
+                    <p class="text-sm font-medium text-gray-600">Clubs</p>
+                </a>
+
+                <!-- Partisipasi -->
+                <div class="group bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="p-2 bg-green-100 rounded-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                        </div>
+                        <span class="text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">{{ number_format($stats['total_partisipasi']) }}</span>
+                    </div>
+                    <p class="text-sm font-medium text-gray-600">Partisipasi</p>
+                </div>
+
+                <!-- Events -->
+                <a href="{{ route('events.index') }}" class="group bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md hover:border-orange-200 transition-all">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="p-2 bg-orange-100 rounded-lg group-hover:bg-orange-200 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <span class="text-xs font-medium text-orange-600 bg-orange-50 px-2 py-1 rounded-full">{{ $stats['total_events'] }}</span>
+                    </div>
+                    <p class="text-sm font-medium text-gray-600">Events</p>
+                </a>
+
+                <!-- Talenta -->
+                <a href="{{ route('talenta.index') }}" class="group bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md hover:border-yellow-200 transition-all">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="p-2 bg-yellow-100 rounded-lg group-hover:bg-yellow-200 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                            </svg>
+                        </div>
+                        <span class="text-xs font-medium text-yellow-600 bg-yellow-50 px-2 py-1 rounded-full">{{ $stats['total_talenta'] }}</span>
+                    </div>
+                    <p class="text-sm font-medium text-gray-600">Talenta</p>
+                </a>
+
+                <!-- Tenaga Ahli -->
+                <a href="{{ route('tenaga-ahli.index') }}" class="group bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md hover:border-red-200 transition-all">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="p-2 bg-red-100 rounded-lg group-hover:bg-red-200 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <span class="text-xs font-medium text-red-600 bg-red-50 px-2 py-1 rounded-full">{{ $stats['total_tenaga_ahli'] }}</span>
+                    </div>
+                    <p class="text-sm font-medium text-gray-600">Tenaga Ahli</p>
+                </a>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <!-- Partisipasi Chart -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-900">Tren Partisipasi</h3>
+                            <p class="text-sm text-gray-500">6 bulan terakhir</p>
+                        </div>
+                        <div class="p-2 bg-indigo-50 rounded-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="h-64">
+                        <canvas id="participationChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Kondisi Prasarana -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-900">Kondisi Prasarana</h3>
+                            <p class="text-sm text-gray-500">Berdasarkan kondisi lantai</p>
+                        </div>
+                        <div class="p-2 bg-green-50 rounded-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="h-64">
+                        <canvas id="facilityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Events Akan Datang -->
+                <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100">
+                    <div class="p-6 border-b border-gray-100">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900">Event Akan Datang</h3>
+                                <p class="text-sm text-gray-500">Jadwal event terdekat</p>
+                            </div>
+                            <a href="{{ route('events.index') }}" class="text-sm text-indigo-600 hover:text-indigo-800 font-medium">Lihat Semua</a>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        @if($upcomingEvents->count() > 0)
+                            <div class="space-y-4">
+                                @foreach($upcomingEvents as $event)
+                                    <div class="flex items-center p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+                                        <div class="flex-shrink-0 w-14 h-14 bg-indigo-100 rounded-xl flex flex-col items-center justify-center">
+                                            <span class="text-xs font-bold text-indigo-600 uppercase">{{ $event->tanggal_mulai->format('M') }}</span>
+                                            <span class="text-lg font-bold text-indigo-800">{{ $event->tanggal_mulai->format('d') }}</span>
+                                        </div>
+                                        <div class="ml-4 flex-1">
+                                            <h4 class="font-semibold text-gray-900">{{ $event->nama_event }}</h4>
+                                            <p class="text-sm text-gray-500">{{ $event->tingkat }} • {{ $event->lokasi ?? 'Lokasi belum ditentukan' }}</p>
+                                        </div>
+                                        <span class="px-3 py-1 text-xs font-medium rounded-full 
+                                            {{ $event->status === 'Akan Datang' ? 'bg-yellow-100 text-yellow-800' : '' }}
+                                            {{ $event->status === 'Sedang Berlangsung' ? 'bg-green-100 text-green-800' : '' }}
+                                            {{ $event->status === 'Selesai' ? 'bg-gray-100 text-gray-800' : '' }}">
+                                            {{ $event->status }}
+                                        </span>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <div class="text-center py-8">
+                                <div class="p-4 bg-gray-100 rounded-full inline-block mb-3">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                </div>
+                                <p class="text-gray-500">Tidak ada event yang akan datang.</p>
+                                <a href="{{ route('events.create') }}" class="mt-2 text-indigo-600 hover:text-indigo-800 text-sm font-medium">Buat event baru</a>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+
+                <!-- Partisipasi by Usia -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Partisipasi by Usia</h3>
+                    <p class="text-sm text-gray-500 mb-6">Distribusi berdasarkan kelompok usia</p>
+                    <div class="h-48">
+                        <canvas id="usiaChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            @if(auth()->user()->isAdmin() && $recentAuditLogs->count() > 0)
+                <!-- Recent Activity -->
+                <div class="mt-8 bg-white rounded-2xl shadow-sm border border-gray-100">
+                    <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-900">Aktivitas Terbaru</h3>
+                            <p class="text-sm text-gray-500">Log aktivitas sistem</p>
+                        </div>
+                        <a href="{{ route('audit-logs.index') }}" class="text-sm text-indigo-600 hover:text-indigo-800 font-medium">Lihat Semua</a>
+                    </div>
+                    <div class="p-6">
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Waktu</th>
+                                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">User</th>
+                                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Aksi</th>
+                                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Tabel</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    @foreach($recentAuditLogs as $log)
+                                        <tr class="hover:bg-gray-50">
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $log->created_at->format('d/m/Y H:i') }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $log->user->name ?? 'System' }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 py-1 text-xs font-semibold rounded-full 
+                                                    {{ $log->action === 'CREATE' ? 'bg-green-100 text-green-800' : '' }}
+                                                    {{ $log->action === 'UPDATE' ? 'bg-yellow-100 text-yellow-800' : '' }}
+                                                    {{ $log->action === 'DELETE' ? 'bg-red-100 text-red-800' : '' }}">
+                                                    {{ $log->action }}
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $log->target_table }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            @endif
+        </div>
+    </div>
+
+    @push('scripts')
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Grafik Doughnut (Kondisi Lapangan)
-            const ctxKondisi = document.getElementById('kondisiChart').getContext('2d');
-            new Chart(ctxKondisi, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Baik', 'Sedang', 'Rusak Berat'],
-                    datasets: [{
-                        data: [65, 35, 24],
-                        backgroundColor: ['#10B981', '#FBBF24', '#EF4444'],
-                        borderWidth: 0,
-                        hoverOffset: 4
-                    }]
+        // Participation Chart
+        const ctxPart = document.getElementById('participationChart').getContext('2d');
+        new Chart(ctxPart, {
+            type: 'line',
+            data: {
+                labels: {!! json_encode($partisipasiPerBulan->pluck('bulan')->map(function($b) { return \Carbon\Carbon::parse($b)->format('M Y'); })) !!},
+                datasets: [{
+                    label: 'Partisipasi',
+                    data: {!! json_encode($partisipasiPerBulan->pluck('total')) !!},
+                    borderColor: '#4f46e5',
+                    backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#4f46e5',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        }
-                    }
-                }
-            });
-
-            // Grafik Garis (Tren Partisipasi)
-            const ctxPartisipasi = document.getElementById('partisipasiChart').getContext('2d');
-            new Chart(ctxPartisipasi, {
-                type: 'line',
-                data: {
-                    labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'],
-                    datasets: [{
-                        label: 'Jumlah Orang Berolahraga',
-                        data: [120, 190, 150, 220, 310, 540, 680],
-                        borderColor: '#8B5CF6',
-                        backgroundColor: 'rgba(139, 92, 246, 0.2)',
-                        borderWidth: 3,
-                        fill: true,
-                        tension: 0.4 // Membuat garis melengkung halus
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
+                scales: {
+                    y: { 
+                        beginAtZero: true,
+                        grid: { color: 'rgba(0,0,0,0.05)' }
                     },
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
+                    x: {
+                        grid: { display: false }
                     }
                 }
-            });
+            }
+        });
+
+        // Facility Chart
+        const ctxFac = document.getElementById('facilityChart').getContext('2d');
+        new Chart(ctxFac, {
+            type: 'doughnut',
+            data: {
+                labels: {!! json_encode($prasaranaByKondisi->pluck('kondisi_lantai')) !!},
+                datasets: [{
+                    data: {!! json_encode($prasaranaByKondisi->pluck('total')) !!},
+                    backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: {
+                    legend: { 
+                        position: 'bottom',
+                        labels: { usePointStyle: true, padding: 20 }
+                    }
+                }
+            }
+        });
+
+        // Usia Chart
+        const ctxUsia = document.getElementById('usiaChart').getContext('2d');
+        new Chart(ctxUsia, {
+            type: 'bar',
+            data: {
+                labels: {!! json_encode($partisipasiByUsia->pluck('mayoritas_usia')) !!},
+                datasets: [{
+                    label: 'Jumlah',
+                    data: {!! json_encode($partisipasiByUsia->pluck('total')) !!},
+                    backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'],
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { 
+                        beginAtZero: true,
+                        grid: { color: 'rgba(0,0,0,0.05)' }
+                    },
+                    x: {
+                        grid: { display: false }
+                    }
+                }
+            }
         });
     </script>
-</body>
-
-</html>
+    @endpush
+</x-app-layout>

@@ -15,6 +15,38 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
+
+                    @auth
+                        @if(auth()->user()->isAdmin() || auth()->user()->isRelawan())
+                            <x-nav-link :href="route('prasarana.index')" :active="request()->routeIs('prasarana.*')">
+                                {{ __('Prasarana') }}
+                            </x-nav-link>
+                            <x-nav-link :href="route('partisipasi.index')" :active="request()->routeIs('partisipasi.*')">
+                                {{ __('Partisipasi') }}
+                            </x-nav-link>
+                            <x-nav-link :href="route('events.index')" :active="request()->routeIs('events.*')">
+                                {{ __('Events') }}
+                            </x-nav-link>
+                        @endif
+
+                        @if(auth()->user()->isAdmin())
+                            <x-nav-link :href="route('talenta.index')" :active="request()->routeIs('talenta.*')">
+                                {{ __('Talenta') }}
+                            </x-nav-link>
+                            <x-nav-link :href="route('tenaga-ahli.index')" :active="request()->routeIs('tenaga-ahli.*')">
+                                {{ __('Tenaga Ahli') }}
+                            </x-nav-link>
+                            <x-nav-link :href="route('audit-logs.index')" :active="request()->routeIs('audit-logs.*')">
+                                {{ __('Audit Log') }}
+                            </x-nav-link>
+                        @endif
+
+                        @if(auth()->user()->isSuperAdmin())
+                            <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
+                                {{ __('Users') }}
+                            </x-nav-link>
+                        @endif
+                    @endauth
                 </div>
             </div>
 
@@ -70,6 +102,38 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
+
+            @auth
+                @if(auth()->user()->isAdmin() || auth()->user()->isRelawan())
+                    <x-responsive-nav-link :href="route('prasarana.index')" :active="request()->routeIs('prasarana.*')">
+                        {{ __('Prasarana') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('partisipasi.index')" :active="request()->routeIs('partisipasi.*')">
+                        {{ __('Partisipasi') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('events.index')" :active="request()->routeIs('events.*')">
+                        {{ __('Events') }}
+                    </x-responsive-nav-link>
+                @endif
+
+                @if(auth()->user()->isAdmin())
+                    <x-responsive-nav-link :href="route('talenta.index')" :active="request()->routeIs('talenta.*')">
+                        {{ __('Talenta') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('tenaga-ahli.index')" :active="request()->routeIs('tenaga-ahli.*')">
+                        {{ __('Tenaga Ahli') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('audit-logs.index')" :active="request()->routeIs('audit-logs.*')">
+                        {{ __('Audit Log') }}
+                    </x-responsive-nav-link>
+                @endif
+
+                @if(auth()->user()->isSuperAdmin())
+                    <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
+                        {{ __('Users') }}
+                    </x-responsive-nav-link>
+                @endif
+            @endauth
         </div>
 
         <!-- Responsive Settings Options -->

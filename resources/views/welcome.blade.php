@@ -97,7 +97,7 @@
                         Sensing</span>
                 </h1>
                 <p class="text-xl md:text-2xl text-blue-50 mb-12 leading-relaxed font-light max-w-3xl mx-auto">
-                    Platform urun daya (<i>crowdsourcing</i>) terintegrasi untuk memetakan fasilitas dan aktivitas
+                    Platform (<i>crowdsourcing</i>) terintegrasi untuk memetakan fasilitas dan aktivitas
                     olahraga daerah berbasis bukti.
                 </p>
 
