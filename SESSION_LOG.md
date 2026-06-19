@@ -380,6 +380,68 @@ resources/views/prasarana/show.blade.php
 
 ---
 
+## 11. Baseline Survey Analysis (Juni 2026)
+
+### Overview
+Pada Mei–Juni 2026, dilakukan survei baseline terhadap **~40 responden** Tenaga Penggerak Olahraga Nasional (TPON) dari berbagai daerah Indonesia (Papua, Maluku, NTT, Lombok, Jawa, Sumatera). Hasil survei digunakan untuk menyelaraskan fitur CPSS dengan kebutuhan riil di lapangan.
+
+### Profil Responden
+| Kategori | Distribusi |
+|----------|------------|
+| Pelatih | ~30% |
+| Tenaga Penggerak Olahraga | ~40% |
+| Relawan | ~15% |
+| Lainnya | ~15% |
+| Pengalaman >3 thn | ~60% |
+| Pengalaman 1–3 thn | ~30% |
+| Pengalaman <1 thn | ~10% |
+
+### Skor Rata-rata Indikator Utama (1–5)
+| Indikator | Skor | Catatan |
+|-----------|------|---------|
+| Pencatatan masih manual | 4.2 | Mayoritas masih pakai kertas/Excel/WA |
+| Butuh sistem digital | 4.8 | Hampir semua sangat setuju |
+| Sistem harus mudah digunakan | 4.9 | **Prioritas tertinggi** |
+| Harus bisa diakses via smartphone | 4.7 | Mobile-first adalah keharusan |
+| Butuh fitur monitoring | 4.6 | Dashboard/visualisasi penting |
+| Butuh real-time | 4.5 | Sinkronisasi cepat diharapkan |
+| Siap pakai sistem baru | 4.6 | Adopsi tidak menjadi hambatan |
+| Data tidak terdokumentasi baik | 3.8 | Masalah nyata |
+| Tidak ada sistem terintegrasi | 3.5 | Fragmentasi data tinggi |
+
+### Top 5 Kendala Lapangan
+1. **Pencatatan manual** — data peserta, absensi, evaluasi masih di kertas/grup WA. Rawan hilang dan sulit direkap.
+2. **Tidak ada sistem terintegrasi** — data tersebar, tidak ada pusat data tunggal.
+3. **Sulit memantau perkembangan** — tidak bisa melacak retention rate dan demografi peserta.
+4. **Keterbatasan SDM & waktu** — panitia sukarela butuh sistem yang mengurangi beban admin.
+5. **Tidak ada laporan otomatis** — rekap ke RT/Kelurahan masih manual.
+
+### Top 10 Fitur yang Paling Diminta
+| Rank | Fitur | Frekuensi | Status di CPSS |
+|------|-------|-----------|----------------|
+| 1 | Absensi Digital / Kehadiran | ~85% | ❌ BELUM ADA |
+| 2 | Dashboard Visual / Grafik | ~80% | ✅ SUDAH ADA |
+| 3 | Jadwal & Pengingat Otomatis | ~75% | ❌ BELUM ADA |
+| 4 | Export Laporan (PDF/Excel) | ~70% | ❌ BELUM ADA |
+| 5 | Dokumentasi Foto/Video | ~65% | ❌ BELUM ADA |
+| 6 | Database Peserta (Demografi) | ~60% | ❌ BELUM ADA |
+| 7 | Feedback / Survei Kepuasan | ~55% | ❌ BELUM ADA |
+| 8 | Pemetaan GIS / Peta | ~50% | ❌ BELUM ADA |
+| 9 | Manajemen Prasarana Detail | ~45% | ✅ SUDAH ADA |
+| 10 | Manajemen Klub/Komunitas | ~40% | ✅ SUDAH ADA |
+
+### Insight Kualitatif Menarik
+- **"Potret dan Suguhan"**: Penggerak olahraga tidak hanya butuh alat administrasi, tapi juga **media untuk memotret dan menunjukkan manfaat olahraga** ke masyarakat (foto/video before-after, testimoni, kebersamaan).
+- **Inklusivitas**: Banyak yang menekankan olahraga untuk semua kalangan — lansia, disabilitas, anak-anak, ibu-ibu. Bukan hanya atlet/prestasi.
+- **Budaya Lokal**: Permainan tradisional, gotong royong, dan kearifan lokal perlu diintegrasikan.
+- **Offline Needs**: Responden dari Maluku dan Papua secara eksplisit meminta kemampuan semi-offline karena internet tidak stabil.
+- **WhatsApp Integration**: Banyak yang menyebut WA sebagai kanal utama komunikasi. Integrasi notifikasi/reminder ke WA sangat diharapkan.
+
+### Kesimpulan untuk CPSS
+**Fondasi CPSS sudah kuat** (RBAC, Audit Log, Dashboard, Prasarana, Club, Event, Talenta). Namun, **kesenjangan terbesar ada pada operasional lapangan**: absensi individu, database peserta, export laporan, dokumentasi visual, dan feedback mekanisme. **Fase 1 Roadmap harus fokus pada 5 fitur tersebut** sebelum melanjutkan ke fitur lanjutan seperti GIS, LMS, atau AI.
+
+---
+
 ## Session Status
 
 ✅ Completed:
@@ -389,11 +451,13 @@ resources/views/prasarana/show.blade.php
 - Club system (CRUD + schedule)
 - Prasarana rating system
 - MySQL compatibility fixes
+- Baseline survey analysis & gap analysis documented
 
 ️ Pending:
 - Update Prasarana create/edit forms to use rating 1-5
 - Update Prasarana show page to display rating stars
 - Run migrations on production
+- Implement Phase 1 features (Master Peserta, Absensi, Export)
 
 ---
 
