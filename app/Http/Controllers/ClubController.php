@@ -18,16 +18,19 @@ class ClubController extends Controller
      */
     public function index(): View
     {
-        $clubs = Club::with(['user', 'prasarana'])
-            ->when(auth()->check() && !auth()->user()->isSuperAdmin(), function($query) {
-                return $query->where('user_id', auth()->id());
-            })
-            ->latest()
-            ->paginate(10);
+        $isSuperAdmin = auth()->check() && auth()->user()->isSuperAdmin();
+        $userId = auth()->id();
 
-        $totalClubs = Club::count();
-        $activeClubs = Club::aktif()->count();
-        $clubsWithPrasarana = Club::whereNotNull('prasarana_id')->count();
+        $clubsQuery = Club::with(['user', 'prasarana'])
+            ->when(!$isSuperAdmin, function($query) use ($userId) {
+                return $query->where('user_id', $userId);
+            });
+
+        $clubs = (clone $clubsQuery)->latest()->paginate(10);
+
+        $totalClubs = (clone $clubsQuery)->count();
+        $activeClubs = (clone $clubsQuery)->where('aktif', true)->count();
+        $clubsWithPrasarana = (clone $clubsQuery)->whereNotNull('prasarana_id')->count();
 
         return view('clubs.index', compact('clubs', 'totalClubs', 'activeClubs', 'clubsWithPrasarana'));
     }
