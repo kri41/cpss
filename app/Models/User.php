@@ -21,6 +21,9 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'desa',
+        'kecamatan',
+        'kabupaten',
     ];
 
     /**
@@ -116,6 +119,32 @@ class User extends Authenticatable
     public function isRelawan(): bool
     {
         return $this->role === 'relawan';
+    }
+
+    /**
+     * Relasi ke Point Transactions
+     */
+    public function pointTransactions(): HasMany
+    {
+        return $this->hasMany(PointTransaction::class);
+    }
+
+    /**
+     * Relasi ke Badges (lencana)
+     */
+    public function badges(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Badge::class, 'user_badges')
+            ->withPivot('earned_at')
+            ->withTimestamps();
+    }
+
+    /**
+     * Relasi ke Kehadiran (yang dicatat oleh user ini)
+     */
+    public function kehadiranDibuat(): HasMany
+    {
+        return $this->hasMany(Kehadiran::class, 'created_by');
     }
 
     /**

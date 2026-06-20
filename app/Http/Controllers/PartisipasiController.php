@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Http\Middleware\AuditLogger;
+use App\Models\Kehadiran;
 use App\Models\Partisipasi;
+use App\Services\GamificationService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -37,6 +39,9 @@ class PartisipasiController extends Controller
     {
         $validated = $request->validate([
             'lokasi_observasi' => 'required|string|max:255',
+            'desa' => 'nullable|string|max:255',
+            'kecamatan' => 'nullable|string|max:255',
+            'kabupaten' => 'nullable|string|max:255',
             'tanggal_observasi' => 'required|date',
             'estimasi_jumlah_orang' => 'required|integer|min:1',
             'mayoritas_usia' => 'required|in:Anak/Pelajar,Dewasa,Lansia',
@@ -49,6 +54,18 @@ class PartisipasiController extends Controller
         // Audit Log
         AuditLogger::logCreate('partisipasi', $partisipasi->id, $validated);
 
+        // Gamification: Partisipasi Valid
+        GamificationService::awardPoints(
+            auth()->id(),
+            'partisipasi_valid',
+            'partisipasi',
+            $partisipasi->id,
+            [
+                'lokasi' => $partisipasi->lokasi_observasi,
+                'tanggal' => $partisipasi->tanggal_observasi->format('Y-m-d'),
+            ]
+        );
+
         return redirect()->route('partisipasi.index')
             ->with('success', 'Data partisipasi berhasil dicatat.');
     }
@@ -58,6 +75,7 @@ class PartisipasiController extends Controller
      */
     public function show(Partisipasi $partisipasi): View
     {
+        $partisipasi->load('kehadiran');
         return view('partisipasi.show', compact('partisipasi'));
     }
 
@@ -76,6 +94,9 @@ class PartisipasiController extends Controller
     {
         $validated = $request->validate([
             'lokasi_observasi' => 'required|string|max:255',
+            'desa' => 'nullable|string|max:255',
+            'kecamatan' => 'nullable|string|max:255',
+            'kabupaten' => 'nullable|string|max:255',
             'tanggal_observasi' => 'required|date',
             'estimasi_jumlah_orang' => 'required|integer|min:1',
             'mayoritas_usia' => 'required|in:Anak/Pelajar,Dewasa,Lansia',
@@ -108,5 +129,66 @@ class PartisipasiController extends Controller
 
         return redirect()->route('partisipasi.index')
             ->with('success', 'Data partisipasi berhasil dihapus.');
+    }
+
+    /* ============================================================
+       KEHADIRAN (PRESENSI SEDERHANA)
+       ============================================================ */
+
+    /**
+     * Store kehadiran peserta untuk sebuah partisipasi
+     */
+    public function storeKehadiran(Request $request, Partisipasi $partisipasi): RedirectResponse
+    {
+        $validated = $request->validate([
+            'nama_peserta' => 'required|string|max:255',
+            'jenis_kelamin' => 'nullable|in:L,P',
+            'usia' => 'nullable|integer|min:0|max:120',
+            'kelompok_usia' => 'nullable|in:Anak,Remaja,Dewasa,Lansia',
+            'kategori_khusus' => 'nullable|string|max:255',
+            'status' => 'required|in:Hadir,Izin,Sakit,Alfa',
+            'catatan' => 'nullable|string',
+        ]);
+
+        $validated['partisipasi_id'] = $partisipasi->id;
+        $validated['created_by'] = auth()->id();
+
+        Kehadiran::create($validated);
+
+        return redirect()->route('partisipasi.show', $partisipasi)
+            ->with('success', 'Kehadiran peserta berhasil dicatat.');
+    }
+
+    /**
+     * Update kehadiran peserta
+     */
+    public function updateKehadiran(Request $request, Kehadiran $kehadiran): RedirectResponse
+    {
+        $validated = $request->validate([
+            'nama_peserta' => 'required|string|max:255',
+            'jenis_kelamin' => 'nullable|in:L,P',
+            'usia' => 'nullable|integer|min:0|max:120',
+            'kelompok_usia' => 'nullable|in:Anak,Remaja,Dewasa,Lansia',
+            'kategori_khusus' => 'nullable|string|max:255',
+            'status' => 'required|in:Hadir,Izin,Sakit,Alfa',
+            'catatan' => 'nullable|string',
+        ]);
+
+        $kehadiran->update($validated);
+
+        return redirect()->route('partisipasi.show', $kehadiran->partisipasi_id)
+            ->with('success', 'Data kehadiran berhasil diperbarui.');
+    }
+
+    /**
+     * Hapus kehadiran peserta
+     */
+    public function destroyKehadiran(Kehadiran $kehadiran): RedirectResponse
+    {
+        $partisipasiId = $kehadiran->partisipasi_id;
+        $kehadiran->delete();
+
+        return redirect()->route('partisipasi.show', $partisipasiId)
+            ->with('success', 'Data kehadiran berhasil dihapus.');
     }
 }

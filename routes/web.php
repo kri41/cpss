@@ -4,6 +4,7 @@ use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\ClubController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\LeaderboardController;
 use App\Http\Controllers\PartisipasiController;
 use App\Http\Controllers\PrasaranaController;
 use App\Http\Controllers\ProfileController;
@@ -16,7 +17,21 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-// Protected Routes with Auth and Verified
+/* ============================================================
+   AKSES PUBLIK (Tanpa Login)
+   ============================================================ */
+Route::get('/prasarana', [PrasaranaController::class, 'index'])->name('prasarana.index');
+Route::get('/prasarana/{prasarana}', [PrasaranaController::class, 'show'])->name('prasarana.show');
+
+Route::get('/clubs', [ClubController::class, 'index'])->name('clubs.index');
+Route::get('/clubs/{club}', [ClubController::class, 'show'])->name('clubs.show');
+
+Route::get('/events', [EventController::class, 'index'])->name('events.index');
+Route::get('/events/{event}', [EventController::class, 'show'])->name('events.show');
+
+/* ============================================================
+   PROTECTED ROUTES
+   ============================================================ */
 Route::middleware(['auth', 'verified'])->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -26,20 +41,36 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Prasarana Routes (Admin & Relawan)
+    // Leaderboard & Gamification (All authenticated users)
+    Route::get('/leaderboard', [LeaderboardController::class, 'index'])->name('leaderboard.index');
+    Route::get('/my-points', [LeaderboardController::class, 'myPoints'])->name('leaderboard.my-points');
+
+    // Prasarana Routes (Admin & Relawan) — create/store/edit/update/destroy only
     Route::middleware(['App\Http\Middleware\CheckRole:admin,relawan'])->group(function () {
-        Route::resource('prasarana', PrasaranaController::class);
+        Route::resource('prasarana', PrasaranaController::class)->except(['index', 'show']);
+    });
+
+    // Partisipasi Routes (Admin & Relawan)
+    Route::middleware(['App\Http\Middleware\CheckRole:admin,relawan'])->group(function () {
         Route::resource('partisipasi', PartisipasiController::class);
+
+        // Kehadiran (Presensi Sederhana)
+        Route::post('/partisipasi/{partisipasi}/kehadiran', [PartisipasiController::class, 'storeKehadiran'])
+            ->name('partisipasi.kehadiran.store');
+        Route::patch('/kehadiran/{kehadiran}', [PartisipasiController::class, 'updateKehadiran'])
+            ->name('partisipasi.kehadiran.update');
+        Route::delete('/kehadiran/{kehadiran}', [PartisipasiController::class, 'destroyKehadiran'])
+            ->name('partisipasi.kehadiran.destroy');
     });
 
-    // Events Routes (Admin & Relawan)
+    // Events Routes (Admin & Relawan) — create/store/edit/update/destroy only
     Route::middleware(['App\Http\Middleware\CheckRole:admin,relawan'])->group(function () {
-        Route::resource('events', EventController::class);
+        Route::resource('events', EventController::class)->except(['index', 'show']);
     });
 
-    // Clubs Routes (Admin & Relawan)
+    // Clubs Routes (Admin & Relawan) — create/store/edit/update/destroy only
     Route::middleware(['App\Http\Middleware\CheckRole:admin,relawan'])->group(function () {
-        Route::resource('clubs', ClubController::class);
+        Route::resource('clubs', ClubController::class)->except(['index', 'show']);
     });
 
     // Talenta Routes (Admin only)

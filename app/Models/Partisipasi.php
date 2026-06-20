@@ -15,6 +15,9 @@ class Partisipasi extends Model
     protected $fillable = [
         'user_id',
         'lokasi_observasi',
+        'desa',
+        'kecamatan',
+        'kabupaten',
         'tanggal_observasi',
         'estimasi_jumlah_orang',
         'mayoritas_usia',
@@ -47,6 +50,14 @@ class Partisipasi extends Model
     public function scopeKelompokUsia($query, $kelompok)
     {
         return $query->where('mayoritas_usia', $kelompok);
+    }
+
+    /**
+     * Relasi ke Kehadiran (peserta individu)
+     */
+    public function kehadiran(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Kehadiran::class);
     }
 
     /**

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Middleware\AuditLogger;
 use App\Models\Event;
+use App\Services\GamificationService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -41,6 +42,9 @@ class EventController extends Controller
             'tanggal_mulai' => 'required|date',
             'tanggal_selesai' => 'nullable|date|after_or_equal:tanggal_mulai',
             'deskripsi_kegiatan' => 'nullable|string',
+            'desa' => 'nullable|string|max:255',
+            'kecamatan' => 'nullable|string|max:255',
+            'kabupaten' => 'nullable|string|max:255',
         ]);
 
         $validated['user_id'] = auth()->id();
@@ -49,6 +53,14 @@ class EventController extends Controller
 
         // Audit Log
         AuditLogger::logCreate('events', $event->id, $validated);
+
+        // Gamification: Event Baru
+        GamificationService::awardPoints(
+            auth()->id(),
+            'event_baru',
+            'event',
+            $event->id
+        );
 
         return redirect()->route('events.index')
             ->with('success', 'Data event berhasil ditambahkan.');
@@ -81,6 +93,9 @@ class EventController extends Controller
             'tanggal_mulai' => 'required|date',
             'tanggal_selesai' => 'nullable|date|after_or_equal:tanggal_mulai',
             'deskripsi_kegiatan' => 'nullable|string',
+            'desa' => 'nullable|string|max:255',
+            'kecamatan' => 'nullable|string|max:255',
+            'kabupaten' => 'nullable|string|max:255',
         ]);
 
         // Simpan data lama untuk audit log

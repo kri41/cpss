@@ -17,6 +17,9 @@ class Event extends Model
         'tanggal_mulai',
         'tanggal_selesai',
         'deskripsi_kegiatan',
+        'desa',
+        'kecamatan',
+        'kabupaten',
     ];
 
     protected $casts = [

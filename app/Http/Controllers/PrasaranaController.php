@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Middleware\AuditLogger;
 use App\Models\Prasarana;
+use App\Services\GamificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
@@ -42,6 +43,10 @@ class PrasaranaController extends Controller
             'kategori_olahraga' => 'required|string|max:100',
             'latitude' => 'nullable|numeric|between:-90,90',
             'longitude' => 'nullable|numeric|between:-180,180',
+            'alamat' => 'nullable|string',
+            'desa' => 'nullable|string|max:255',
+            'kecamatan' => 'nullable|string|max:255',
+            'kabupaten' => 'nullable|string|max:255',
             'kondisi_lantai' => 'required|in:Baik,Sedang,Rusak Berat',
             'akses_disabilitas' => 'boolean',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
@@ -60,6 +65,14 @@ class PrasaranaController extends Controller
 
         // Audit Log
         AuditLogger::logCreate('prasarana', $prasarana->id, $validated);
+
+        // Gamification: Prasarana Baru
+        GamificationService::awardPoints(
+            auth()->id(),
+            'prasarana_baru',
+            'prasarana',
+            $prasarana->id
+        );
 
         return redirect()->route('prasarana.index')
             ->with('success', 'Data prasarana berhasil ditambahkan.');
@@ -92,6 +105,10 @@ class PrasaranaController extends Controller
             'kategori_olahraga' => 'required|string|max:100',
             'latitude' => 'nullable|numeric|between:-90,90',
             'longitude' => 'nullable|numeric|between:-180,180',
+            'alamat' => 'nullable|string',
+            'desa' => 'nullable|string|max:255',
+            'kecamatan' => 'nullable|string|max:255',
+            'kabupaten' => 'nullable|string|max:255',
             'kondisi_lantai' => 'required|in:Baik,Sedang,Rusak Berat',
             'akses_disabilitas' => 'boolean',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
@@ -116,6 +133,14 @@ class PrasaranaController extends Controller
 
         // Audit Log
         AuditLogger::logUpdate('prasarana', $prasarana->id, $oldData, $prasarana->fresh()->toArray());
+
+        // Gamification: Prasarana Update (jika memenuhi syarat)
+        GamificationService::awardPoints(
+            auth()->id(),
+            'prasarana_update',
+            'prasarana',
+            $prasarana->id
+        );
 
         return redirect()->route('prasarana.index')
             ->with('success', 'Data prasarana berhasil diperbarui.');

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Club;
 use App\Models\Prasarana;
 use App\Models\JadwalLatihan;
+use App\Services\GamificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
@@ -53,6 +54,9 @@ class ClubController extends Controller
             'no_telepon' => 'required|string|max:20',
             'email' => 'nullable|email|max:255',
             'alamat' => 'nullable|string',
+            'desa' => 'nullable|string|max:255',
+            'kecamatan' => 'nullable|string|max:255',
+            'kabupaten' => 'nullable|string|max:255',
             'prasarana_id' => 'nullable|exists:prasarana,id',
             'tanggal_berdiri' => 'nullable|date',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
@@ -73,6 +77,14 @@ class ClubController extends Controller
         if ($request->has('jadwal')) {
             $this->createJadwal($club, $request->jadwal);
         }
+
+        // Gamification: Club Baru
+        GamificationService::awardPoints(
+            auth()->id(),
+            'club_baru',
+            'club',
+            $club->id
+        );
 
         return redirect()->route('clubs.show', $club)
             ->with('success', 'Club berhasil dibuat.');
@@ -121,6 +133,9 @@ class ClubController extends Controller
             'no_telepon' => 'required|string|max:20',
             'email' => 'nullable|email|max:255',
             'alamat' => 'nullable|string',
+            'desa' => 'nullable|string|max:255',
+            'kecamatan' => 'nullable|string|max:255',
+            'kabupaten' => 'nullable|string|max:255',
             'prasarana_id' => 'nullable|exists:prasarana,id',
             'tanggal_berdiri' => 'nullable|date',
             'aktif' => 'boolean',
@@ -145,6 +160,14 @@ class ClubController extends Controller
             $club->jadwalLatihan()->delete();
             $this->createJadwal($club, $request->jadwal);
         }
+
+        // Gamification: Club Update
+        GamificationService::awardPoints(
+            auth()->id(),
+            'club_update',
+            'club',
+            $club->id
+        );
 
         return redirect()->route('clubs.show', $club)
             ->with('success', 'Club berhasil diperbarui.');

@@ -21,6 +21,9 @@ class Prasarana extends Model
         'latitude',
         'longitude',
         'alamat',
+        'desa',
+        'kecamatan',
+        'kabupaten',
         // Kondisi (1-5 scale)
         'kondisi_lantai',
         'kondisi_ring',
