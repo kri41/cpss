@@ -91,6 +91,10 @@ class PrasaranaController extends Controller
      */
     public function edit(Prasarana $prasarana): View
     {
+        if (!auth()->user()->canEdit($prasarana)) {
+            abort(403, 'Anda tidak memiliki izin untuk mengedit data prasarana ini.');
+        }
+
         return view('prasarana.edit', compact('prasarana'));
     }
 
@@ -99,6 +103,10 @@ class PrasaranaController extends Controller
      */
     public function update(Request $request, Prasarana $prasarana): RedirectResponse
     {
+        if (!auth()->user()->canEdit($prasarana)) {
+            abort(403, 'Anda tidak memiliki izin untuk mengedit data prasarana ini.');
+        }
+
         $validated = $request->validate([
             'nama_fasilitas' => 'required|string|max:255',
             'club_komunitas' => 'nullable|string|max:255',
@@ -151,6 +159,10 @@ class PrasaranaController extends Controller
      */
     public function destroy(Prasarana $prasarana): RedirectResponse
     {
+        if (!auth()->user()->canEdit($prasarana)) {
+            abort(403, 'Anda tidak memiliki izin untuk menghapus data prasarana ini.');
+        }
+
         // Simpan data untuk audit log
         $oldData = $prasarana->toArray();
 
@@ -166,5 +178,20 @@ class PrasaranaController extends Controller
 
         return redirect()->route('prasarana.index')
             ->with('success', 'Data prasarana berhasil dihapus.');
+    }
+
+    /**
+     * Validate the specified prasarana.
+     */
+    public function validatePrasarana(Prasarana $prasarana): RedirectResponse
+    {
+        if (!auth()->user()->canValidate($prasarana)) {
+            abort(403, 'Anda tidak memiliki izin untuk memvalidasi data prasarana ini.');
+        }
+
+        $prasarana->update(['status_validasi' => 'validated']);
+
+        return redirect()->route('prasarana.index')
+            ->with('success', 'Data prasarana berhasil divalidasi.');
     }
 }

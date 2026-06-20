@@ -18,19 +18,11 @@ class ClubController extends Controller
      */
     public function index(): View
     {
-        $isSuperAdmin = auth()->check() && auth()->user()->isSuperAdmin();
-        $userId = auth()->id();
+        $clubs = Club::with(['user', 'prasarana'])->latest()->paginate(10);
 
-        $clubsQuery = Club::with(['user', 'prasarana'])
-            ->when(!$isSuperAdmin, function($query) use ($userId) {
-                return $query->where('user_id', $userId);
-            });
-
-        $clubs = (clone $clubsQuery)->latest()->paginate(10);
-
-        $totalClubs = (clone $clubsQuery)->count();
-        $activeClubs = (clone $clubsQuery)->where('aktif', true)->count();
-        $clubsWithPrasarana = (clone $clubsQuery)->whereNotNull('prasarana_id')->count();
+        $totalClubs = Club::count();
+        $activeClubs = Club::where('aktif', true)->count();
+        $clubsWithPrasarana = Club::whereNotNull('prasarana_id')->count();
 
         return view('clubs.index', compact('clubs', 'totalClubs', 'activeClubs', 'clubsWithPrasarana'));
     }
@@ -117,6 +109,10 @@ class ClubController extends Controller
      */
     public function edit(Club $club): View
     {
+        if (!auth()->user()->canEdit($club)) {
+            abort(403, 'Anda tidak memiliki izin untuk mengedit club ini.');
+        }
+
         $prasarana = Prasarana::all();
         $club->load('jadwalLatihan');
         
@@ -128,6 +124,10 @@ class ClubController extends Controller
      */
     public function update(Request $request, Club $club): RedirectResponse
     {
+        if (!auth()->user()->canEdit($club)) {
+            abort(403, 'Anda tidak memiliki izin untuk mengedit club ini.');
+        }
+
         $validated = $request->validate([
             'nama_club' => 'required|string|max:255',
             'deskripsi' => 'nullable|string',
@@ -181,6 +181,10 @@ class ClubController extends Controller
      */
     public function destroy(Club $club): RedirectResponse
     {
+        if (!auth()->user()->canEdit($club)) {
+            abort(403, 'Anda tidak memiliki izin untuk menghapus club ini.');
+        }
+
         // Delete logo if exists
         if ($club->logo_path) {
             Storage::disk('public')->delete($club->logo_path);
@@ -190,6 +194,21 @@ class ClubController extends Controller
 
         return redirect()->route('clubs.index')
             ->with('success', 'Club berhasil dihapus.');
+    }
+
+    /**
+     * Validate the specified club.
+     */
+    public function validateClub(Club $club): RedirectResponse
+    {
+        if (!auth()->user()->canValidate($club)) {
+            abort(403, 'Anda tidak memiliki izin untuk memvalidasi club ini.');
+        }
+
+        $club->update(['status_validasi' => 'validated']);
+
+        return redirect()->route('clubs.index')
+            ->with('success', 'Club berhasil divalidasi.');
     }
 
     /**

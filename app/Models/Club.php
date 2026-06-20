@@ -27,6 +27,7 @@ class Club extends Model
         'logo_path',
         'aktif',
         'tanggal_berdiri',
+        'status_validasi',
     ];
 
     protected $casts = [

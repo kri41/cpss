@@ -21,6 +21,7 @@ class Partisipasi extends Model
         'tanggal_observasi',
         'estimasi_jumlah_orang',
         'mayoritas_usia',
+        'status_validasi',
     ];
 
     protected $casts = [

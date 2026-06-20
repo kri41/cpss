@@ -20,6 +20,7 @@ class Event extends Model
         'desa',
         'kecamatan',
         'kabupaten',
+        'status_validasi',
     ];
 
     protected $casts = [

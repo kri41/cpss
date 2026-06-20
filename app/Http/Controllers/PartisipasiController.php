@@ -84,6 +84,10 @@ class PartisipasiController extends Controller
      */
     public function edit(Partisipasi $partisipasi): View
     {
+        if (!auth()->user()->canEdit($partisipasi)) {
+            abort(403, 'Anda tidak memiliki izin untuk mengedit data partisipasi ini.');
+        }
+
         return view('partisipasi.edit', compact('partisipasi'));
     }
 
@@ -92,6 +96,10 @@ class PartisipasiController extends Controller
      */
     public function update(Request $request, Partisipasi $partisipasi): RedirectResponse
     {
+        if (!auth()->user()->canEdit($partisipasi)) {
+            abort(403, 'Anda tidak memiliki izin untuk mengedit data partisipasi ini.');
+        }
+
         $validated = $request->validate([
             'lokasi_observasi' => 'required|string|max:255',
             'desa' => 'nullable|string|max:255',
@@ -119,6 +127,10 @@ class PartisipasiController extends Controller
      */
     public function destroy(Partisipasi $partisipasi): RedirectResponse
     {
+        if (!auth()->user()->canEdit($partisipasi)) {
+            abort(403, 'Anda tidak memiliki izin untuk menghapus data partisipasi ini.');
+        }
+
         // Simpan data untuk audit log
         $oldData = $partisipasi->toArray();
 
@@ -129,6 +141,21 @@ class PartisipasiController extends Controller
 
         return redirect()->route('partisipasi.index')
             ->with('success', 'Data partisipasi berhasil dihapus.');
+    }
+
+    /**
+     * Validate the specified partisipasi.
+     */
+    public function validatePartisipasi(Partisipasi $partisipasi): RedirectResponse
+    {
+        if (!auth()->user()->canValidate($partisipasi)) {
+            abort(403, 'Anda tidak memiliki izin untuk memvalidasi data partisipasi ini.');
+        }
+
+        $partisipasi->update(['status_validasi' => 'validated']);
+
+        return redirect()->route('partisipasi.index')
+            ->with('success', 'Data partisipasi berhasil divalidasi.');
     }
 
     /* ============================================================

@@ -79,6 +79,10 @@ class EventController extends Controller
      */
     public function edit(Event $event): View
     {
+        if (!auth()->user()->canEdit($event)) {
+            abort(403, 'Anda tidak memiliki izin untuk mengedit event ini.');
+        }
+
         return view('events.edit', compact('event'));
     }
 
@@ -87,6 +91,10 @@ class EventController extends Controller
      */
     public function update(Request $request, Event $event): RedirectResponse
     {
+        if (!auth()->user()->canEdit($event)) {
+            abort(403, 'Anda tidak memiliki izin untuk mengedit event ini.');
+        }
+
         $validated = $request->validate([
             'nama_event' => 'required|string|max:255',
             'tingkat' => 'required|in:Desa/Kelurahan,Kecamatan,Kabupaten/Kota',
@@ -115,6 +123,10 @@ class EventController extends Controller
      */
     public function destroy(Event $event): RedirectResponse
     {
+        if (!auth()->user()->canEdit($event)) {
+            abort(403, 'Anda tidak memiliki izin untuk menghapus event ini.');
+        }
+
         // Simpan data untuk audit log
         $oldData = $event->toArray();
 
@@ -125,5 +137,20 @@ class EventController extends Controller
 
         return redirect()->route('events.index')
             ->with('success', 'Data event berhasil dihapus.');
+    }
+
+    /**
+     * Validate the specified event.
+     */
+    public function validateEvent(Event $event): RedirectResponse
+    {
+        if (!auth()->user()->canValidate($event)) {
+            abort(403, 'Anda tidak memiliki izin untuk memvalidasi event ini.');
+        }
+
+        $event->update(['status_validasi' => 'validated']);
+
+        return redirect()->route('events.index')
+            ->with('success', 'Data event berhasil divalidasi.');
     }
 }

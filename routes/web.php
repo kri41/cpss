@@ -48,6 +48,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Prasarana Routes (Admin & Relawan) — create/store/edit/update/destroy only
     Route::middleware(['App\Http\Middleware\CheckRole:admin,relawan'])->group(function () {
         Route::resource('prasarana', PrasaranaController::class)->except(['index', 'show']);
+        Route::patch('/prasarana/{prasarana}/validate', [PrasaranaController::class, 'validatePrasarana'])->name('prasarana.validate');
     });
 
     // Partisipasi Routes (Admin & Relawan)
@@ -61,16 +62,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->name('partisipasi.kehadiran.update');
         Route::delete('/kehadiran/{kehadiran}', [PartisipasiController::class, 'destroyKehadiran'])
             ->name('partisipasi.kehadiran.destroy');
+
+        Route::patch('/partisipasi/{partisipasi}/validate', [PartisipasiController::class, 'validatePartisipasi'])->name('partisipasi.validate');
     });
 
     // Events Routes (Admin & Relawan) — create/store/edit/update/destroy only
     Route::middleware(['App\Http\Middleware\CheckRole:admin,relawan'])->group(function () {
         Route::resource('events', EventController::class)->except(['index', 'show']);
+        Route::patch('/events/{event}/validate', [EventController::class, 'validateEvent'])->name('events.validate');
     });
 
     // Clubs Routes (Admin & Relawan) — create/store/edit/update/destroy only
     Route::middleware(['App\Http\Middleware\CheckRole:admin,relawan'])->group(function () {
         Route::resource('clubs', ClubController::class)->except(['index', 'show']);
+        Route::patch('/clubs/{club}/validate', [ClubController::class, 'validateClub'])->name('clubs.validate');
     });
 
     // Talenta Routes (Admin only)

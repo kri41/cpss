@@ -29,10 +29,10 @@
                             <thead class="bg-gray-50">
                                 <tr>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Fasilitas</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Club/Komunitas</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Wilayah</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kategori</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kondisi</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Akses Disabilitas</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Validasi</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pelapor</th>
                                     <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                                 </tr>
@@ -42,9 +42,11 @@
                                     <tr>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="text-sm font-medium text-gray-900">{{ $item->nama_fasilitas }}</div>
+                                            <div class="text-xs text-gray-500">{{ $item->club_komunitas ?: '-' }}</div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="text-sm text-gray-900">{{ $item->club_komunitas ?: '-' }}</div>
+                                            <div class="text-sm text-gray-900">{{ $item->desa }}</div>
+                                            <div class="text-xs text-gray-500">{{ $item->kecamatan }}, {{ $item->kabupaten }}</div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="text-sm text-gray-900">{{ $item->kategori_olahraga }}</div>
@@ -58,14 +60,15 @@
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            @if($item->akses_disabilitas)
-                                                <span class="text-green-600">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                                                    </svg>
+                                            @if($item->status_validasi === 'validated')
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                                    Tervalidasi
                                                 </span>
                                             @else
-                                                <span class="text-gray-400">-</span>
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                                    Pending
+                                                </span>
                                             @endif
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
@@ -74,13 +77,20 @@
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <a href="{{ route('prasarana.show', $item) }}" class="text-indigo-600 hover:text-indigo-900 mr-3">Detail</a>
                                             @auth
-                                                @if(auth()->user()->isAdmin() || auth()->user()->isRelawan())
-                                                <a href="{{ route('prasarana.edit', $item) }}" class="text-yellow-600 hover:text-yellow-900 mr-3">Edit</a>
-                                                <form action="{{ route('prasarana.destroy', $item) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="text-red-600 hover:text-red-900">Hapus</button>
-                                                </form>
+                                                @if(auth()->user()->canEdit($item))
+                                                    <a href="{{ route('prasarana.edit', $item) }}" class="text-yellow-600 hover:text-yellow-900 mr-3">Edit</a>
+                                                    <form action="{{ route('prasarana.destroy', $item) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="text-red-600 hover:text-red-900">Hapus</button>
+                                                    </form>
+                                                @endif
+                                                @if(auth()->user()->canValidate($item) && $item->status_validasi !== 'validated')
+                                                    <form action="{{ route('prasarana.validate', $item) }}" method="POST" class="inline ml-2" onsubmit="return confirm('Validasi data prasarana ini? Data yang sudah divalidasi tidak dapat diedit.');">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <button type="submit" class="text-purple-600 hover:text-purple-900 font-medium">Validasi</button>
+                                                    </form>
                                                 @endif
                                             @endauth
                                         </td>

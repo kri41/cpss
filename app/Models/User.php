@@ -148,10 +148,65 @@ class User extends Authenticatable
     }
 
     /**
-     * Scope untuk filter berdasarkan role
+     * Cek apakah user bisa mengedit model (data ownership + wilayah + status validasi)
      */
-    public function scopeRole($query, $role)
+    public function canEdit($model): bool
     {
-        return $query->where('role', $role);
+        // Super admin bisa edit apapun
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        // Data yang sudah divalidasi tidak bisa diedit (kecuali super admin)
+        if ($model->status_validasi === 'validated') {
+            return false;
+        }
+
+        // Pemilik data bisa edit
+        if ($model->user_id === $this->id) {
+            return true;
+        }
+
+        return false;
     }
-}
+
+    /**
+     * Cek apakah user bisa memvalidasi model (admin wilayah / super admin)
+     */
+    public function canValidate($model): bool
+    {
+        // Super admin bisa validasi apapun
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        // Hanya admin yang bisa validasi
+        if (!$this->isAdmin() || $this->role === 'relawan') {
+            return false;
+        }
+
+        // Admin hanya bisa validasi data di wilayah yang sama
+        return $this->isSameWilayah($model);
+    }
+
+    /**
+     * Cek apakah user berada di wilayah yang sama dengan model
+     */
+    public function isSameWilayah($model): bool
+    {
+        // Cocokkan kabupaten
+        if (!empty($this->kabupaten) && !empty($model->kabupaten)) {
+            if (strtolower(trim($this->kabupaten)) !== strtolower(trim($model->kabupaten))) {
+                return false;
+            }
+        }
+
+        // Cocokkan kecamatan (jika keduanya ada)
+        if (!empty($this->kecamatan) && !empty($model->kecamatan)) {
+            if (strtolower(trim($this->kecamatan)) !== strtolower(trim($model->kecamatan))) {
+                return false;
+            }
+        }
+
+        return true;
+    }

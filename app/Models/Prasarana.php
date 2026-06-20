@@ -43,6 +43,7 @@ class Prasarana extends Model
         'foto_path',
         'foto_tambahan',
         'keterangan',
+        'status_validasi',
     ];
 
     protected $casts = [

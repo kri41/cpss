@@ -25,9 +25,10 @@
                             <thead class="bg-gray-50">
                                 <tr>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lokasi Observasi</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Wilayah</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jumlah Orang</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mayoritas Usia</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Validasi</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pencatat</th>
                                     <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                                 </tr>
@@ -37,6 +38,11 @@
                                     <tr>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="text-sm font-medium text-gray-900">{{ $item->lokasi_observasi }}</div>
+                                            <div class="text-xs text-gray-500">{{ $item->mayoritas_usia }}</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm text-gray-900">{{ $item->desa }}</div>
+                                            <div class="text-xs text-gray-500">{{ $item->kecamatan }}, {{ $item->kabupaten }}</div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="text-sm text-gray-900">{{ $item->tanggal_observasi->format('d/m/Y') }}</div>
@@ -45,26 +51,44 @@
                                             <div class="text-sm font-semibold text-indigo-600">{{ number_format($item->estimasi_jumlah_orang) }} orang</div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                                                {{ $item->mayoritas_usia }}
-                                            </span>
+                                            @if($item->status_validasi === 'validated')
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                                    Tervalidasi
+                                                </span>
+                                            @else
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                                    Pending
+                                                </span>
+                                            @endif
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="text-sm text-gray-900">{{ $item->user->name ?? '-' }}</div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <a href="{{ route('partisipasi.show', $item) }}" class="text-indigo-600 hover:text-indigo-900 mr-3">Detail</a>
-                                            <a href="{{ route('partisipasi.edit', $item) }}" class="text-yellow-600 hover:text-yellow-900 mr-3">Edit</a>
-                                            <form action="{{ route('partisipasi.destroy', $item) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="text-red-600 hover:text-red-900">Hapus</button>
-                                            </form>
+                                            @auth
+                                                @if(auth()->user()->canEdit($item))
+                                                    <a href="{{ route('partisipasi.edit', $item) }}" class="text-yellow-600 hover:text-yellow-900 mr-3">Edit</a>
+                                                    <form action="{{ route('partisipasi.destroy', $item) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="text-red-600 hover:text-red-900">Hapus</button>
+                                                    </form>
+                                                @endif
+                                                @if(auth()->user()->canValidate($item) && $item->status_validasi !== 'validated')
+                                                    <form action="{{ route('partisipasi.validate', $item) }}" method="POST" class="inline ml-2" onsubmit="return confirm('Validasi data partisipasi ini? Data yang sudah divalidasi tidak dapat diedit.');">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <button type="submit" class="text-purple-600 hover:text-purple-900 font-medium">Validasi</button>
+                                                    </form>
+                                                @endif
+                                            @endauth
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+                                        <td colspan="7" class="px-6 py-4 text-center text-gray-500">
                                             Tidak ada data partisipasi. <a href="{{ route('partisipasi.create') }}" class="text-indigo-600 hover:text-indigo-900">Catat data pertama</a>
                                         </td>
                                     </tr>

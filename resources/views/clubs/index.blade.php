@@ -85,8 +85,8 @@
                         <thead class="bg-gray-50">
                             <tr>
                                 <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Club</th>
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Wilayah</th>
                                 <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Ketua</th>
-                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Kontak</th>
                                 <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Prasarana</th>
                                 <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
                                 <th class="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Aksi</th>
@@ -102,16 +102,18 @@
                                             </div>
                                             <div class="ml-4">
                                                 <div class="text-sm font-medium text-gray-900">{{ $club->nama_club }}</div>
-                                                <div class="text-sm text-gray-500">{{ $club->tanggal_berdiri ? $club->tanggal_berdiri->format('Y') : 'Tahun tidak diketahui' }}</div>
+                                                <div class="text-xs text-gray-500">Oleh: {{ $club->user->name ?? 'Unknown' }}</div>
+                                                <div class="text-xs text-gray-400">{{ $club->tanggal_berdiri ? $club->tanggal_berdiri->format('Y') : 'Tahun tidak diketahui' }}</div>
                                             </div>
                                         </div>
                                     </td>
                                     <td class="px-6 py-4">
-                                        <div class="text-sm text-gray-900">{{ $club->ketua_club }}</div>
+                                        <div class="text-sm text-gray-900">{{ $club->desa }}</div>
+                                        <div class="text-xs text-gray-500">{{ $club->kecamatan }}, {{ $club->kabupaten }}</div>
                                     </td>
                                     <td class="px-6 py-4">
-                                        <div class="text-sm text-gray-900">{{ $club->narahubung }}</div>
-                                        <div class="text-sm text-gray-500">{{ $club->no_telepon }}</div>
+                                        <div class="text-sm text-gray-900">{{ $club->ketua_club }}</div>
+                                        <div class="text-xs text-gray-500">{{ $club->narahubung }} | {{ $club->no_telepon }}</div>
                                     </td>
                                     <td class="px-6 py-4">
                                         @if($club->prasarana)
@@ -123,27 +125,46 @@
                                         @endif
                                     </td>
                                     <td class="px-6 py-4">
-                                        @if($club->aktif)
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                Aktif
-                                            </span>
-                                        @else
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                                Nonaktif
-                                            </span>
-                                        @endif
+                                        <div class="flex flex-col gap-1">
+                                            @if($club->aktif)
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 w-fit">
+                                                    Aktif
+                                                </span>
+                                            @else
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 w-fit">
+                                                    Nonaktif
+                                                </span>
+                                            @endif
+                                            @if($club->status_validasi === 'validated')
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 w-fit">
+                                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                                    Tervalidasi
+                                                </span>
+                                            @else
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 w-fit">
+                                                    Pending
+                                                </span>
+                                            @endif
+                                        </div>
                                     </td>
                                     <td class="px-6 py-4 text-right text-sm font-medium">
                                         <div class="flex items-center justify-end space-x-3">
                                             <a href="{{ route('clubs.show', $club) }}" class="text-indigo-600 hover:text-indigo-900">Detail</a>
                                             @auth
-                                                @if(auth()->user()->isAdmin() || auth()->user()->isRelawan())
-                                                <a href="{{ route('clubs.edit', $club) }}" class="text-yellow-600 hover:text-yellow-900">Edit</a>
-                                                <form action="{{ route('clubs.destroy', $club) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus club ini?');">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="text-red-600 hover:text-red-900">Hapus</button>
-                                                </form>
+                                                @if(auth()->user()->canEdit($club))
+                                                    <a href="{{ route('clubs.edit', $club) }}" class="text-yellow-600 hover:text-yellow-900">Edit</a>
+                                                    <form action="{{ route('clubs.destroy', $club) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus club ini?');">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="text-red-600 hover:text-red-900">Hapus</button>
+                                                    </form>
+                                                @endif
+                                                @if(auth()->user()->canValidate($club) && $club->status_validasi !== 'validated')
+                                                    <form action="{{ route('clubs.validate', $club) }}" method="POST" class="inline" onsubmit="return confirm('Validasi club ini? Data yang sudah divalidasi tidak dapat diedit.');">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <button type="submit" class="text-purple-600 hover:text-purple-900 font-medium">Validasi</button>
+                                                    </form>
                                                 @endif
                                             @endauth
                                         </div>
