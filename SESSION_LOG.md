@@ -659,6 +659,70 @@ Fitur-fitur lain seperti notifikasi, QR, video, forum, PWA, NIK, dan big data ba
 - Uji fungsional berhasil — semua fitur bekerja sesuai spesifikasi
 - 8 akun dummy + data lapangan dummy tersedia untuk demo
 
+## 14. Pengujian Tampilan Web (UI/UX Review)
+
+### Tanggal Pengujian: 20 Juni 2026
+Server lokal dijalankan pada `http://127.0.0.1:8001`.
+
+### 14.1 Temuan Awal
+| Halaman | Temuan | Status |
+|---------|--------|--------|
+| `/prasarana` (guest) | Error 500: `Attempt to read property "name" on null` di layout sidebar | ❌ |
+| `/clubs` (guest) | Error 500: `Call to a member function isSuperAdmin() on null` di ClubController | ❌ |
+
+### 14.2 Perbaikan UI/UX yang Dilakukan
+| File | Perbaikan |
+|------|-----------|
+| `resources/views/layouts/app.blade.php` | Wrap user profile & dropdown dengan `@auth`; tampilkan tombol "Masuk untuk Melapor" untuk guest; pindahkan menu Prasarana/Clubs/Events ke luar `@auth` |
+| `app/Http/Controllers/ClubController.php` | Fix `auth()->user()->isSuperAdmin()` → `auth()->check() && !auth()->user()->isSuperAdmin()` agar tidak error saat guest |
+| `resources/views/prasarana/index.blade.php` | Sembunyikan tombol "Tambah Prasarana" dan "Edit/Hapus" untuk guest |
+| `resources/views/prasarana/show.blade.php` | Tambah info Wilayah; sembunyikan tombol Edit untuk guest |
+| `resources/views/clubs/index.blade.php` | Sembunyikan tombol "Tambah Club" dan "Edit/Hapus" untuk guest |
+| `resources/views/clubs/show.blade.php` | Tambah info Wilayah; sembunyikan tombol Edit untuk guest |
+| `resources/views/events/index.blade.php` | Sembunyikan tombol "Tambah Event" dan "Edit/Hapus" untuk guest |
+| `resources/views/events/show.blade.php` | Tambah info Wilayah; sembunyikan tombol Edit untuk guest |
+| `resources/views/partisipasi/show.blade.php` | Tambah tabel **Daftar Kehadiran Individu** dengan kolom nama, gender, usia, kelompok, status, catatan |
+
+### 14.3 Hasil Pengujian Akhir
+| Halaman | Guest (Tanpa Login) | Auth (Relawan/Admin) |
+|---------|---------------------|----------------------|
+| `/prasarana` | ✅ Data muncul, hanya tombol "Detail" | ✅ Semua tombol aktif |
+| `/prasarana/1` | ✅ Info lengkap + Wilayah, tanpa tombol Edit | ✅ Ada tombol Edit |
+| `/clubs` | ✅ Data muncul, hanya tombol "Detail" | ✅ Semua tombol aktif |
+| `/clubs/1` | ✅ Info lengkap + Wilayah, tanpa tombol Edit | ✅ Ada tombol Edit |
+| `/events` | ✅ Data muncul, hanya tombol "Detail" | ✅ Semua tombol aktif |
+| `/events/1` | ✅ Info lengkap + Wilayah, tanpa tombol Edit | ✅ Ada tombol Edit |
+| `/partisipasi/1` | ❌ Redirect ke login (sesuai desain) | ✅ Detail + tabel kehadiran individu |
+| `/leaderboard` | ❌ Redirect ke login (sesuai desain) | ✅ Leaderboard + peringkat pribadi |
+| `/my-points` | ❌ Redirect ke login (sesuai desain) | ✅ Poin & lencana pribadi |
+
+### 14.4 Bug Ditemukan & Diperbaiki (Tambahan)
+| Bug | Solusi |
+|-----|--------|
+| Sidebar layout error saat guest (null user) | Wrap profile section dengan `@auth` / `@else` |
+| ClubController error `isSuperAdmin() on null` | Tambah `auth()->check()` sebelum panggil `isSuperAdmin()` |
+
+---
+
+## Session Status
+
+✅ Completed:
+- MFA removal
+- Sidebar layout
+- Dashboard redesign
+- Club system (CRUD + schedule)
+- Prasarana rating system
+- MySQL compatibility fixes
+- Baseline survey analysis REVISED with 3 official documents
+- PRD.md updated to v2.1 with gamification, wilayah, and public access specs
+- **Fase 1 Prototipe Disertasi FULLY IMPLEMENTED, TESTED & UI-REVIEWED:**
+  - ✅ Struktur Wilayah
+  - ✅ Akses Publik (guest-friendly)
+  - ✅ Presensi Sederhana (dengan tabel kehadiran)
+  - ✅ Modul Gamifikasi (poin, leaderboard, lencana)
+- Uji fungsional & tampilan web berhasil
+- 8 akun dummy + data lapangan dummy tersedia
+
 ️ Pending:
 - Update Prasarana create/edit forms to use rating 1-5
 - Update Prasarana show page to display rating stars
