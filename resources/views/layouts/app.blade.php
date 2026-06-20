@@ -232,7 +232,11 @@
 
                 <!-- Page Content -->
                 <main class="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-900">
-                    {{ $slot }}
+                    @isset($slot)
+                        {{ $slot }}
+                    @else
+                        @yield('content')
+                    @endisset
                 </main>
             </div>
         </div>
