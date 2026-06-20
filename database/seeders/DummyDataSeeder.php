@@ -22,6 +22,7 @@ class DummyDataSeeder extends Seeder
         $this->seedClubs();
         $this->seedEvents();
         $this->seedPartisipasiDanKehadiran();
+        $this->call(AuditLogSeeder::class);
     }
 
     private function seedPrasarana(): void
