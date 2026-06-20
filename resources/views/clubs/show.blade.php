@@ -6,12 +6,16 @@
                 <p class="text-sm text-gray-500 mt-1">Detail informasi club</p>
             </div>
             <div class="flex items-center space-x-3">
-                <a href="{{ route('clubs.edit', $club) }}" class="inline-flex items-center px-4 py-2 bg-yellow-500 text-white rounded-xl font-medium hover:bg-yellow-600 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
-                    Edit
-                </a>
+                @auth
+                    @if(auth()->user()->isAdmin() || auth()->user()->isRelawan())
+                    <a href="{{ route('clubs.edit', $club) }}" class="inline-flex items-center px-4 py-2 bg-yellow-500 text-white rounded-xl font-medium hover:bg-yellow-600 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                        Edit
+                    </a>
+                    @endif
+                @endauth
             </div>
         </div>
     </x-slot>
@@ -43,6 +47,15 @@
                                 @if($club->deskripsi)
                                     <p class="text-gray-600">{{ $club->deskripsi }}</p>
                                 @endif
+                                <p class="text-sm text-gray-500 mt-2">
+                                    <span class="flex items-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        </svg>
+                                        {{ $club->desa ?? '-' }} / {{ $club->kecamatan ?? '-' }} / {{ $club->kabupaten ?? '-' }}
+                                    </span>
+                                </p>
                                 <div class="flex items-center gap-4 mt-4 text-sm text-gray-500">
                                     @if($club->tanggal_berdiri)
                                         <span class="flex items-center">

@@ -32,6 +32,11 @@
                         </div>
 
                         <div>
+                            <h3 class="text-sm font-medium text-gray-500">Wilayah</h3>
+                            <p class="mt-1 text-lg text-gray-900">{{ $prasarana->desa ?? '-' }} / {{ $prasarana->kecamatan ?? '-' }} / {{ $prasarana->kabupaten ?? '-' }}</p>
+                        </div>
+
+                        <div>
                             <h3 class="text-sm font-medium text-gray-500">Kondisi Lantai</h3>
                             <p class="mt-1">
                                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
@@ -94,9 +99,13 @@
                         <a href="{{ route('prasarana.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 focus:bg-gray-300 active:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
                             {{ __('Kembali') }}
                         </a>
-                        <a href="{{ route('prasarana.edit', $prasarana) }}" class="inline-flex items-center px-4 py-2 bg-yellow-500 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-yellow-600 focus:bg-yellow-600 active:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                            {{ __('Edit') }}
-                        </a>
+                        @auth
+                            @if(auth()->user()->isAdmin() || auth()->user()->isRelawan())
+                            <a href="{{ route('prasarana.edit', $prasarana) }}" class="inline-flex items-center px-4 py-2 bg-yellow-500 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-yellow-600 focus:bg-yellow-600 active:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                {{ __('Edit') }}
+                            </a>
+                            @endif
+                        @endauth
                     </div>
                 </div>
             </div>

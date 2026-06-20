@@ -19,7 +19,7 @@ class ClubController extends Controller
     public function index(): View
     {
         $clubs = Club::with(['user', 'prasarana'])
-            ->when(!auth()->user()->isSuperAdmin(), function($query) {
+            ->when(auth()->check() && !auth()->user()->isSuperAdmin(), function($query) {
                 return $query->where('user_id', auth()->id());
             })
             ->latest()

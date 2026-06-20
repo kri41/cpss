@@ -5,13 +5,17 @@
                 <h2 class="text-2xl font-bold text-gray-900">Clubs & Komunitas</h2>
                 <p class="text-sm text-gray-500 mt-1">Kelola data club dan komunitas olahraga</p>
             </div>
-            <a href="{{ route('clubs.create') }}" 
-               class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-lg font-medium text-sm text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                </svg>
-                Tambah Club
-            </a>
+            @auth
+                @if(auth()->user()->isAdmin() || auth()->user()->isRelawan())
+                <a href="{{ route('clubs.create') }}" 
+                   class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-lg font-medium text-sm text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Tambah Club
+                </a>
+                @endif
+            @endauth
         </div>
     </x-slot>
 
@@ -132,12 +136,16 @@
                                     <td class="px-6 py-4 text-right text-sm font-medium">
                                         <div class="flex items-center justify-end space-x-3">
                                             <a href="{{ route('clubs.show', $club) }}" class="text-indigo-600 hover:text-indigo-900">Detail</a>
-                                            <a href="{{ route('clubs.edit', $club) }}" class="text-yellow-600 hover:text-yellow-900">Edit</a>
-                                            <form action="{{ route('clubs.destroy', $club) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus club ini?');">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="text-red-600 hover:text-red-900">Hapus</button>
-                                            </form>
+                                            @auth
+                                                @if(auth()->user()->isAdmin() || auth()->user()->isRelawan())
+                                                <a href="{{ route('clubs.edit', $club) }}" class="text-yellow-600 hover:text-yellow-900">Edit</a>
+                                                <form action="{{ route('clubs.destroy', $club) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus club ini?');">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="text-red-600 hover:text-red-900">Hapus</button>
+                                                </form>
+                                                @endif
+                                            @endauth
                                         </div>
                                     </td>
                                 </tr>
@@ -151,7 +159,11 @@
                                                 </svg>
                                             </div>
                                             <p class="text-gray-500 text-sm">Belum ada data club</p>
-                                            <a href="{{ route('clubs.create') }}" class="mt-2 text-indigo-600 hover:text-indigo-800 text-sm font-medium">Tambah club pertama</a>
+                                            @auth
+                                                @if(auth()->user()->isAdmin() || auth()->user()->isRelawan())
+                                                <a href="{{ route('clubs.create') }}" class="mt-2 text-indigo-600 hover:text-indigo-800 text-sm font-medium">Tambah club pertama</a>
+                                                @endif
+                                            @endauth
                                         </div>
                                     </td>
                                 </tr>
