@@ -173,7 +173,14 @@
 - [x] Halaman my-points (riwayat + lencana)
 - [x] Menu sidebar untuk authenticated user
 
-### 4.6 Notifikasi Inbox-Style
+### 4.6 Landing Page (Welcome)
+- [x] Navbar minimal (logo + auth saja, tanpa menu tengah)
+- [x] **1 halaman fullscreen tanpa scroll di desktop**
+- [x] Hero card kanan: statistik + 4 menu compact
+- [x] Mobile tetap scrollable dengan menu cards
+- [x] Login/Register modal tetap ada
+
+### 4.7 Notifikasi Inbox-Style
 - [x] Migration: tabel `user_notifications`
 - [x] Model: `UserNotification` dengan type (poin, badge, validasi)
 - [x] Controller: `NotificationController` (markAsRead, markAllAsRead)
