@@ -10,10 +10,10 @@
 | Properti | Nilai |
 |----------|-------|
 | **Proyek** | CPSS - Disertasi Fase 1 Prototipe |
-| **Versi Target** | v2.1+ (Post-Fase 1) |
+| **Versi Target** | v2.2+ (Post-Fase 1) |
 | **Terakhir Update** | 27 Juni 2026 |
-| **Total Fitur Utama** | 15 |
-| **Status Keseluruhan** | Fase 1 Selesai, Minor Polish & Bugfix |
+| **Total Fitur Utama** | 18 |
+| **Status Keseluruhan** | Fase 1 + Filter/Notif/Kalender Done |
 
 ---
 
@@ -149,14 +149,20 @@
 - [x] Show page: display bintang SVG + label
 - [x] Index: hide action buttons untuk guest
 - [x] Show: hide edit button untuk guest
+- [x] **Filter & Search: by nama, kabupaten, kecamatan, kategori olahraga**
+- [x] **Guest hanya melihat data validated**
 
 ### 4.2 Club
 - [x] Index: hide action buttons untuk guest
 - [x] Show: info wilayah + hide edit untuk guest
+- [x] **Filter & Search: by nama, kabupaten, kecamatan, status aktif**
+- [x] **Guest hanya melihat data validated**
 
 ### 4.3 Event
 - [x] Index: hide action buttons untuk guest
 - [x] Show: info wilayah + hide edit untuk guest
+- [x] **Filter & Search: by nama, kabupaten, kecamatan, tingkat**
+- [x] **Guest hanya melihat data validated**
 
 ### 4.4 Partisipasi
 - [x] Show: tabel daftar kehadiran individu
@@ -166,6 +172,26 @@
 - [x] Halaman leaderboard responsif
 - [x] Halaman my-points (riwayat + lencana)
 - [x] Menu sidebar untuk authenticated user
+
+### 4.6 Notifikasi Inbox-Style
+- [x] Migration: tabel `user_notifications`
+- [x] Model: `UserNotification` dengan type (poin, badge, validasi)
+- [x] Controller: `NotificationController` (markAsRead, markAllAsRead)
+- [x] Icon lonceng di header dengan badge unread count
+- [x] Dropdown panel: list 5 notifikasi terbaru
+- [x] Auto-generate notifikasi saat validasi admin (+poin)
+- [x] Auto-generate notifikasi saat lencana baru didapat
+- [x] Link "Tandai semua baca" & "Lihat Poin & Lencana"
+
+### 4.7 Kalender Terintegrasi
+- [x] Route publik: `/kalender`
+- [x] Controller: `KalenderController`
+- [x] View: grid bulanan (Senin-Minggu)
+- [x] Data Event: ditampilkan per tanggal (multi-day support)
+- [x] Data Jadwal Latihan Club: ditampilkan berulang per hari
+- [x] Navigasi: previous/next month
+- [x] Legend: Event (biru) & Jadwal Latihan (hijau)
+- [x] Menu sidebar: Kalender
 
 ---
 
@@ -196,15 +222,16 @@
 ## 6. BACKLOG & PENDING (Daftar Tugas Belum / Akan Dikerjakan)
 
 ### 6.1 Bugfix & Polish (Priority: High)
-- [~] Commit semua uncommitted changes ke git (banyak file modified & untracked)
+- [x] Commit semua uncommitted changes ke git (7 commits terpisah)
 - [ ] Review perubahan `app.blade.php` — cek apakah layout masih konsisten
 - [ ] Cek routes `web.php` — bersihkan route duplikat atau tidak terpakai
 - [ ] Fix validasi form Prasarana: bintang rating harus nullable atau required?
 
 ### 6.2 Fitur Minor (Priority: Medium)
-- [ ] Halaman publik: filter & search untuk Prasarana/Club/Event
+- [x] Halaman publik: filter & search untuk Prasarana/Club/Event
+- [x] Notifikasi inbox-style untuk poin & lencana
+- [x] Kalender terintegrasi event & jadwal latihan
 - [ ] Export data (PDF/Excel) untuk admin
-- [ ] Notifikasi sederhana (flash message improvements)
 - [ ] Halaman profil relawan dengan statistik kontribusi
 - [ ] Foto tambahan (multiple upload) untuk Prasarana
 
@@ -361,6 +388,8 @@ npm run dev
 | 20 Juni 2026 | MFA dihapus karena kompleksitas tidak proporsional |
 | 20 Juni 2026 | QR, Video, Forum, PWA dicadangkan ke Bab V (Saran) |
 | 27 Juni 2026 | Form Prasarana diupdate dengan star rating interaktif |
+| 27 Juni 2026 | Implementasi filter/search publik + notifikasi inbox + kalender |
+| 27 Juni 2026 | Semua perubahan di-commit terpisah (7 commits) |
 
 ---
 
