@@ -15,9 +15,9 @@
 <body class="font-sans antialiased bg-gray-50 text-gray-800" x-data="{ mobileMenu: false }">
 
     <!-- Navbar Publik -->
-    <nav class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm">
+    <nav class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-gray-100">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16">
+            <div class="flex justify-between items-center h-14">
                 <!-- Logo -->
                 <a href="{{ url('/') }}" class="flex items-center gap-2.5">
                     <div class="w-8 h-8 bg-gradient-to-br from-blue-600 to-sky-400 rounded-lg shadow-sm flex items-center justify-center text-white font-bold text-sm">C</div>
