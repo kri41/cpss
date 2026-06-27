@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Http\Middleware\AuditLogger;
+use App\Models\PointTransaction;
 use App\Models\Prasarana;
+use App\Models\UserNotification;
 use App\Services\GamificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -15,13 +17,44 @@ class PrasaranaController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): View
+    public function index(Request $request): View
     {
-        $prasarana = Prasarana::with('user')
-            ->latest()
-            ->paginate(10);
-        
-        return view('prasarana.index', compact('prasarana'));
+        $query = Prasarana::with('user')->latest();
+
+        // Guest (publik) hanya lihat yang sudah divalidasi
+        if (!auth()->check()) {
+            $query->validated();
+        }
+
+        // Filter: search nama
+        if ($request->filled('search')) {
+            $query->where('nama_fasilitas', 'like', '%' . $request->search . '%');
+        }
+
+        // Filter: kabupaten
+        if ($request->filled('kabupaten')) {
+            $query->where('kabupaten', $request->kabupaten);
+        }
+
+        // Filter: kecamatan
+        if ($request->filled('kecamatan')) {
+            $query->where('kecamatan', $request->kecamatan);
+        }
+
+        // Filter: kategori olahraga
+        if ($request->filled('kategori')) {
+            $query->where('kategori_olahraga', 'like', '%' . $request->kategori . '%');
+        }
+
+        $prasarana = $query->paginate(10)->withQueryString();
+
+        // Data untuk dropdown filter (hanya dari data yang visible)
+        $filterQuery = auth()->check() ? Prasarana::query() : Prasarana::validated();
+        $kabupatenList = (clone $filterQuery)->distinct()->orderBy('kabupaten')->pluck('kabupaten')->filter();
+        $kecamatanList = (clone $filterQuery)->when($request->filled('kabupaten'), fn($q) => $q->where('kabupaten', $request->kabupaten))->distinct()->orderBy('kecamatan')->pluck('kecamatan')->filter();
+        $kategoriList = (clone $filterQuery)->distinct()->orderBy('kategori_olahraga')->pluck('kategori_olahraga')->filter();
+
+        return view('prasarana.index', compact('prasarana', 'kabupatenList', 'kecamatanList', 'kategoriList'));
     }
 
     /**
@@ -47,13 +80,30 @@ class PrasaranaController extends Controller
             'desa' => 'nullable|string|max:255',
             'kecamatan' => 'nullable|string|max:255',
             'kabupaten' => 'nullable|string|max:255',
-            'kondisi_lantai' => 'required|in:Baik,Sedang,Rusak Berat',
+            // Kondisi (1-5)
+            'kondisi_lantai' => 'nullable|integer|min:1|max:5',
+            'kondisi_ring' => 'nullable|integer|min:1|max:5',
+            'kondisi_net' => 'nullable|integer|min:1|max:5',
+            'kondisi_gawang' => 'nullable|integer|min:1|max:5',
+            'kondisi_lapangan' => 'nullable|integer|min:1|max:5',
+            'kondisi_ventilasi' => 'nullable|integer|min:1|max:5',
+            'kondisi_pencahayaan' => 'nullable|integer|min:1|max:5',
+            'kondisi_kamar_mandi' => 'nullable|integer|min:1|max:5',
+            // Akses & Fasilitas
             'akses_disabilitas' => 'boolean',
+            'akses_parkir' => 'boolean',
+            'akses_transportasi' => 'boolean',
+            'fasilitas_ruang_ganti' => 'boolean',
+            'fasilitas_tribun' => 'boolean',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
         $validated['user_id'] = auth()->id();
         $validated['akses_disabilitas'] = $request->boolean('akses_disabilitas', false);
+        $validated['akses_parkir'] = $request->boolean('akses_parkir', false);
+        $validated['akses_transportasi'] = $request->boolean('akses_transportasi', false);
+        $validated['fasilitas_ruang_ganti'] = $request->boolean('fasilitas_ruang_ganti', false);
+        $validated['fasilitas_tribun'] = $request->boolean('fasilitas_tribun', false);
 
         // Handle file upload
         if ($request->hasFile('foto')) {
@@ -66,16 +116,8 @@ class PrasaranaController extends Controller
         // Audit Log
         AuditLogger::logCreate('prasarana', $prasarana->id, $validated);
 
-        // Gamification: Prasarana Baru
-        GamificationService::awardPoints(
-            auth()->id(),
-            'prasarana_baru',
-            'prasarana',
-            $prasarana->id
-        );
-
         return redirect()->route('prasarana.index')
-            ->with('success', 'Data prasarana berhasil ditambahkan.');
+            ->with('success', 'Data prasarana berhasil ditambahkan. Menunggu validasi admin untuk kredit poin.');
     }
 
     /**
@@ -117,12 +159,29 @@ class PrasaranaController extends Controller
             'desa' => 'nullable|string|max:255',
             'kecamatan' => 'nullable|string|max:255',
             'kabupaten' => 'nullable|string|max:255',
-            'kondisi_lantai' => 'required|in:Baik,Sedang,Rusak Berat',
+            // Kondisi (1-5)
+            'kondisi_lantai' => 'nullable|integer|min:1|max:5',
+            'kondisi_ring' => 'nullable|integer|min:1|max:5',
+            'kondisi_net' => 'nullable|integer|min:1|max:5',
+            'kondisi_gawang' => 'nullable|integer|min:1|max:5',
+            'kondisi_lapangan' => 'nullable|integer|min:1|max:5',
+            'kondisi_ventilasi' => 'nullable|integer|min:1|max:5',
+            'kondisi_pencahayaan' => 'nullable|integer|min:1|max:5',
+            'kondisi_kamar_mandi' => 'nullable|integer|min:1|max:5',
+            // Akses & Fasilitas
             'akses_disabilitas' => 'boolean',
+            'akses_parkir' => 'boolean',
+            'akses_transportasi' => 'boolean',
+            'fasilitas_ruang_ganti' => 'boolean',
+            'fasilitas_tribun' => 'boolean',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
         $validated['akses_disabilitas'] = $request->boolean('akses_disabilitas', false);
+        $validated['akses_parkir'] = $request->boolean('akses_parkir', false);
+        $validated['akses_transportasi'] = $request->boolean('akses_transportasi', false);
+        $validated['fasilitas_ruang_ganti'] = $request->boolean('fasilitas_ruang_ganti', false);
+        $validated['fasilitas_tribun'] = $request->boolean('fasilitas_tribun', false);
 
         // Simpan data lama untuk audit log
         $oldData = $prasarana->toArray();
@@ -141,14 +200,6 @@ class PrasaranaController extends Controller
 
         // Audit Log
         AuditLogger::logUpdate('prasarana', $prasarana->id, $oldData, $prasarana->fresh()->toArray());
-
-        // Gamification: Prasarana Update (jika memenuhi syarat)
-        GamificationService::awardPoints(
-            auth()->id(),
-            'prasarana_update',
-            'prasarana',
-            $prasarana->id
-        );
 
         return redirect()->route('prasarana.index')
             ->with('success', 'Data prasarana berhasil diperbarui.');
@@ -183,15 +234,69 @@ class PrasaranaController extends Controller
     /**
      * Validate the specified prasarana.
      */
-    public function validatePrasarana(Prasarana $prasarana): RedirectResponse
+    public function validatePrasarana(Request $request, Prasarana $prasarana): RedirectResponse
     {
         if (!auth()->user()->canValidate($prasarana)) {
             abort(403, 'Anda tidak memiliki izin untuk memvalidasi data prasarana ini.');
         }
 
-        $prasarana->update(['status_validasi' => 'validated']);
+        $prasarana->update([
+            'status_validasi' => 'validated',
+            'komentar_validasi' => $request->input('komentar_validasi'),
+        ]);
+
+        // Gamification: berikan poin saat validasi (baru jika belum pernah, update jika sudah)
+        $kode = GamificationService::resolveKodeAktivitas('prasarana_baru', $prasarana->user_id, 'prasarana', $prasarana->id);
+        $tx = GamificationService::awardPoints(
+            $prasarana->user_id,
+            $kode,
+            'prasarana',
+            $prasarana->id
+        );
+
+        $msg = 'Data prasarana berhasil divalidasi.';
+        if ($tx) {
+            $msg .= ' +' . $tx->poin . ' poin diberikan ke relawan.';
+
+            // Notifikasi ke relawan
+            UserNotification::create([
+                'user_id' => $prasarana->user_id,
+                'type' => 'poin',
+                'title' => '+' . $tx->poin . ' Poin Diterima',
+                'message' => 'Laporan prasarana "' . $prasarana->nama_fasilitas . '" telah divalidasi. Anda mendapatkan ' . $tx->poin . ' poin.',
+                'data' => ['related_type' => 'prasarana', 'related_id' => $prasarana->id, 'poin' => $tx->poin],
+            ]);
+        }
 
         return redirect()->route('prasarana.index')
-            ->with('success', 'Data prasarana berhasil divalidasi.');
+            ->with('success', $msg);
+    }
+
+    /**
+     * Cancel validation (super admin only).
+     */
+    public function cancelValidatePrasarana(Prasarana $prasarana): RedirectResponse
+    {
+        if (!auth()->user()->isSuperAdmin()) {
+            abort(403, 'Hanya Super Admin yang dapat membatalkan validasi.');
+        }
+
+        $prasarana->update([
+            'status_validasi' => 'pending',
+            'komentar_validasi' => null,
+        ]);
+
+        // Batalkan poin terkait jika ada
+        $tx = PointTransaction::where('related_type', 'prasarana')
+            ->where('related_id', $prasarana->id)
+            ->where('status', 'valid')
+            ->first();
+
+        if ($tx) {
+            GamificationService::batalkanPoin($tx->id, auth()->id(), 'Validasi dibatalkan oleh Super Admin');
+        }
+
+        return redirect()->route('prasarana.index')
+            ->with('success', 'Validasi prasarana dibatalkan. Poin relawan telah ditarik.');
     }
 }

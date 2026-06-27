@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Club;
+use App\Models\PointTransaction;
 use App\Models\Prasarana;
 use App\Models\JadwalLatihan;
+use App\Models\UserNotification;
 use App\Services\GamificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -16,15 +18,47 @@ class ClubController extends Controller
     /**
      * Display a listing of clubs.
      */
-    public function index(): View
+    public function index(Request $request): View
     {
-        $clubs = Club::with(['user', 'prasarana'])->latest()->paginate(10);
+        $query = Club::with(['user', 'prasarana'])->latest();
 
-        $totalClubs = Club::count();
-        $activeClubs = Club::where('aktif', true)->count();
-        $clubsWithPrasarana = Club::whereNotNull('prasarana_id')->count();
+        // Guest (publik) hanya lihat yang sudah divalidasi
+        if (!auth()->check()) {
+            $query->validated();
+        }
 
-        return view('clubs.index', compact('clubs', 'totalClubs', 'activeClubs', 'clubsWithPrasarana'));
+        // Filter: search nama
+        if ($request->filled('search')) {
+            $query->where('nama_club', 'like', '%' . $request->search . '%');
+        }
+
+        // Filter: kabupaten
+        if ($request->filled('kabupaten')) {
+            $query->where('kabupaten', $request->kabupaten);
+        }
+
+        // Filter: kecamatan
+        if ($request->filled('kecamatan')) {
+            $query->where('kecamatan', $request->kecamatan);
+        }
+
+        // Filter: aktif
+        if ($request->filled('aktif')) {
+            $query->where('aktif', $request->boolean('aktif'));
+        }
+
+        $clubs = $query->paginate(10)->withQueryString();
+
+        // Data untuk dropdown filter
+        $filterQuery = auth()->check() ? Club::query() : Club::validated();
+        $kabupatenList = (clone $filterQuery)->distinct()->orderBy('kabupaten')->pluck('kabupaten')->filter();
+        $kecamatanList = (clone $filterQuery)->when($request->filled('kabupaten'), fn($q) => $q->where('kabupaten', $request->kabupaten))->distinct()->orderBy('kecamatan')->pluck('kecamatan')->filter();
+
+        $totalClubs = (clone $query)->count();
+        $activeClubs = (clone $query)->where('aktif', true)->count();
+        $clubsWithPrasarana = (clone $query)->whereNotNull('prasarana_id')->count();
+
+        return view('clubs.index', compact('clubs', 'totalClubs', 'activeClubs', 'clubsWithPrasarana', 'kabupatenList', 'kecamatanList'));
     }
 
     /**
@@ -73,16 +107,8 @@ class ClubController extends Controller
             $this->createJadwal($club, $request->jadwal);
         }
 
-        // Gamification: Club Baru
-        GamificationService::awardPoints(
-            auth()->id(),
-            'club_baru',
-            'club',
-            $club->id
-        );
-
-        return redirect()->route('clubs.show', $club)
-            ->with('success', 'Club berhasil dibuat.');
+        return redirect()->route('clubs.index')
+            ->with('success', 'Club berhasil didaftarkan. Menunggu validasi admin untuk kredit poin.');
     }
 
     /**
@@ -164,14 +190,6 @@ class ClubController extends Controller
             $this->createJadwal($club, $request->jadwal);
         }
 
-        // Gamification: Club Update
-        GamificationService::awardPoints(
-            auth()->id(),
-            'club_update',
-            'club',
-            $club->id
-        );
-
         return redirect()->route('clubs.show', $club)
             ->with('success', 'Club berhasil diperbarui.');
     }
@@ -199,16 +217,68 @@ class ClubController extends Controller
     /**
      * Validate the specified club.
      */
-    public function validateClub(Club $club): RedirectResponse
+    public function validateClub(Request $request, Club $club): RedirectResponse
     {
         if (!auth()->user()->canValidate($club)) {
             abort(403, 'Anda tidak memiliki izin untuk memvalidasi club ini.');
         }
 
-        $club->update(['status_validasi' => 'validated']);
+        $club->update([
+            'status_validasi' => 'validated',
+            'komentar_validasi' => $request->input('komentar_validasi'),
+        ]);
+
+        // Gamification: berikan poin saat validasi (baru jika belum pernah, update jika sudah)
+        $kode = GamificationService::resolveKodeAktivitas('club_baru', $club->user_id, 'club', $club->id);
+        $tx = GamificationService::awardPoints(
+            $club->user_id,
+            $kode,
+            'club',
+            $club->id
+        );
+
+        $msg = 'Club berhasil divalidasi.';
+        if ($tx) {
+            $msg .= ' +' . $tx->poin . ' poin diberikan ke relawan.';
+
+            UserNotification::create([
+                'user_id' => $club->user_id,
+                'type' => 'poin',
+                'title' => '+' . $tx->poin . ' Poin Diterima',
+                'message' => 'Club "' . $club->nama_club . '" telah divalidasi. Anda mendapatkan ' . $tx->poin . ' poin.',
+                'data' => ['related_type' => 'club', 'related_id' => $club->id, 'poin' => $tx->poin],
+            ]);
+        }
 
         return redirect()->route('clubs.index')
-            ->with('success', 'Club berhasil divalidasi.');
+            ->with('success', $msg);
+    }
+
+    /**
+     * Cancel validation (super admin only).
+     */
+    public function cancelValidateClub(Club $club): RedirectResponse
+    {
+        if (!auth()->user()->isSuperAdmin()) {
+            abort(403, 'Hanya Super Admin yang dapat membatalkan validasi.');
+        }
+
+        $club->update([
+            'status_validasi' => 'pending',
+            'komentar_validasi' => null,
+        ]);
+
+        $tx = PointTransaction::where('related_type', 'club')
+            ->where('related_id', $club->id)
+            ->where('status', 'valid')
+            ->first();
+
+        if ($tx) {
+            GamificationService::batalkanPoin($tx->id, auth()->id(), 'Validasi dibatalkan oleh Super Admin');
+        }
+
+        return redirect()->route('clubs.index')
+            ->with('success', 'Validasi club dibatalkan. Poin relawan telah ditarik.');
     }
 
     /**

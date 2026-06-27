@@ -21,6 +21,7 @@ class Event extends Model
         'kecamatan',
         'kabupaten',
         'status_validasi',
+        'komentar_validasi',
     ];
 
     protected $casts = [
@@ -63,6 +64,14 @@ class Event extends Model
                          $q->whereNull('tanggal_selesai')
                            ->orWhere('tanggal_selesai', '>=', now()->format('Y-m-d'));
                      });
+    }
+
+    /**
+     * Scope untuk data yang sudah divalidasi
+     */
+    public function scopeValidated($query)
+    {
+        return $query->where('status_validasi', 'validated');
     }
 
     /**

@@ -44,6 +44,7 @@ class Prasarana extends Model
         'foto_tambahan',
         'keterangan',
         'status_validasi',
+        'komentar_validasi',
     ];
 
     protected $casts = [
@@ -207,5 +208,13 @@ class Prasarana extends Model
             $q->whereBetween('kondisi_lantai', [$min, $max])
               ->orWhereBetween('kondisi_lapangan', [$min, $max]);
         });
+    }
+
+    /**
+     * Scope untuk data yang sudah divalidasi
+     */
+    public function scopeValidated($query)
+    {
+        return $query->where('status_validasi', 'validated');
     }
 }

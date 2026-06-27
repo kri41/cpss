@@ -28,6 +28,7 @@ class Club extends Model
         'aktif',
         'tanggal_berdiri',
         'status_validasi',
+        'komentar_validasi',
     ];
 
     protected $casts = [
@@ -84,6 +85,14 @@ class Club extends Model
             ->where('hari', now()->locale('id')->dayName)
             ->where('aktif', true)
             ->get();
+    }
+
+    /**
+     * Scope untuk data yang sudah divalidasi
+     */
+    public function scopeValidated($query)
+    {
+        return $query->where('status_validasi', 'validated');
     }
 
     /**
