@@ -3,9 +3,9 @@
 @section('title', 'Kalender Kegiatan - CPSS')
 
 @section('content')
-<div class="h-[calc(100vh-3.5rem)] flex flex-col overflow-hidden">
+<div class="h-[calc(100vh-3.5rem)] flex flex-col overflow-hidden px-4 sm:px-6 lg:px-8 pb-4">
     <!-- Header Kalender -->
-    <div class="shrink-0 bg-gray-50 border-b border-gray-200 px-4 sm:px-6 lg:px-8 py-3">
+    <div class="shrink-0 bg-gray-50 border-b border-gray-200 py-3">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <div class="flex items-center gap-4">
                 <h2 class="text-lg font-bold text-gray-900">Kalender Kegiatan</h2>
