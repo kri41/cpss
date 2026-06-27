@@ -14,14 +14,17 @@ class Partisipasi extends Model
 
     protected $fillable = [
         'user_id',
+        'qr_token',
         'lokasi_observasi',
         'desa',
         'kecamatan',
         'kabupaten',
+        'provinsi',
         'tanggal_observasi',
         'estimasi_jumlah_orang',
         'mayoritas_usia',
         'status_validasi',
+        'komentar_validasi',
     ];
 
     protected $casts = [
@@ -67,5 +70,17 @@ class Partisipasi extends Model
     public static function totalPartisipasi(): int
     {
         return self::sum('estimasi_jumlah_orang');
+    }
+
+    /**
+     * Generate unique QR token
+     */
+    public static function generateQrToken(): string
+    {
+        do {
+            $token = bin2hex(random_bytes(16));
+        } while (self::where('qr_token', $token)->exists());
+
+        return $token;
     }
 }
