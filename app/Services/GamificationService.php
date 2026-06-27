@@ -6,6 +6,7 @@ use App\Models\Badge;
 use App\Models\PointTransaction;
 use App\Models\User;
 use App\Models\UserBadge;
+use App\Models\UserNotification;
 use Carbon\Carbon;
 
 class GamificationService
@@ -53,6 +54,27 @@ class GamificationService
         self::cekDanBerikanLencana($userId);
 
         return $tx;
+    }
+
+    /**
+     * Tentukan kode aktivitas saat validasi (baru vs update)
+     */
+    public static function resolveKodeAktivitas(string $baseCode, int $userId, string $relatedType, int $relatedId): string
+    {
+        // Cek apakah sudah pernah ada transaksi 'baru' yang valid untuk entitas ini
+        $hasBaru = PointTransaction::where('user_id', $userId)
+            ->where('related_type', $relatedType)
+            ->where('related_id', $relatedId)
+            ->where('jenis_aksi', 'baru')
+            ->where('status', 'valid')
+            ->exists();
+
+        if ($hasBaru && str_contains($baseCode, '_baru')) {
+            // Ganti _baru menjadi _update
+            return str_replace('_baru', '_update', $baseCode);
+        }
+
+        return $baseCode;
     }
 
     /**
@@ -131,7 +153,7 @@ class GamificationService
     /**
      * Update denormalisasi total_poin pada tabel users
      */
-    protected static function updateTotalPoin(int $userId): void
+    public static function updateTotalPoin(int $userId): void
     {
         $total = PointTransaction::where('user_id', $userId)
             ->where('status', 'valid')
@@ -161,6 +183,15 @@ class GamificationService
                     'user_id'   => $userId,
                     'badge_id'  => $badge->id,
                     'earned_at' => now(),
+                ]);
+
+                // Notifikasi lencana baru
+                UserNotification::create([
+                    'user_id' => $userId,
+                    'type' => 'badge',
+                    'title' => 'Lencana Baru: ' . $badge->nama,
+                    'message' => $badge->deskripsi,
+                    'data' => ['badge_id' => $badge->id, 'badge_kode' => $badge->kode],
                 ]);
             }
         }

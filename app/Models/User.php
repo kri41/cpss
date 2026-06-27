@@ -21,6 +21,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'provinsi',
         'desa',
         'kecamatan',
         'kabupaten',
@@ -47,6 +48,14 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Relasi ke User Notifications
+     */
+    public function notifications(): HasMany
+    {
+        return $this->hasMany(UserNotification::class)->latest();
     }
 
     /**
