@@ -21,7 +21,7 @@
                         </div>
 
                         <div class="md:col-span-2">
-                            <h3 class="text-sm font-medium text-gray-500">Asal Sekolah/Klub</h3>
+                            <h3 class="text-sm font-medium text-gray-500">Asal Klub/Komunitas</h3>
                             <p class="mt-1 text-lg text-gray-900">{{ $talenta->asal_sekolah_atau_klub }}</p>
                         </div>
 

@@ -27,9 +27,9 @@
                                 <x-input-error :messages="$errors->get('cabang_olahraga')" class="mt-2" />
                             </div>
 
-                            <!-- Asal Sekolah/Klub -->
+                            <!-- Asal Klub/Komunitas -->
                             <div class="md:col-span-2">
-                                <x-input-label for="asal_sekolah_atau_klub" :value="__('Asal Sekolah/Klub')" />
+                                <x-input-label for="asal_sekolah_atau_klub" :value="__('Asal Klub/Komunitas')" />
                                 <x-text-input id="asal_sekolah_atau_klub" class="block mt-1 w-full" type="text" name="asal_sekolah_atau_klub" :value="old('asal_sekolah_atau_klub')" required />
                                 <x-input-error :messages="$errors->get('asal_sekolah_atau_klub')" class="mt-2" />
                             </div>

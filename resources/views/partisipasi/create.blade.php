@@ -20,6 +20,11 @@
                                 <x-input-error :messages="$errors->get('lokasi_observasi')" class="mt-2" />
                             </div>
 
+                            <!-- Wilayah -->
+                            <div class="md:col-span-2">
+                                <x-wilayah-dropdown />
+                            </div>
+
                             <!-- Tanggal Observasi -->
                             <div>
                                 <x-input-label for="tanggal_observasi" :value="__('Tanggal Observasi')" />
