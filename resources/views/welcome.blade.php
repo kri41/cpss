@@ -47,83 +47,84 @@
                 <div class="absolute bottom-0 left-0 w-72 h-72 bg-sky-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30"></div>
             </div>
 
-            <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-6 lg:py-4">
-                <div class="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-                    <!-- Kiri: Headline -->
+            <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+                <div class="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+                    <!-- Kiri: Headline + Stats -->
                     <div class="text-center lg:text-left">
-                        <span class="inline-block px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-[11px] font-semibold tracking-wide mb-3 border border-blue-100">PLATFORM KEOLAHRAGAAN BERBASIS BUKTI</span>
-                        <h1 class="text-3xl sm:text-4xl lg:text-[2.75rem] font-extrabold text-gray-900 leading-[1.15] mb-3">
+                        <span class="inline-block px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-[11px] font-semibold tracking-wide mb-4 border border-blue-100">PLATFORM KEOLAHRAGAAN BERBASIS BUKTI</span>
+                        <h1 class="text-4xl sm:text-5xl lg:text-[3.5rem] font-extrabold text-gray-900 leading-[1.1] mb-5">
                             Satu Data <br><span class="text-gradient">Untuk Olahraga Daerah</span>
                         </h1>
-                        <p class="text-base text-gray-600 leading-relaxed mb-5 max-w-md mx-auto lg:mx-0">
+                        <p class="text-base text-gray-600 leading-relaxed mb-6 max-w-lg mx-auto lg:mx-0">
                             Ruang kolaborasi digital bagi penggerak olahraga. Laporkan fasilitas, bagikan aktivitas komunitas, dan temukan data keolahragaan daerah Anda.
                         </p>
-                        <div class="flex flex-wrap gap-3 justify-center lg:justify-start">
+
+                        <!-- Stats Bar -->
+                        <div class="flex items-center justify-center lg:justify-start gap-8 mb-6">
+                            <div class="text-center">
+                                <p class="text-3xl font-bold text-gray-900">{{ number_format($stats['totalPrasarana']) }}</p>
+                                <p class="text-xs text-gray-500 uppercase tracking-wide mt-0.5">Prasarana</p>
+                            </div>
+                            <div class="w-px h-10 bg-gray-200"></div>
+                            <div class="text-center">
+                                <p class="text-3xl font-bold text-gray-900">{{ number_format($stats['totalEvents']) }}</p>
+                                <p class="text-xs text-gray-500 uppercase tracking-wide mt-0.5">Event</p>
+                            </div>
+                            <div class="w-px h-10 bg-gray-200"></div>
+                            <div class="text-center">
+                                <p class="text-3xl font-bold text-gray-900">{{ number_format($stats['totalClubs']) }}</p>
+                                <p class="text-xs text-gray-500 uppercase tracking-wide mt-0.5">Klub</p>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-center lg:justify-start">
                             @auth
-                                <a href="{{ url('/dashboard') }}" class="px-6 py-2.5 bg-blue-600 text-white font-semibold rounded-xl shadow-lg hover:bg-blue-700 transition-all text-sm">Masuk ke Dasbor</a>
+                                <a href="{{ url('/dashboard') }}" class="px-8 py-3 bg-blue-600 text-white font-semibold rounded-xl shadow-lg hover:bg-blue-700 transition-all text-sm">Masuk ke Dasbor</a>
                             @else
-                                <button @click="modal = 'register'" class="px-6 py-2.5 bg-blue-600 text-white font-semibold rounded-xl shadow-lg hover:bg-blue-700 transition-all text-sm">Mulai Berkontribusi</button>
-                                <button @click="modal = 'login'" class="px-6 py-2.5 bg-white text-gray-700 font-semibold rounded-xl border border-gray-200 hover:border-blue-300 hover:text-blue-600 transition-all text-sm">Masuk</button>
+                                <button @click="modal = 'register'" class="px-8 py-3 bg-blue-600 text-white font-semibold rounded-xl shadow-lg hover:bg-blue-700 transition-all text-sm">Mulai Berkontribusi</button>
                             @endauth
                         </div>
                     </div>
 
-                    <!-- Kanan: Compact Menu Card -->
+                    <!-- Kanan: Menu Cards -->
                     <div class="hidden lg:block">
-                        <div class="relative max-w-sm mx-auto">
-                            <div class="absolute -inset-3 bg-gradient-to-r from-blue-100 to-sky-100 rounded-2xl transform rotate-2"></div>
-                            <div class="relative bg-white rounded-xl shadow-lg border border-gray-100 p-5 space-y-2.5">
-                                <!-- Compact Stat -->
-                                <div class="grid grid-cols-3 gap-2 pb-3 border-b border-gray-100">
-                                    <div class="text-center">
-                                        <p class="text-lg font-bold text-gray-900 leading-none">{{ number_format($stats['totalPrasarana']) }}</p>
-                                        <p class="text-[10px] text-gray-500 mt-1 uppercase tracking-wide">Prasarana</p>
-                                    </div>
-                                    <div class="text-center border-x border-gray-100">
-                                        <p class="text-lg font-bold text-gray-900 leading-none">{{ number_format($stats['totalEvents']) }}</p>
-                                        <p class="text-[10px] text-gray-500 mt-1 uppercase tracking-wide">Event</p>
-                                    </div>
-                                    <div class="text-center">
-                                        <p class="text-lg font-bold text-gray-900 leading-none">{{ number_format($stats['totalClubs']) }}</p>
-                                        <p class="text-[10px] text-gray-500 mt-1 uppercase tracking-wide">Klub</p>
-                                    </div>
-                                </div>
-
-                                <!-- Menu Items -->
-                                <a href="{{ route('prasarana.index') }}" class="flex items-center gap-3 p-2.5 bg-blue-50 rounded-lg hover:bg-blue-100 transition group">
-                                    <div class="w-9 h-9 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 text-sm group-hover:bg-white transition"><i class="fas fa-building"></i></div>
+                        <div class="relative max-w-md mx-auto">
+                            <div class="absolute -inset-4 bg-gradient-to-r from-blue-100 to-sky-100 rounded-3xl transform rotate-2"></div>
+                            <div class="relative bg-white rounded-2xl shadow-xl border border-gray-100 p-6 space-y-3">
+                                <a href="{{ route('prasarana.index') }}" class="flex items-center gap-4 p-4 bg-blue-50 rounded-xl hover:bg-blue-100 transition group">
+                                    <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600 text-lg group-hover:bg-white transition"><i class="fas fa-building"></i></div>
                                     <div class="flex-1 min-w-0">
-                                        <p class="text-sm font-semibold text-gray-900">Prasarana</p>
-                                        <p class="text-[11px] text-gray-500">{{ $stats['totalPrasarana'] }} fasilitas tervalidasi</p>
+                                        <p class="text-base font-semibold text-gray-900">Jelajahi Prasarana</p>
+                                        <p class="text-xs text-gray-500">{{ $stats['totalPrasarana'] }} fasilitas tervalidasi</p>
                                     </div>
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 group-hover:text-blue-600 transition shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 group-hover:text-blue-600 transition shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
                                 </a>
 
-                                <a href="{{ route('events.index') }}" class="flex items-center gap-3 p-2.5 bg-sky-50 rounded-lg hover:bg-sky-100 transition group">
-                                    <div class="w-9 h-9 bg-sky-100 rounded-lg flex items-center justify-center text-sky-600 text-sm group-hover:bg-white transition"><i class="fas fa-calendar-alt"></i></div>
+                                <a href="{{ route('events.index') }}" class="flex items-center gap-4 p-4 bg-sky-50 rounded-xl hover:bg-sky-100 transition group">
+                                    <div class="w-12 h-12 bg-sky-100 rounded-xl flex items-center justify-center text-sky-600 text-lg group-hover:bg-white transition"><i class="fas fa-calendar-alt"></i></div>
                                     <div class="flex-1 min-w-0">
-                                        <p class="text-sm font-semibold text-gray-900">Event</p>
-                                        <p class="text-[11px] text-gray-500">{{ $stats['totalEvents'] }} event tervalidasi</p>
+                                        <p class="text-base font-semibold text-gray-900">Lihat Event</p>
+                                        <p class="text-xs text-gray-500">{{ $stats['totalEvents'] }} event tervalidasi</p>
                                     </div>
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 group-hover:text-sky-600 transition shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 group-hover:text-sky-600 transition shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
                                 </a>
 
-                                <a href="{{ route('clubs.index') }}" class="flex items-center gap-3 p-2.5 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition group">
-                                    <div class="w-9 h-9 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-600 text-sm group-hover:bg-white transition"><i class="fas fa-shield-alt"></i></div>
+                                <a href="{{ route('clubs.index') }}" class="flex items-center gap-4 p-4 bg-indigo-50 rounded-xl hover:bg-indigo-100 transition group">
+                                    <div class="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center text-indigo-600 text-lg group-hover:bg-white transition"><i class="fas fa-shield-alt"></i></div>
                                     <div class="flex-1 min-w-0">
-                                        <p class="text-sm font-semibold text-gray-900">Klub</p>
-                                        <p class="text-[11px] text-gray-500">{{ $stats['totalClubs'] }} klub aktif</p>
+                                        <p class="text-base font-semibold text-gray-900">Temukan Klub</p>
+                                        <p class="text-xs text-gray-500">{{ $stats['totalClubs'] }} klub aktif</p>
                                     </div>
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 group-hover:text-indigo-600 transition shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 group-hover:text-indigo-600 transition shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
                                 </a>
 
-                                <a href="{{ route('kalender.index') }}" class="flex items-center gap-3 p-2.5 bg-emerald-50 rounded-lg hover:bg-emerald-100 transition group">
-                                    <div class="w-9 h-9 bg-emerald-100 rounded-lg flex items-center justify-center text-emerald-600 text-sm group-hover:bg-white transition"><i class="fas fa-calendar-check"></i></div>
+                                <a href="{{ route('kalender.index') }}" class="flex items-center gap-4 p-4 bg-emerald-50 rounded-xl hover:bg-emerald-100 transition group">
+                                    <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-600 text-lg group-hover:bg-white transition"><i class="fas fa-calendar-check"></i></div>
                                     <div class="flex-1 min-w-0">
-                                        <p class="text-sm font-semibold text-gray-900">Kalender</p>
-                                        <p class="text-[11px] text-gray-500">Jadwal & kegiatan</p>
+                                        <p class="text-base font-semibold text-gray-900">Kalender Kegiatan</p>
+                                        <p class="text-xs text-gray-500">Jadwal event & latihan</p>
                                     </div>
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 group-hover:text-emerald-600 transition shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 group-hover:text-emerald-600 transition shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
                                 </a>
                             </div>
                         </div>
@@ -135,20 +136,6 @@
         <!-- Mobile Menu Cards -->
         <section class="lg:hidden px-4 sm:px-6 pb-6">
             <div class="max-w-sm mx-auto space-y-2.5">
-                <div class="grid grid-cols-3 gap-2 mb-3">
-                    <div class="bg-white rounded-lg p-2.5 text-center border border-gray-100 shadow-sm">
-                        <p class="text-lg font-bold text-gray-900">{{ number_format($stats['totalPrasarana']) }}</p>
-                        <p class="text-[10px] text-gray-500 uppercase tracking-wide">Prasarana</p>
-                    </div>
-                    <div class="bg-white rounded-lg p-2.5 text-center border border-gray-100 shadow-sm">
-                        <p class="text-lg font-bold text-gray-900">{{ number_format($stats['totalEvents']) }}</p>
-                        <p class="text-[10px] text-gray-500 uppercase tracking-wide">Event</p>
-                    </div>
-                    <div class="bg-white rounded-lg p-2.5 text-center border border-gray-100 shadow-sm">
-                        <p class="text-lg font-bold text-gray-900">{{ number_format($stats['totalClubs']) }}</p>
-                        <p class="text-[10px] text-gray-500 uppercase tracking-wide">Klub</p>
-                    </div>
-                </div>
                 <a href="{{ route('prasarana.index') }}" class="flex items-center gap-3 p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition">
                     <div class="w-9 h-9 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 text-sm"><i class="fas fa-building"></i></div>
                     <div class="flex-1"><p class="text-sm font-semibold text-gray-900">Prasarana</p></div>
