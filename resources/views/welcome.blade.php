@@ -59,24 +59,6 @@
                             Ruang kolaborasi digital bagi penggerak olahraga. Laporkan fasilitas, bagikan aktivitas komunitas, dan temukan data keolahragaan daerah Anda.
                         </p>
 
-                        <!-- Stats Bar -->
-                        <div class="flex items-center justify-center lg:justify-start gap-8 mb-6">
-                            <div class="text-center">
-                                <p class="text-3xl font-bold text-gray-900">{{ number_format($stats['totalPrasarana']) }}</p>
-                                <p class="text-xs text-gray-500 uppercase tracking-wide mt-0.5">Prasarana</p>
-                            </div>
-                            <div class="w-px h-10 bg-gray-200"></div>
-                            <div class="text-center">
-                                <p class="text-3xl font-bold text-gray-900">{{ number_format($stats['totalEvents']) }}</p>
-                                <p class="text-xs text-gray-500 uppercase tracking-wide mt-0.5">Event</p>
-                            </div>
-                            <div class="w-px h-10 bg-gray-200"></div>
-                            <div class="text-center">
-                                <p class="text-3xl font-bold text-gray-900">{{ number_format($stats['totalClubs']) }}</p>
-                                <p class="text-xs text-gray-500 uppercase tracking-wide mt-0.5">Klub</p>
-                            </div>
-                        </div>
-
                         <div class="flex justify-center lg:justify-start">
                             @auth
                                 <a href="{{ url('/dashboard') }}" class="px-8 py-3 bg-blue-600 text-white font-semibold rounded-xl shadow-lg hover:bg-blue-700 transition-all text-sm">Masuk ke Dasbor</a>
