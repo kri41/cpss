@@ -19,15 +19,15 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     $stats = [
-        'totalPrasarana' => \App\Models\Prasarana::count(),
-        'totalClubs' => \App\Models\Club::count(),
-        'totalEvents' => \App\Models\Event::count(),
-        'totalPartisipasi' => \App\Models\Partisipasi::sum('estimasi_jumlah_orang') ?? 0,
+        'totalPrasarana' => \App\Models\Prasarana::validated()->count(),
+        'totalClubs' => \App\Models\Club::validated()->where('aktif', true)->count(),
+        'totalEvents' => \App\Models\Event::validated()->count(),
+        'totalPartisipasi' => \App\Models\Partisipasi::where('status_validasi', 'validated')->sum('estimasi_jumlah_orang') ?? 0,
     ];
 
-    $latestPrasarana = \App\Models\Prasarana::latest()->take(6)->get();
-    $upcomingEvents = \App\Models\Event::akanDatang()->take(4)->get();
-    $activeClubs = \App\Models\Club::aktif()->with('prasarana')->take(4)->get();
+    $latestPrasarana = \App\Models\Prasarana::validated()->latest()->take(3)->get();
+    $upcomingEvents = \App\Models\Event::validated()->akanDatang()->take(3)->get();
+    $activeClubs = \App\Models\Club::validated()->aktif()->with('prasarana')->take(3)->get();
 
     return view('welcome', compact('stats', 'latestPrasarana', 'upcomingEvents', 'activeClubs'));
 });

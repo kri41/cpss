@@ -22,10 +22,21 @@
     <nav class="fixed w-full z-40 top-0 bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
-                <div class="flex-shrink-0 flex items-center gap-3">
+                <!-- Logo -->
+                <a href="{{ url('/') }}" class="flex items-center gap-3">
                     <div class="w-9 h-9 bg-gradient-to-br from-blue-600 to-sky-400 rounded-lg shadow-md flex items-center justify-center text-white font-bold text-lg">C</div>
                     <span class="font-bold text-xl text-gray-900 tracking-tight">CPSS</span>
+                </a>
+
+                <!-- Menu Tengah -->
+                <div class="hidden md:flex items-center space-x-1">
+                    <a href="{{ route('prasarana.index') }}" class="px-3 py-2 text-sm font-medium text-gray-600 hover:text-blue-600 rounded-lg hover:bg-blue-50/50 transition">Prasarana</a>
+                    <a href="{{ route('events.index') }}" class="px-3 py-2 text-sm font-medium text-gray-600 hover:text-blue-600 rounded-lg hover:bg-blue-50/50 transition">Event</a>
+                    <a href="{{ route('clubs.index') }}" class="px-3 py-2 text-sm font-medium text-gray-600 hover:text-blue-600 rounded-lg hover:bg-blue-50/50 transition">Klub</a>
+                    <a href="{{ route('kalender.index') }}" class="px-3 py-2 text-sm font-medium text-gray-600 hover:text-blue-600 rounded-lg hover:bg-blue-50/50 transition">Kalender</a>
                 </div>
+
+                <!-- Auth Kanan -->
                 <div class="hidden md:flex items-center space-x-3">
                     @guest
                         <button @click="modal = 'login'" class="text-gray-600 hover:text-blue-600 font-medium px-4 py-2 transition cursor-pointer text-sm">Masuk</button>
@@ -35,25 +46,47 @@
                         <a href="{{ url('/dashboard') }}" class="px-5 py-2 bg-gradient-to-r from-blue-600 to-sky-500 text-white font-medium rounded-full shadow-md hover:shadow-lg transition-all duration-300 text-sm">Buka Dasbor</a>
                     @endguest
                 </div>
+
+                <!-- Mobile menu button -->
+                <div class="md:hidden flex items-center" x-data="{ mobileOpen: false }">
+                    <button @click="mobileOpen = !mobileOpen" class="p-2 rounded-lg text-gray-600 hover:bg-gray-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                    </button>
+                    <div x-show="mobileOpen" @click.away="mobileOpen = false" x-cloak x-transition class="absolute top-16 left-0 right-0 bg-white border-b border-gray-200 shadow-lg p-4 space-y-2">
+                        <a href="{{ route('prasarana.index') }}" class="block px-4 py-2 text-sm font-medium text-gray-700 hover:bg-blue-50 rounded-lg">Prasarana</a>
+                        <a href="{{ route('events.index') }}" class="block px-4 py-2 text-sm font-medium text-gray-700 hover:bg-blue-50 rounded-lg">Event</a>
+                        <a href="{{ route('clubs.index') }}" class="block px-4 py-2 text-sm font-medium text-gray-700 hover:bg-blue-50 rounded-lg">Klub</a>
+                        <a href="{{ route('kalender.index') }}" class="block px-4 py-2 text-sm font-medium text-gray-700 hover:bg-blue-50 rounded-lg">Kalender</a>
+                        <div class="pt-2 border-t border-gray-100">
+                            @guest
+                                <button @click="modal = 'login'; mobileOpen = false" class="block w-full text-left px-4 py-2 text-sm font-medium text-gray-700 hover:bg-blue-50 rounded-lg">Masuk</button>
+                                <button @click="modal = 'register'; mobileOpen = false" class="block w-full text-left px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-lg">Daftar Relawan</button>
+                            @else
+                                <a href="{{ url('/dashboard') }}" class="block px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-lg">Buka Dasbor</a>
+                            @endguest
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </nav>
 
     <!-- Hero Section -->
-    <section class="relative pt-28 pb-16 md:pt-36 md:pb-24 overflow-hidden">
+    <section class="relative pt-28 pb-20 md:pt-36 md:pb-28 overflow-hidden min-h-[90vh] flex items-center">
         <div class="absolute inset-0 pointer-events-none">
             <div class="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-bl from-blue-50 to-transparent opacity-70"></div>
             <div class="absolute bottom-0 left-0 w-96 h-96 bg-sky-100 rounded-full mix-blend-multiply filter blur-3xl opacity-40"></div>
         </div>
-        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
             <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <!-- Kiri: Headline -->
                 <div>
                     <span class="inline-block px-4 py-1.5 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold tracking-wide mb-6 border border-blue-100">PLATFORM KEOLAHRAGAAN BERBASIS BUKTI</span>
                     <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-gray-900 leading-tight mb-6">
                         Satu Data <br><span class="text-gradient">Untuk Olahraga Daerah</span>
                     </h1>
                     <p class="text-lg text-gray-600 leading-relaxed mb-8 max-w-lg">
-                        CPSS adalah ruang kolaborasi digital bagi para penggerak olahraga di seluruh Indonesia. Laporkan fasilitas, bagikan aktivitas komunitas, dan temukan data keolahragaan daerah Anda — semua dalam satu platform terintegrasi.
+                        CPSS adalah ruang kolaborasi digital bagi para penggerak olahraga di seluruh Indonesia. Laporkan fasilitas, bagikan aktivitas komunitas, dan temukan data keolahragaan daerah Anda.
                     </p>
                     <div class="flex flex-wrap gap-4">
                         @auth
@@ -64,31 +97,64 @@
                         @endauth
                     </div>
                 </div>
+
+                <!-- Kanan: Menu Card + Statistik -->
                 <div class="hidden lg:block">
                     <div class="relative">
                         <div class="absolute -inset-4 bg-gradient-to-r from-blue-100 to-sky-100 rounded-3xl transform rotate-3"></div>
-                        <div class="relative bg-white rounded-2xl shadow-xl border border-gray-100 p-6 space-y-4">
-                            <div class="flex items-center gap-4 p-4 bg-blue-50 rounded-xl">
-                                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600"><i class="fas fa-building text-xl"></i></div>
-                                <div>
-                                    <p class="text-sm font-semibold text-gray-900">Lapangan Sepak Bola</p>
-                                    <p class="text-xs text-gray-500">Baru dilaporkan di Banyuwangi</p>
+                        <div class="relative bg-white rounded-2xl shadow-xl border border-gray-100 p-6 space-y-5">
+                            <!-- Statistik Bar -->
+                            <div class="grid grid-cols-3 gap-3 pb-5 border-b border-gray-100">
+                                <div class="text-center">
+                                    <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['totalPrasarana']) }}</p>
+                                    <p class="text-xs text-gray-500 mt-0.5">Prasarana</p>
+                                </div>
+                                <div class="text-center border-x border-gray-100">
+                                    <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['totalEvents']) }}</p>
+                                    <p class="text-xs text-gray-500 mt-0.5">Event</p>
+                                </div>
+                                <div class="text-center">
+                                    <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['totalClubs']) }}</p>
+                                    <p class="text-xs text-gray-500 mt-0.5">Klub Aktif</p>
                                 </div>
                             </div>
-                            <div class="flex items-center gap-4 p-4 bg-sky-50 rounded-xl">
-                                <div class="w-12 h-12 bg-sky-100 rounded-lg flex items-center justify-center text-sky-600"><i class="fas fa-users text-xl"></i></div>
-                                <div>
-                                    <p class="text-sm font-semibold text-gray-900">Fun Run Glagah</p>
-                                    <p class="text-xs text-gray-500">120 orang berpartisipasi</p>
+
+                            <!-- Menu Cards -->
+                            <a href="{{ route('prasarana.index') }}" class="flex items-center gap-4 p-4 bg-blue-50 rounded-xl hover:bg-blue-100 transition group">
+                                <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600 group-hover:bg-white transition"><i class="fas fa-building text-xl"></i></div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-semibold text-gray-900">Jelajahi Prasarana</p>
+                                    <p class="text-xs text-gray-500">{{ $stats['totalPrasarana'] }} fasilitas tervalidasi</p>
                                 </div>
-                            </div>
-                            <div class="flex items-center gap-4 p-4 bg-indigo-50 rounded-xl">
-                                <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-600"><i class="fas fa-shield-alt text-xl"></i></div>
-                                <div>
-                                    <p class="text-sm font-semibold text-gray-900">Persisaga Banyuwangi</p>
-                                    <p class="text-xs text-gray-500">Klub aktif dengan 45 anggota</p>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 group-hover:text-blue-600 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                            </a>
+
+                            <a href="{{ route('events.index') }}" class="flex items-center gap-4 p-4 bg-sky-50 rounded-xl hover:bg-sky-100 transition group">
+                                <div class="w-12 h-12 bg-sky-100 rounded-xl flex items-center justify-center text-sky-600 group-hover:bg-white transition"><i class="fas fa-calendar-alt text-xl"></i></div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-semibold text-gray-900">Lihat Event</p>
+                                    <p class="text-xs text-gray-500">{{ $stats['totalEvents'] }} event tervalidasi</p>
                                 </div>
-                            </div>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 group-hover:text-sky-600 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                            </a>
+
+                            <a href="{{ route('clubs.index') }}" class="flex items-center gap-4 p-4 bg-indigo-50 rounded-xl hover:bg-indigo-100 transition group">
+                                <div class="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center text-indigo-600 group-hover:bg-white transition"><i class="fas fa-shield-alt text-xl"></i></div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-semibold text-gray-900">Temukan Klub</p>
+                                    <p class="text-xs text-gray-500">{{ $stats['totalClubs'] }} klub aktif</p>
+                                </div>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 group-hover:text-indigo-600 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                            </a>
+
+                            <a href="{{ route('kalender.index') }}" class="flex items-center gap-4 p-4 bg-emerald-50 rounded-xl hover:bg-emerald-100 transition group">
+                                <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-600 group-hover:bg-white transition"><i class="fas fa-calendar-check text-xl"></i></div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-semibold text-gray-900">Kalender Kegiatan</p>
+                                    <p class="text-xs text-gray-500">Jadwal event & latihan</p>
+                                </div>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 group-hover:text-emerald-600 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -96,145 +162,43 @@
         </div>
     </section>
 
-    <!-- Statistics Section -->
-    <section class="bg-gray-50 py-12 border-y border-gray-100">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                <div class="bg-white rounded-2xl p-6 text-center shadow-sm border border-gray-100 hover:shadow-md transition-all">
-                    <div class="w-12 h-12 mx-auto mb-3 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600 text-xl"><i class="fas fa-building"></i></div>
-                    <h3 class="text-2xl font-bold text-gray-900 mb-1">{{ number_format($stats['totalPrasarana']) }}</h3>
-                    <p class="text-gray-500 text-sm">Prasarana Tercatat</p>
+    <!-- Mobile Menu Cards (tampil di bawah hero untuk mobile) -->
+    <section class="lg:hidden pb-12 px-4 sm:px-6">
+        <div class="max-w-xl mx-auto space-y-3">
+            <div class="grid grid-cols-3 gap-3 mb-4">
+                <div class="bg-white rounded-xl p-3 text-center border border-gray-100 shadow-sm">
+                    <p class="text-xl font-bold text-gray-900">{{ number_format($stats['totalPrasarana']) }}</p>
+                    <p class="text-[10px] text-gray-500 uppercase tracking-wide">Prasarana</p>
                 </div>
-                <div class="bg-white rounded-2xl p-6 text-center shadow-sm border border-gray-100 hover:shadow-md transition-all">
-                    <div class="w-12 h-12 mx-auto mb-3 bg-sky-100 rounded-xl flex items-center justify-center text-sky-600 text-xl"><i class="fas fa-users"></i></div>
-                    <h3 class="text-2xl font-bold text-gray-900 mb-1">{{ number_format($stats['totalClubs']) }}</h3>
-                    <p class="text-gray-500 text-sm">Klub & Komunitas</p>
+                <div class="bg-white rounded-xl p-3 text-center border border-gray-100 shadow-sm">
+                    <p class="text-xl font-bold text-gray-900">{{ number_format($stats['totalEvents']) }}</p>
+                    <p class="text-[10px] text-gray-500 uppercase tracking-wide">Event</p>
                 </div>
-                <div class="bg-white rounded-2xl p-6 text-center shadow-sm border border-gray-100 hover:shadow-md transition-all">
-                    <div class="w-12 h-12 mx-auto mb-3 bg-indigo-100 rounded-xl flex items-center justify-center text-indigo-600 text-xl"><i class="fas fa-calendar-alt"></i></div>
-                    <h3 class="text-2xl font-bold text-gray-900 mb-1">{{ number_format($stats['totalEvents']) }}</h3>
-                    <p class="text-gray-500 text-sm">Event Tercatat</p>
-                </div>
-                <div class="bg-white rounded-2xl p-6 text-center shadow-sm border border-gray-100 hover:shadow-md transition-all">
-                    <div class="w-12 h-12 mx-auto mb-3 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-600 text-xl"><i class="fas fa-running"></i></div>
-                    <h3 class="text-2xl font-bold text-gray-900 mb-1">{{ number_format($stats['totalPartisipasi']) }}</h3>
-                    <p class="text-gray-500 text-sm">Partisipasi Masyarakat</p>
+                <div class="bg-white rounded-xl p-3 text-center border border-gray-100 shadow-sm">
+                    <p class="text-xl font-bold text-gray-900">{{ number_format($stats['totalClubs']) }}</p>
+                    <p class="text-[10px] text-gray-500 uppercase tracking-wide">Klub</p>
                 </div>
             </div>
-        </div>
-    </section>
-
-    <!-- Latest Prasarana -->
-    <section class="py-16 bg-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between mb-8">
-                <div>
-                    <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-1">Prasarana Terbaru</h2>
-                    <p class="text-gray-500">Fasilitas olahraga yang baru dilaporkan relawan.</p>
-                </div>
-                <a href="{{ route('prasarana.index') }}" class="hidden md:inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium transition text-sm">Lihat Semua <i class="fas fa-arrow-right"></i></a>
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                @forelse($latestPrasarana as $p)
-                    <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-lg hover:border-blue-100 transition-all duration-300 group">
-                        <div class="flex items-start justify-between mb-4">
-                            <div class="w-11 h-11 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 text-lg group-hover:bg-blue-100 transition"><i class="fas fa-map-marker-alt"></i></div>
-                            <span class="px-3 py-1 rounded-full text-xs font-semibold {{ $p->status_color }}">{{ $p->status }}</span>
-                        </div>
-                        <h3 class="text-base font-bold text-gray-900 mb-1 truncate">{{ $p->nama_fasilitas }}</h3>
-                        <p class="text-gray-500 text-sm mb-3">{{ $p->kategori_olahraga }}</p>
-                        <div class="flex items-center justify-between text-sm">
-                            <span class="text-gray-500"><i class="fas fa-city mr-1 text-gray-400"></i> {{ $p->kabupaten ?? '-' }}</span>
-                            <span class="text-blue-600 font-semibold">Kondisi {{ $p->average_kondisi }}/5</span>
-                        </div>
-                    </div>
-                @empty
-                    <div class="col-span-full text-center py-12 text-gray-400"><i class="fas fa-inbox text-4xl mb-3 opacity-50"></i><p>Belum ada data prasarana.</p></div>
-                @endforelse
-            </div>
-            <div class="mt-6 text-center md:hidden">
-                <a href="{{ route('prasarana.index') }}" class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium transition text-sm">Lihat Semua <i class="fas fa-arrow-right"></i></a>
-            </div>
-        </div>
-    </section>
-
-    <!-- Upcoming Events -->
-    <section class="py-16 bg-gray-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between mb-8">
-                <div>
-                    <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-1">Event Akan Datang</h2>
-                    <p class="text-gray-500">Jadwal kegiatan olahraga terdekat di daerah Anda.</p>
-                </div>
-                <a href="{{ route('events.index') }}" class="hidden md:inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium transition text-sm">Lihat Semua <i class="fas fa-arrow-right"></i></a>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                @forelse($upcomingEvents as $event)
-                    <div class="flex items-center gap-5 bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300">
-                        <div class="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-blue-500 to-sky-400 rounded-xl flex flex-col items-center justify-center text-white font-bold shadow-md">
-                            <span class="text-xs uppercase">{{ $event->tanggal_mulai->format('M') }}</span>
-                            <span class="text-xl leading-none">{{ $event->tanggal_mulai->format('d') }}</span>
-                        </div>
-                        <div class="min-w-0 flex-1">
-                            <h3 class="text-base font-bold text-gray-900 truncate mb-1">{{ $event->nama_event }}</h3>
-                            <div class="flex items-center gap-3 text-sm text-gray-500">
-                                <span class="inline-flex items-center gap-1"><i class="fas fa-layer-group text-blue-400"></i> {{ $event->tingkat }}</span>
-                                <span class="inline-flex items-center gap-1"><i class="fas fa-map-pin text-sky-400"></i> {{ $event->kabupaten ?? '-' }}</span>
-                            </div>
-                        </div>
-                    </div>
-                @empty
-                    <div class="col-span-full text-center py-12 text-gray-400"><i class="fas fa-calendar-times text-4xl mb-3 opacity-50"></i><p>Tidak ada event yang akan datang.</p></div>
-                @endforelse
-            </div>
-            <div class="mt-6 text-center md:hidden">
-                <a href="{{ route('events.index') }}" class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium transition text-sm">Lihat Semua <i class="fas fa-arrow-right"></i></a>
-            </div>
-        </div>
-    </section>
-
-    <!-- Active Clubs -->
-    <section class="py-16 bg-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between mb-8">
-                <div>
-                    <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-1">Klub Aktif</h2>
-                    <p class="text-gray-500">Komunitas olahraga yang aktif berlatih saat ini.</p>
-                </div>
-                <a href="{{ route('clubs.index') }}" class="hidden md:inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium transition text-sm">Lihat Semua <i class="fas fa-arrow-right"></i></a>
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                @forelse($activeClubs as $club)
-                    <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-lg hover:border-blue-100 transition-all duration-300 text-center">
-                        <div class="w-14 h-14 mx-auto mb-4 bg-gradient-to-tr from-blue-400 to-sky-400 rounded-full flex items-center justify-center text-white text-2xl shadow-md"><i class="fas fa-shield-alt"></i></div>
-                        <h3 class="text-base font-bold text-gray-900 mb-1 truncate">{{ $club->nama_club }}</h3>
-                        <p class="text-gray-500 text-sm mb-3">Ketua: {{ $club->ketua_club }}</p>
-                        @if($club->prasarana)
-                            <span class="inline-block px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-medium border border-blue-100"><i class="fas fa-building mr-1"></i> {{ $club->prasarana->nama_fasilitas }}</span>
-                        @else
-                            <span class="inline-block px-3 py-1 rounded-full bg-gray-50 text-gray-500 text-xs font-medium border border-gray-100">Belum memiliki prasarana</span>
-                        @endif
-                    </div>
-                @empty
-                    <div class="col-span-full text-center py-12 text-gray-400"><i class="fas fa-users-slash text-4xl mb-3 opacity-50"></i><p>Belum ada klub aktif.</p></div>
-                @endforelse
-            </div>
-            <div class="mt-6 text-center md:hidden">
-                <a href="{{ route('clubs.index') }}" class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium transition text-sm">Lihat Semua <i class="fas fa-arrow-right"></i></a>
-            </div>
-        </div>
-    </section>
-
-    <!-- CTA Section -->
-    <section class="py-16 bg-gradient-to-br from-blue-600 to-sky-500">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Jadilah Bagian dari Perubahan</h2>
-            <p class="text-blue-100 text-lg mb-8 max-w-2xl mx-auto">Bersama-sama kita bisa membangun peta keolahragaan daerah yang akurat dan bermanfaat untuk semua.</p>
-            @guest
-                <button @click="modal = 'register'" class="px-8 py-3.5 bg-white text-blue-600 font-bold rounded-xl shadow-lg hover:bg-blue-50 transition-all duration-300">Daftar Sebagai Relawan</button>
-            @else
-                <a href="{{ url('/dashboard') }}" class="px-8 py-3.5 bg-white text-blue-600 font-bold rounded-xl shadow-lg hover:bg-blue-50 transition-all duration-300">Buka Dasbor Saya</a>
-            @endguest
+            <a href="{{ route('prasarana.index') }}" class="flex items-center gap-4 p-4 bg-blue-50 rounded-xl hover:bg-blue-100 transition">
+                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600"><i class="fas fa-building"></i></div>
+                <div class="flex-1"><p class="text-sm font-semibold text-gray-900">Jelajahi Prasarana</p></div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+            </a>
+            <a href="{{ route('events.index') }}" class="flex items-center gap-4 p-4 bg-sky-50 rounded-xl hover:bg-sky-100 transition">
+                <div class="w-10 h-10 bg-sky-100 rounded-lg flex items-center justify-center text-sky-600"><i class="fas fa-calendar-alt"></i></div>
+                <div class="flex-1"><p class="text-sm font-semibold text-gray-900">Lihat Event</p></div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+            </a>
+            <a href="{{ route('clubs.index') }}" class="flex items-center gap-4 p-4 bg-indigo-50 rounded-xl hover:bg-indigo-100 transition">
+                <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-600"><i class="fas fa-shield-alt"></i></div>
+                <div class="flex-1"><p class="text-sm font-semibold text-gray-900">Temukan Klub</p></div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+            </a>
+            <a href="{{ route('kalender.index') }}" class="flex items-center gap-4 p-4 bg-emerald-50 rounded-xl hover:bg-emerald-100 transition">
+                <div class="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center text-emerald-600"><i class="fas fa-calendar-check"></i></div>
+                <div class="flex-1"><p class="text-sm font-semibold text-gray-900">Kalender Kegiatan</p></div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+            </a>
         </div>
     </section>
 
