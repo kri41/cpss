@@ -15,6 +15,8 @@ class Kehadiran extends Model
     protected $fillable = [
         'partisipasi_id',
         'nama_peserta',
+        'jenis_olahraga',
+        'rpe',
         'jenis_kelamin',
         'usia',
         'kelompok_usia',
@@ -22,6 +24,7 @@ class Kehadiran extends Model
         'status',
         'catatan',
         'created_by',
+        'sumber',
     ];
 
     protected $casts = [

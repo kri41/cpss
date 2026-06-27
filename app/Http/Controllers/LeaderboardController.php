@@ -16,18 +16,33 @@ class LeaderboardController extends Controller
     {
         $periode = $request->get('periode', 'bulanan'); // mingguan | bulanan | total
 
+        $mingguAwal = now()->startOfWeek();
+        $mingguAkhir = now()->endOfWeek();
+        $bulanAwal = now()->startOfMonth();
+        $bulanAkhir = now()->endOfMonth();
+
         $query = User::where('role', 'relawan')
-            ->withCount(['pointTransactions as poin_mingguan' => function ($q) {
-                $q->where('status', 'valid')
-                  ->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()]);
-            }])
-            ->withCount(['pointTransactions as poin_bulanan' => function ($q) {
-                $q->where('status', 'valid')
-                  ->whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()]);
-            }])
-            ->withCount(['pointTransactions as poin_total' => function ($q) {
-                $q->where('status', 'valid');
-            }]);
+            ->select('users.*')
+            ->selectSub(function ($q) use ($mingguAwal, $mingguAkhir) {
+                $q->from('point_transactions')
+                  ->whereColumn('point_transactions.user_id', 'users.id')
+                  ->where('point_transactions.status', 'valid')
+                  ->whereBetween('point_transactions.created_at', [$mingguAwal, $mingguAkhir])
+                  ->selectRaw('COALESCE(SUM(point_transactions.poin), 0)');
+            }, 'poin_mingguan')
+            ->selectSub(function ($q) use ($bulanAwal, $bulanAkhir) {
+                $q->from('point_transactions')
+                  ->whereColumn('point_transactions.user_id', 'users.id')
+                  ->where('point_transactions.status', 'valid')
+                  ->whereBetween('point_transactions.created_at', [$bulanAwal, $bulanAkhir])
+                  ->selectRaw('COALESCE(SUM(point_transactions.poin), 0)');
+            }, 'poin_bulanan')
+            ->selectSub(function ($q) {
+                $q->from('point_transactions')
+                  ->whereColumn('point_transactions.user_id', 'users.id')
+                  ->where('point_transactions.status', 'valid')
+                  ->selectRaw('COALESCE(SUM(point_transactions.poin), 0)');
+            }, 'poin_total');
 
         $orderColumn = match ($periode) {
             'mingguan' => 'poin_mingguan',
@@ -42,20 +57,24 @@ class LeaderboardController extends Controller
         // Peringkat pribadi user yang login (meski di luar 10 besar)
         $personalRank = null;
         if (auth()->check() && auth()->user()->isRelawan()) {
-            $allUsers = User::where('role', 'relawan')
-                ->withCount(['pointTransactions as poin_sort' => function ($q) use ($periode) {
-                    $q->where('status', 'valid');
+            $sortQuery = User::where('role', 'relawan')
+                ->select('users.id')
+                ->selectSub(function ($q) use ($periode, $mingguAwal, $mingguAkhir, $bulanAwal, $bulanAkhir) {
+                    $q->from('point_transactions')
+                      ->whereColumn('point_transactions.user_id', 'users.id')
+                      ->where('point_transactions.status', 'valid');
                     if ($periode === 'mingguan') {
-                        $q->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()]);
+                        $q->whereBetween('point_transactions.created_at', [$mingguAwal, $mingguAkhir]);
                     } elseif ($periode === 'bulanan') {
-                        $q->whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()]);
+                        $q->whereBetween('point_transactions.created_at', [$bulanAwal, $bulanAkhir]);
                     }
-                }])
+                    $q->selectRaw('COALESCE(SUM(point_transactions.poin), 0)');
+                }, 'poin_sort')
                 ->orderByDesc('poin_sort')
                 ->pluck('id')
                 ->search(auth()->id());
 
-            $personalRank = $allUsers !== false ? $allUsers + 1 : null;
+            $personalRank = $sortQuery !== false ? $sortQuery + 1 : null;
         }
 
         return view('leaderboard.index', compact('leaderboard', 'periode', 'personalRank'));
