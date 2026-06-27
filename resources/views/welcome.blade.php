@@ -177,6 +177,17 @@
         </div>
     </section>
 
+    <!-- Footer — Mobile Only -->
+    <footer class="lg:hidden bg-gray-900 text-gray-400 py-6 mt-4">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div class="flex items-center justify-center gap-3 mb-2">
+                <div class="w-7 h-7 bg-gradient-to-br from-blue-500 to-sky-400 rounded-lg flex items-center justify-center text-white font-bold text-xs">C</div>
+                <span class="text-white font-semibold text-sm">CPSS</span>
+            </div>
+            <p class="text-xs">&copy; {{ date('Y') }} Cloud-Participatory Sport Sensing</p>
+        </div>
+    </footer>
+
     <!-- Login Modal -->
     <div x-show="modal === 'login'" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm">
         <div x-show="modal === 'login'" @click.away="modal = ''" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-95 translate-y-4" x-transition:enter-end="opacity-100 scale-100 translate-y-0" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 scale-100 translate-y-0" x-transition:leave-end="opacity-0 scale-95 translate-y-4" class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden relative">
