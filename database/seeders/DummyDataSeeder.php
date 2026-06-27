@@ -6,8 +6,10 @@ use App\Models\Club;
 use App\Models\Event;
 use App\Models\Kehadiran;
 use App\Models\Partisipasi;
+use App\Models\PointTransaction;
 use App\Models\Prasarana;
 use App\Models\User;
+use App\Services\GamificationService;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 
@@ -22,6 +24,7 @@ class DummyDataSeeder extends Seeder
         $this->seedClubs();
         $this->seedEvents();
         $this->seedPartisipasiDanKehadiran();
+        $this->seedPointTransactions();
         $this->call(AuditLogSeeder::class);
     }
 
@@ -53,6 +56,7 @@ class DummyDataSeeder extends Seeder
                 'fasilitas_ruang_ganti' => true,
                 'fasilitas_tribun' => false,
                 'keterangan' => 'Lapangan utama desa, sering dipakai latihan klub lokal.',
+                'status_validasi' => 'validated',
             ],
             [
                 'nama_fasilitas' => 'Gor Tamansari',
@@ -77,6 +81,7 @@ class DummyDataSeeder extends Seeder
                 'fasilitas_ruang_ganti' => true,
                 'fasilitas_tribun' => true,
                 'keterangan' => 'Gedung olahraga indoor dengan 4 lapangan badminton.',
+                'status_validasi' => 'validated',
             ],
             [
                 'nama_fasilitas' => 'Lapangan Voli Jajag',
@@ -101,6 +106,7 @@ class DummyDataSeeder extends Seeder
                 'fasilitas_ruang_ganti' => false,
                 'fasilitas_tribun' => false,
                 'keterangan' => 'Lapangan terbuka tanpa tribun, perlu perbaikan net.',
+                'status_validasi' => 'validated',
             ],
             [
                 'nama_fasilitas' => 'Stadion Mini Gumukmas',
@@ -125,6 +131,7 @@ class DummyDataSeeder extends Seeder
                 'fasilitas_ruang_ganti' => true,
                 'fasilitas_tribun' => true,
                 'keterangan' => 'Stadion mini dengan lintasan atletik dan lapangan sepak bola.',
+                'status_validasi' => 'validated',
             ],
             [
                 'nama_fasilitas' => 'Lapangan Basket Tempurejo',
@@ -149,6 +156,7 @@ class DummyDataSeeder extends Seeder
                 'fasilitas_ruang_ganti' => false,
                 'fasilitas_tribun' => false,
                 'keterangan' => 'Lapangan basket outdoor, kondisi ring perlu perhatian.',
+                'status_validasi' => 'pending',
             ],
         ];
 
@@ -178,6 +186,7 @@ class DummyDataSeeder extends Seeder
                 'kecamatan' => 'Kec. Glagah',
                 'kabupaten' => 'Kab. Banyuwangi',
                 'tanggal_berdiri' => '2019-03-15',
+                'status_validasi' => 'validated',
             ],
             [
                 'nama_club' => 'Voli Putri Tamansari',
@@ -191,6 +200,7 @@ class DummyDataSeeder extends Seeder
                 'kecamatan' => 'Kec. Banyuwangi',
                 'kabupaten' => 'Kab. Banyuwangi',
                 'tanggal_berdiri' => '2021-07-20',
+                'status_validasi' => 'validated',
             ],
             [
                 'nama_club' => 'Atletik Jember Muda',
@@ -204,6 +214,7 @@ class DummyDataSeeder extends Seeder
                 'kecamatan' => 'Kec. Gumukmas',
                 'kabupaten' => 'Kab. Jember',
                 'tanggal_berdiri' => '2020-01-10',
+                'status_validasi' => 'pending',
             ],
         ];
 
@@ -231,6 +242,7 @@ class DummyDataSeeder extends Seeder
                 'desa' => 'Desa Tamansari',
                 'kecamatan' => 'Kec. Banyuwangi',
                 'kabupaten' => 'Kab. Banyuwangi',
+                'status_validasi' => 'validated',
             ],
             [
                 'nama_event' => 'Turnamen Voli Antar-Desa',
@@ -241,6 +253,7 @@ class DummyDataSeeder extends Seeder
                 'desa' => 'Desa Sumber Agung',
                 'kecamatan' => 'Kec. Glagah',
                 'kabupaten' => 'Kab. Banyuwangi',
+                'status_validasi' => 'validated',
             ],
             [
                 'nama_event' => 'Senam Lansia Jember',
@@ -251,6 +264,7 @@ class DummyDataSeeder extends Seeder
                 'desa' => 'Desa Gumukmas',
                 'kecamatan' => 'Kec. Gumukmas',
                 'kabupaten' => 'Kab. Jember',
+                'status_validasi' => 'pending',
             ],
             [
                 'nama_event' => 'Pelatihan Pelatih Akar Rumput',
@@ -261,6 +275,7 @@ class DummyDataSeeder extends Seeder
                 'desa' => 'Desa Jajag',
                 'kecamatan' => 'Kec. Gambiran',
                 'kabupaten' => 'Kab. Banyuwangi',
+                'status_validasi' => 'validated',
             ],
         ];
 
@@ -285,6 +300,7 @@ class DummyDataSeeder extends Seeder
                 'tanggal_observasi' => Carbon::now()->subDays(2),
                 'estimasi_jumlah_orang' => 25,
                 'mayoritas_usia' => 'Dewasa',
+                'status_validasi' => 'validated',
             ],
             [
                 'lokasi_observasi' => 'Gor Tamansari',
@@ -294,6 +310,7 @@ class DummyDataSeeder extends Seeder
                 'tanggal_observasi' => Carbon::now()->subDays(5),
                 'estimasi_jumlah_orang' => 12,
                 'mayoritas_usia' => 'Anak/Pelajar',
+                'status_validasi' => 'validated',
             ],
             [
                 'lokasi_observasi' => 'Stadion Mini Gumukmas',
@@ -303,6 +320,7 @@ class DummyDataSeeder extends Seeder
                 'tanggal_observasi' => Carbon::now()->subDays(8),
                 'estimasi_jumlah_orang' => 30,
                 'mayoritas_usia' => 'Lansia',
+                'status_validasi' => 'validated',
             ],
             [
                 'lokasi_observasi' => 'Lapangan Voli Jajag',
@@ -312,6 +330,7 @@ class DummyDataSeeder extends Seeder
                 'tanggal_observasi' => Carbon::now()->subDays(12),
                 'estimasi_jumlah_orang' => 8,
                 'mayoritas_usia' => 'Dewasa',
+                'status_validasi' => 'pending',
             ],
             [
                 'lokasi_observasi' => 'Lapangan Basket Tempurejo',
@@ -321,6 +340,7 @@ class DummyDataSeeder extends Seeder
                 'tanggal_observasi' => Carbon::now()->subDays(15),
                 'estimasi_jumlah_orang' => 15,
                 'mayoritas_usia' => 'Anak/Pelajar',
+                'status_validasi' => 'validated',
             ],
         ];
 
@@ -353,5 +373,72 @@ class DummyDataSeeder extends Seeder
         }
 
         $this->command->info('Seeded 5 partisipasi dengan kehadiran individu.');
+    }
+
+    /**
+     * Buat transaksi poin dummy untuk entitas yang sudah tervalidasi.
+     */
+    private function seedPointTransactions(): void
+    {
+        // Prasarana validated -> prasarana_baru (50 poin)
+        foreach (Prasarana::where('status_validasi', 'validated')->get() as $p) {
+            PointTransaction::create([
+                'user_id'      => $p->user_id,
+                'related_type' => 'prasarana',
+                'related_id'   => $p->id,
+                'jenis_aksi'   => 'baru',
+                'poin'         => 50,
+                'status'       => 'valid',
+                'created_at'   => $p->created_at,
+            ]);
+        }
+
+        // Clubs validated -> club_baru (40 poin)
+        foreach (Club::where('status_validasi', 'validated')->get() as $c) {
+            PointTransaction::create([
+                'user_id'      => $c->user_id,
+                'related_type' => 'club',
+                'related_id'   => $c->id,
+                'jenis_aksi'   => 'baru',
+                'poin'         => 40,
+                'status'       => 'valid',
+                'created_at'   => $c->created_at,
+            ]);
+        }
+
+        // Events validated -> event_baru (20 poin)
+        foreach (Event::where('status_validasi', 'validated')->get() as $e) {
+            PointTransaction::create([
+                'user_id'      => $e->user_id,
+                'related_type' => 'event',
+                'related_id'   => $e->id,
+                'jenis_aksi'   => 'baru',
+                'poin'         => 20,
+                'status'       => 'valid',
+                'created_at'   => $e->created_at,
+            ]);
+        }
+
+        // Partisipasi validated -> partisipasi_valid (3 poin)
+        foreach (Partisipasi::where('status_validasi', 'validated')->get() as $part) {
+            PointTransaction::create([
+                'user_id'      => $part->user_id,
+                'related_type' => 'partisipasi',
+                'related_id'   => $part->id,
+                'jenis_aksi'   => 'baru',
+                'poin'         => 3,
+                'status'       => 'valid',
+                'created_at'   => $part->created_at,
+            ]);
+        }
+
+        // Update total_poin semua user relawan dan cek lencana
+        $relawanIds = User::where('role', 'relawan')->pluck('id');
+        foreach ($relawanIds as $uid) {
+            GamificationService::updateTotalPoin($uid);
+            GamificationService::cekDanBerikanLencana($uid);
+        }
+
+        $this->command->info('Seeded point transactions & badges.');
     }
 }

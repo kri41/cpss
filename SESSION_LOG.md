@@ -1,7 +1,7 @@
-# Session Log - CPSS Enhancement
+﻿# Session Log - CPSS Enhancement
 
 **Date:** 2026-05-05  
-**Project:** CPSS (Club & Prasarana Sekolah)  
+**Project:** CPSS (Cloud Participatory Sport Sensing)  
 **Status:** In Progress  
 
 ---
@@ -475,9 +475,9 @@ Kebutuhan disaring menggunakan empat kriteria dari **Kajian_Prioritas_Implementa
 3. Kelayakan teknis untuk dikerjakan dalam skala dan waktu penelitian.
 4. Tingkat urgensi empiris (kemunculan tema >=30 kali atau tingkat persetujuan >=80%).
 
-### Hasil Penyaringan: Prioritas Prototipe vs Pengembangan Lanjutan
+### Hasil Penyaringan: Prioritas pengembangan awal vs Pengembangan Lanjutan
 
-#### Prioritas Prototipe (Masuk Lingkup Disertasi)
+#### Prioritas pengembangan awal (Masuk Lingkup penelitian)
 | Fitur | Justifikasi |
 |-------|-------------|
 | **Modul Gamifikasi** (poin, leaderboard, lencana) | Mengoperasionalkan Pilar Rekayasa Perilaku NMIPS yang dijanjikan Bab III |
@@ -485,15 +485,15 @@ Kebutuhan disaring menggunakan empat kriteria dari **Kajian_Prioritas_Implementa
 | **Akses Publik Tanpa Login** | Biaya implementasi rendah, dampak besar terhadap Facilitating Conditions (UTAUT) |
 | **Presensi Sederhana pada Partisipasi** | Permintaan eksplisit tertinggi ke-4 (92 kemunculan); pemicu poin observasi berulang |
 
-#### Pengembangan Lanjutan (Di Luar Lingkup Prototipe)
+#### Pengembangan Lanjutan (Di Luar Lingkup pengembangan awal)
 | Fitur | Alasan Penyaringan |
 |-------|-------------------|
 | Notifikasi dalam aplikasi | Bukan prasyarat H1/H2; dapat digantikan sementara oleh tampilan status dashboard |
-| Verifikasi lokasi via QR | Geolokasi GPS pada Prasarana sudah mencukupi kebutuhan validasi lokasi prototipe |
+| Verifikasi lokasi via QR | Geolokasi GPS pada Prasarana sudah mencukupi kebutuhan validasi lokasi pengembangan awal |
 | Unggah video | Foto kondisi sudah memadai untuk validasi pakar; video menambah beban penyimpanan |
 | Forum/komunikasi komunitas | Bersifat engagement jangka panjang, di luar cakupan pengujian dua bulan |
 | PWA / mode luring (offline) | 93,3% responden menyatakan akses internet memadai; urgensi empiris rendah |
-| Integrasi NIK / Satu Data Indonesia | Kompleksitas legal tidak proporsional dengan skala uji prototipe |
+| Integrasi NIK / Satu Data Indonesia | Kompleksitas legal tidak proporsional dengan skala uji pengembangan awal |
 | Backend big data (Kafka/Storm/HBase) | Relevan sebagai arsitektur konseptual skala nasional, bukan syarat validasi mekanisme inti |
 
 ### Rancangan Modul Gamifikasi (Ringkasan dari PRD Addendum)
@@ -522,17 +522,17 @@ Kebutuhan disaring menggunakan empat kriteria dari **Kajian_Prioritas_Implementa
 - Relawan bisa lihat peringkat pribadi meski di luar 10 besar
 
 ### Kesimpulan untuk CPSS (Revisi)
-**Fondasi CPSS sudah kuat** (RBAC, Audit Log, Dashboard, Prasarana, Club, Event, Talenta). Berdasarkan kajian prioritas resmi, **Fase 1 Roadmap harus fokus pada 4 fitur Prioritas Prototipe:**
+**Fondasi CPSS sudah kuat** (RBAC, Audit Log, Dashboard, Prasarana, Club, Event, Talenta). Berdasarkan kajian prioritas resmi, **Fase 1 Roadmap harus fokus pada 4 fitur Prioritas pengembangan awal:**
 1. Modul Gamifikasi (poin, leaderboard, lencana)
 2. Struktur Wilayah Administratif (desa/kecamatan/kabupaten)
 3. Akses Publik Tanpa Login (index/show Prasarana, Clubs, Events)
 4. Presensi Sederhana pada Partisipasi (absensi individu sebagai pelengkap estimasi)
 
-Fitur-fitur lain seperti notifikasi, QR, video, forum, PWA, NIK, dan big data backend dicadangkan sebagai **Pengembangan Lanjutan** pada Bab V (Saran) disertasi.
+Fitur-fitur lain seperti notifikasi, QR, video, forum, PWA, NIK, dan big data backend dicadangkan sebagai **Pengembangan Lanjutan** pada Bab V (Saran) penelitian.
 
 ---
 
-## 12. Implementasi Fase 1 Prototipe Disertasi
+## 12. Implementasi Fase 1 pengembangan awal penelitian
 
 ### Tanggal Implementasi: 20 Juni 2026
 
@@ -651,7 +651,7 @@ Fitur-fitur lain seperti notifikasi, QR, video, forum, PWA, NIK, dan big data ba
 - MySQL compatibility fixes
 - Baseline survey analysis REVISED with 3 official documents
 - PRD.md updated to v2.1 with gamification, wilayah, and public access specs
-- **Fase 1 Prototipe Disertasi FULLY IMPLEMENTED & TESTED:**
+- **Fase 1 pengembangan awal penelitian FULLY IMPLEMENTED & TESTED:**
   - ✅ Struktur Wilayah (desa/kecamatan/kabupaten pada 5 tabel)
   - ✅ Akses Publik (index/show tanpa login)
   - ✅ Presensi Sederhana (kehadiran individu per partisipasi)
@@ -715,7 +715,7 @@ Server lokal dijalankan pada `http://127.0.0.1:8001`.
 - MySQL compatibility fixes
 - Baseline survey analysis REVISED with 3 official documents
 - PRD.md updated to v2.1 with gamification, wilayah, and public access specs
-- **Fase 1 Prototipe Disertasi FULLY IMPLEMENTED, TESTED & UI-REVIEWED:**
+- **Fase 1 pengembangan awal penelitian FULLY IMPLEMENTED, TESTED & UI-REVIEWED:**
   - ✅ Struktur Wilayah
   - ✅ Akses Publik (guest-friendly)
   - ✅ Presensi Sederhana (dengan tabel kehadiran)

@@ -1,4 +1,4 @@
-# PRD — Project Requirements Document
+﻿# PRD — Project Requirements Document
 
 ## 1. Overview
 Saat ini, data mengenai keolahragaan di suatu daerah—seperti jumlah partisipasi masyarakat, kondisi fasilitas, komunitas yang aktif, hingga event dan prestasi—seringkali tersebar dan tidak terorganisir. Hal ini menyulitkan para pemangku kepentingan untuk menganalisis tren dan membuat kebijakan yang tepat sasaran.
@@ -32,8 +32,8 @@ Dokumen ini merupakan versi 2.0 yang telah diselaraskan dengan hasil analisis ke
 
 ---
 
-## 4. Core Features (New — Prioritas Prototipe Disertasi)
-Berdasarkan **Kajian Prioritas Implementasi** dan **PRD Addendum Gamifikasi**, tiga kelompok kebutuhan baru dinyatakan sebagai **Prioritas Prototipe** (masuk dalam lingkup pengujian pakar pada disertasi):
+## 4. Core Features (New — Prioritas pengembangan awal penelitian)
+Berdasarkan **Kajian Prioritas Implementasi** dan **PRD Addendum Gamifikasi**, tiga kelompok kebutuhan baru dinyatakan sebagai **Prioritas pengembangan awal** (masuk dalam lingkup pengujian pakar pada penelitian):
 
 ### 4.1 Modul Gamifikasi (Poin, Leaderboard, Lencana)
 Mengoperasionalkan Pilar Rekayasa Perilaku (NMIPS — Non-Monetary Incentives for Participatory Sensing) dan Self-Determination Theory.
@@ -107,7 +107,7 @@ flowchart TD
 - **Tenaga Ahli:** Menyimpan data pelatih dan penggerak olahraga yang tersertifikasi.
 - **Audit Logs:** Menyimpan rekam jejak aktivitas sistem untuk menjaga integritas data dan akuntabilitas perubahan.
 
-### 7.2 Tabel Baru (Prioritas Prototipe)
+### 7.2 Tabel Baru (Prioritas pengembangan awal)
 
 #### `point_transactions`
 | Kolom | Tipe | Keterangan |
@@ -140,7 +140,7 @@ flowchart TD
 | badge_id | FK → badges | Jenis lencana |
 | earned_at | timestamp | Waktu perolehan |
 
-#### `wilayah` (tabel referensi, opsional untuk skala prototipe)
+#### `wilayah` (tabel referensi, opsional untuk skala pengembangan awal)
 | Kolom | Tipe | Keterangan |
 |-------|------|------------|
 | id | PK | Auto-increment |
@@ -159,7 +159,7 @@ flowchart TD
 | users | wilayah_id | FK → wilayah, nullable | Wilayah tugas relawan |
 | users | total_poin | integer, default 0 | Denormalisasi untuk performa query leaderboard |
 
-> **Catatan implementasi:** Untuk skala prototipe (purposive sampling di sebagian wilayah Jawa Timur), pendekatan field string langsung (tanpa tabel referensi wilayah berjenjang penuh) sudah cukup dan lebih cepat dikerjakan; tabel referensi penuh disarankan apabila pengembangan berlanjut ke skala provinsi/nasional.
+> **Catatan implementasi:** Untuk skala pengembangan awal (purposive sampling di sebagian wilayah Jawa Timur), pendekatan field string langsung (tanpa tabel referensi wilayah berjenjang penuh) sudah cukup dan lebih cepat dikerjakan; tabel referensi penuh disarankan apabila pengembangan berlanjut ke skala provinsi/nasional.
 
 ---
 
@@ -315,7 +315,7 @@ Berdasarkan **PRD_Addendum_Gamifikasi_CPSS.docx**. Rancangan ini mengoperasional
 
 ---
 
-## 11. Gap Analysis — Fitur Sudah Ada vs. Prioritas Prototipe
+## 11. Gap Analysis — Fitur Sudah Ada vs. Prioritas pengembangan awal
 
 ### 11.1 Fitur yang SUDAH ADA ✅
 | Fitur | Keterangan |
@@ -329,7 +329,7 @@ Berdasarkan **PRD_Addendum_Gamifikasi_CPSS.docx**. Rancangan ini mengoperasional
 | Manajemen Talenta & Tenaga Ahli | Database bibit atlet & pelatih |
 | Responsive Design | Tailwind + mobile-friendly |
 
-### 11.2 Fitur Prioritas Prototipe — BELUM ADA ❌ (Wajib Dibangun)
+### 11.2 Fitur Prioritas pengembangan awal — BELUM ADA ❌ (Wajib Dibangun)
 | # | Fitur | Justifikasi dari Survei |
 |---|-------|------------------------|
 | 1 | **Modul Gamifikasi (Poin, Leaderboard, Lencana)** | Pijakan empiris NMIPS; dimensi promotif/sosial muncul kuat; mengurangi beban admin |
@@ -337,22 +337,22 @@ Berdasarkan **PRD_Addendum_Gamifikasi_CPSS.docx**. Rancangan ini mengoperasional
 | 3 | **Akses Publik Tanpa Login** | Biaya rendah, dampak besar terhadap Facilitating Conditions (UTAUT) |
 | 4 | **Presensi Sederhana pada Partisipasi** | 92 kemunculan absensi; pemicu poin observasi berulang |
 
-### 11.3 Pengembangan Lanjutan (di Luar Lingkup Prototipe Disertasi)
+### 11.3 Pengembangan Lanjutan (di Luar Lingkup pengembangan awal penelitian)
 | Fitur | Justifikasi Penyaringan |
 |-------|------------------------|
 | Notifikasi dalam aplikasi | Bukan prasyarat pengujian H1/H2; dapat digantikan sementara oleh tampilan status dashboard |
-| Verifikasi lokasi via QR | Geolokasi GPS pada modul Prasarana sudah mencukupi kebutuhan validasi lokasi prototipe |
+| Verifikasi lokasi via QR | Geolokasi GPS pada modul Prasarana sudah mencukupi kebutuhan validasi lokasi pengembangan awal |
 | Unggah video | Foto kondisi sudah memadai untuk validasi pakar; video menambah beban penyimpanan tanpa menambah validitas data |
 | Forum/komunikasi komunitas | Bersifat engagement jangka panjang, di luar cakupan pengujian dua bulan |
 | PWA / mode luring (offline) | 93,3% responden sudah menyatakan akses internet memadai; urgensi empiris rendah meski relevan secara teori |
-| Integrasi NIK / Satu Data Indonesia | Kompleksitas legal dan keamanan data pribadi tidak proporsional dengan skala uji prototipe |
+| Integrasi NIK / Satu Data Indonesia | Kompleksitas legal dan keamanan data pribadi tidak proporsional dengan skala uji pengembangan awal |
 | Backend big data (Kafka/Storm/HBase) | Tetap relevan sebagai gambaran arsitektur konseptual skala nasional, namun bukan syarat validasi mekanisme inti CPSS |
 
 ---
 
 ## 12. Roadmap Implementasi
 
-### Fase 1 — Lingkup Prototipe Disertasi (Sprint 1–4)
+### Fase 1 — Lingkup pengembangan awal penelitian (Sprint 1–4)
 **Fokus:** Fitur yang masuk dalam pengujian pakar dan pengujian hipotesis H1/H2.
 - [ ] **Struktur Wilayah:** Tambah kolom wilayah (desa/kecamatan/kabupaten) pada tabel Prasarana, Partisipasi, Clubs, Events, dan Users.
 - [ ] **Akses Publik:** Rute `index`/`show` untuk Prasarana, Clubs, Events tanpa autentikasi.
@@ -362,8 +362,8 @@ Berdasarkan **PRD_Addendum_Gamifikasi_CPSS.docx**. Rancangan ini mengoperasional
 - [ ] **Modul Gamifikasi — Leaderboard:** Halaman leaderboard (mingguan + bulanan + total).
 - [ ] **Modul Gamifikasi — Lencana:** Evaluasi otomatis syarat lencana.
 
-### Fase 2 — Pengembangan Lanjutan (di Luar Lingkup Prototipe)
-**Fokus:** Fitur yang dicantumkan pada Bab V (Saran) disertasi sebagai arah pengembangan pasca-prototipe.
+### Fase 2 — Pengembangan Lanjutan (di Luar Lingkup pengembangan awal)
+**Fokus:** Fitur yang dicantumkan pada Bab V (Saran) penelitian sebagai arah pengembangan pasca-pengembangan awal.
 - [ ] Poin update (`prasarana_update`, `club_update`) dengan validasi jarak waktu 30 hari.
 - [ ] Notifikasi in-app (status verifikasi data, pengingat tugas pendataan).
 - [ ] Verifikasi lokasi berbasis QR code pada titik-titik fasilitas olahraga.
@@ -371,7 +371,7 @@ Berdasarkan **PRD_Addendum_Gamifikasi_CPSS.docx**. Rancangan ini mengoperasional
 - [ ] Kanal komunikasi/forum ringan antar relawan dan antar klub.
 - [ ] Progressive Web App dengan kemampuan mode luring (offline-first).
 - [ ] Integrasi Nomor Induk Kependudukan (NIK) sebagai Kode Referensi Unik sesuai mandat Satu Data Indonesia.
-- [ ] Backend big data berskala perusahaan (Apache Kafka, Storm, HBase) untuk skenario implementasi nasional pasca-disertasi.
+- [ ] Backend big data berskala perusahaan (Apache Kafka, Storm, HBase) untuk skenario implementasi nasional pasca-penelitian.
 
 ---
 
@@ -380,10 +380,10 @@ Berdasarkan **PRD_Addendum_Gamifikasi_CPSS.docx**. Rancangan ini mengoperasional
 **CPSS saat ini telah memiliki fondasi teknis yang kuat** dengan RBAC, audit log, dashboard visual, manajemen prasarana, klub, event, talenta, dan tenaga ahli. Hasil survei baseline terhadap **476 tenaga penggerak olahraga nasional** menunjukkan **jendela peluang implementasi yang sangat terbuka**: kesiapan adopsi hampir mutlak (87–96%), dengan keluhan utama bersifat struktural (fragmentasi data) bukan individual.
 
 ### Rekomendasi Utama:
-1. **Fokus Fase 1 pada 4 fitur Prioritas Prototipe:** Gamifikasi, Struktur Wilayah, Akses Publik, dan Presensi Sederhana. Keempatnya merupakan prasyarat teknis dan empiris untuk pengujian hipotesis H1/H2 pada disertasi.
+1. **Fokus Fase 1 pada 4 fitur Prioritas pengembangan awal:** Gamifikasi, Struktur Wilayah, Akses Publik, dan Presensi Sederhana. Keempatnya merupakan prasyarat teknis dan empiris untuk pengujian hipotesis H1/H2 pada penelitian.
 2. **Pertahankan prinsip UX sederhana dan mobile-first.** Survei menunjukkan nilai 4,74/5 untuk "sistem harus mudah digunakan" dan 4,77/5 untuk "harus bisa diakses via smartphone". Kesederhanaan muncul pada lebih dari 75% jawaban terbuka.
 3. **Gunakan gamifikasi sebagai penggerak motivasi, bukan sekadar hiburan.** Pembedaan poin antara entitas statis (prasarana, klub) dan observasi berulang (partisipasi) sengaja dirancang agar relawan tetap termotivasi mendata fasilitas baru yang lebih bernilai bagi kebijakan daerah.
-4. **Dokumentasikan secara eksplisit butir "Pengembangan Lanjutan"** pada Bab V disertasi agar tidak menimbulkan pertanyaan dari penguji mengenai konsistensi antara kajian teori dan ruang lingkup prototipe yang diuji.
+4. **Dokumentasikan secara eksplisit butir "Pengembangan Lanjutan"** pada Bab V penelitian agar tidak menimbulkan pertanyaan dari penguji mengenai konsistensi antara kajian teori dan ruang lingkup pengembangan awal yang diuji.
 
 ---
 

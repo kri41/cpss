@@ -105,5 +105,8 @@ class DatabaseSeeder extends Seeder
 
         // Seed badges
         $this->call(BadgeSeeder::class);
+
+        // Seed data dummy operasional (prasarana, clubs, events, partisipasi, poin)
+        $this->call(DummyDataSeeder::class);
     }
 }
