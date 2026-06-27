@@ -3,6 +3,12 @@
 @section('title', 'Kalender Kegiatan - CPSS')
 
 @section('content')
+@php
+    $totalCells = $firstDayOfWeek - 1 + $daysInMonth;
+    $remaining = (7 - ($totalCells % 7)) % 7;
+    $rows = ($totalCells + $remaining) / 7;
+@endphp
+
 <div class="h-[calc(100vh-3.5rem)] flex flex-col overflow-hidden px-4 sm:px-6 lg:px-8 pb-4">
     <!-- Header Kalender -->
     <div class="shrink-0 bg-gray-50 border-b border-gray-200 py-3">
@@ -29,7 +35,7 @@
     </div>
 
     <!-- Calendar Grid -->
-    <div class="flex-1 bg-white border-b border-gray-200 overflow-hidden">
+    <div class="flex-1 bg-white border border-gray-200 rounded-b-xl overflow-hidden">
         <!-- Header Hari -->
         <div class="grid grid-cols-7 bg-gray-50 border-b border-gray-200">
             @foreach(['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'] as $hari)
@@ -38,17 +44,10 @@
         </div>
 
         <!-- Grid Tanggal -->
-        <div class="grid grid-cols-7 h-[calc(100%-2.25rem)]">
-            @php
-                $totalCells = $firstDayOfWeek - 1 + $daysInMonth;
-                $remaining = (7 - ($totalCells % 7)) % 7;
-                $rows = ($totalCells + $remaining) / 7;
-                $cellHeight = $rows > 0 ? 'calc(100% / ' . $rows . ')' : 'auto';
-            @endphp
-
+        <div class="grid grid-cols-7 h-[calc(100%-2.25rem)]" style="grid-template-rows: repeat({{ $rows }}, minmax(0, 1fr));">
             {{-- Empty cells sebelum tanggal 1 --}}
             @for($i = 1; $i < $firstDayOfWeek; $i++)
-                <div class="border-b border-r border-gray-100 bg-gray-50/30" style="height: {{ $cellHeight }}"></div>
+                <div class="border-b border-r border-gray-100 bg-gray-50/30 h-full"></div>
             @endfor
 
             {{-- Tanggal --}}
@@ -57,24 +56,29 @@
                     $dateKey = $currentDate->copy()->setDay($day)->format('Y-m-d');
                     $items = $calendarData[$dateKey] ?? [];
                     $isToday = $dateKey === now()->format('Y-m-d');
+                    $visibleItems = array_slice($items, 0, 3);
+                    $hiddenCount = count($items) - 3;
                 @endphp
-                <div class="border-b border-r border-gray-100 p-1.5 hover:bg-gray-50/50 transition overflow-hidden {{ $isToday ? 'bg-blue-50/40' : '' }}" style="height: {{ $cellHeight }}">
+                <div class="border-b border-r border-gray-100 p-1.5 hover:bg-gray-50/50 transition overflow-hidden h-full {{ $isToday ? 'bg-blue-50/40' : '' }}">
                     <div class="flex items-center justify-between mb-1">
-                        <span class="text-xs font-medium {{ $isToday ? 'text-blue-600 bg-blue-100 w-6 h-6 flex items-center justify-center rounded-full' : 'text-gray-700' }}">{{ $day }}</span>
+                        <span class="text-sm font-medium {{ $isToday ? 'text-blue-600 bg-blue-100 w-6 h-6 flex items-center justify-center rounded-full' : 'text-gray-700' }}">{{ $day }}</span>
                     </div>
                     <div class="space-y-0.5">
-                        @foreach($items as $item)
+                        @foreach($visibleItems as $item)
                             <a href="{{ $item['url'] ?? '#' }}" class="block px-1.5 py-0.5 rounded text-[10px] font-medium border truncate {{ $item['color'] }} hover:opacity-80 transition leading-tight" title="{{ $item['title'] }}{{ isset($item['time']) ? ' (' . $item['time'] . ')' : '' }}">
                                 {{ $item['title'] }}
                             </a>
                         @endforeach
+                        @if($hiddenCount > 0)
+                            <span class="block px-1.5 text-[10px] text-gray-400">+{{ $hiddenCount }} lainnya</span>
+                        @endif
                     </div>
                 </div>
             @endfor
 
             {{-- Empty cells setelah tanggal terakhir --}}
             @for($i = 0; $i < $remaining; $i++)
-                <div class="border-b border-r border-gray-100 bg-gray-50/30" style="height: {{ $cellHeight }}"></div>
+                <div class="border-b border-r border-gray-100 bg-gray-50/30 h-full"></div>
             @endfor
         </div>
     </div>

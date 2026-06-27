@@ -24,12 +24,14 @@ class KalenderController extends Controller
         $endOfMonth = $currentDate->copy()->endOfMonth();
 
         // Ambil event di bulan ini (hanya validated untuk publik)
-        $eventQuery = Event::whereBetween('tanggal_mulai', [$startOfMonth, $endOfMonth])
-            ->orWhereBetween('tanggal_selesai', [$startOfMonth, $endOfMonth])
-            ->orWhere(function ($q) use ($startOfMonth, $endOfMonth) {
-                $q->where('tanggal_mulai', '<=', $startOfMonth)
-                  ->where('tanggal_selesai', '>=', $endOfMonth);
-            });
+        $eventQuery = Event::where(function ($q) use ($startOfMonth, $endOfMonth) {
+            $q->whereBetween('tanggal_mulai', [$startOfMonth, $endOfMonth])
+              ->orWhereBetween('tanggal_selesai', [$startOfMonth, $endOfMonth])
+              ->orWhere(function ($q2) use ($startOfMonth, $endOfMonth) {
+                  $q2->where('tanggal_mulai', '<=', $startOfMonth)
+                     ->where('tanggal_selesai', '>=', $endOfMonth);
+              });
+        });
 
         if (!auth()->check()) {
             $eventQuery->validated();
