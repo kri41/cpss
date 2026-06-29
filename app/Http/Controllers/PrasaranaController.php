@@ -54,7 +54,7 @@ class PrasaranaController extends Controller
         $kecamatanList = (clone $filterQuery)->when($request->filled('kabupaten'), fn($q) => $q->where('kabupaten', $request->kabupaten))->distinct()->orderBy('kecamatan')->pluck('kecamatan')->filter();
         $kategoriList = (clone $filterQuery)->distinct()->orderBy('kategori_olahraga')->pluck('kategori_olahraga')->filter();
 
-        return view('prasarana.index', compact('prasarana', 'kabupatenList', 'kecamatanList', 'kategoriList'));
+        return view(auth()->check() ? 'prasarana.index-dashboard' : 'prasarana.index', compact('prasarana', 'kabupatenList', 'kecamatanList', 'kategoriList'));
     }
 
     /**
