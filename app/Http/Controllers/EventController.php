@@ -53,7 +53,9 @@ class EventController extends Controller
         $kecamatanList = (clone $filterQuery)->when($request->filled('kabupaten'), fn($q) => $q->where('kabupaten', $request->kabupaten))->distinct()->orderBy('kecamatan')->pluck('kecamatan')->filter();
         $tingkatList = ['Desa/Kelurahan', 'Kecamatan', 'Kabupaten/Kota'];
 
-        return view(auth()->check() ? 'events.index-dashboard' : 'events.index', compact('events', 'kabupatenList', 'kecamatanList', 'tingkatList'));
+        $isDashboard = request()->is('dashboard/*');
+        $view = $isDashboard ? 'events.index-dashboard' : 'events.index';
+        return view($view, compact('events', 'kabupatenList', 'kecamatanList', 'tingkatList'));
     }
 
     /**

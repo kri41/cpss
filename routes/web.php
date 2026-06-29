@@ -62,6 +62,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+    // Dashboard views (index with sidebar)
+    Route::get('/dashboard/events', [EventController::class, 'index'])->name('dashboard.events');
+    Route::get('/dashboard/prasarana', [PrasaranaController::class, 'index'])->name('dashboard.prasarana');
+    Route::get('/dashboard/clubs', [ClubController::class, 'index'])->name('dashboard.clubs');
+    Route::get('/dashboard/kalender', [KalenderController::class, 'index'])->name('dashboard.kalender');
+
     // Profile Routes
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

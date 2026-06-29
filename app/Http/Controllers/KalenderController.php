@@ -109,7 +109,9 @@ class KalenderController extends Controller
         $firstDayOfWeek = $firstDayOfWeek === 0 ? 7 : $firstDayOfWeek; // Minggu = 7
         $daysInMonth = $startOfMonth->daysInMonth;
 
-        return view(auth()->check() ? 'kalender.index-dashboard' : 'kalender.index', compact(
+        $isDashboard = request()->is('dashboard/*');
+        $view = $isDashboard ? 'kalender.index-dashboard' : 'kalender.index';
+        return view($view, compact(
             'currentDate', 'prevMonth', 'nextMonth', 'calendarData',
             'firstDayOfWeek', 'daysInMonth', 'bulan'
         ));

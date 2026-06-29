@@ -58,7 +58,9 @@ class ClubController extends Controller
         $activeClubs = (clone $query)->where('aktif', true)->count();
         $clubsWithPrasarana = (clone $query)->whereNotNull('prasarana_id')->count();
 
-        return view(auth()->check() ? 'clubs.index-dashboard' : 'clubs.index', compact('clubs', 'totalClubs', 'activeClubs', 'clubsWithPrasarana', 'kabupatenList', 'kecamatanList'));
+        $isDashboard = request()->is('dashboard/*');
+        $view = $isDashboard ? 'clubs.index-dashboard' : 'clubs.index';
+        return view($view, compact('clubs', 'totalClubs', 'activeClubs', 'clubsWithPrasarana', 'kabupatenList', 'kecamatanList'));
     }
 
     /**
