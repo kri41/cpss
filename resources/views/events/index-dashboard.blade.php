@@ -122,9 +122,9 @@
                                 @endif
                                 @if(auth()->user()->isAdmin() || auth()->user()->isRelawan())
                                     @if($event->status_validasi === 'pending')
-                                        <button @click="selected = { id: {{ $event->id }}, nama: '{{ $event->nama_event }}', action: '{{ route('events.validate', $event) }}' }; verifyOpen = true" class="p-2 rounded-lg text-emerald-600 hover:bg-emerald-50 transition-colors" title="Verifikasi"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></button>
+                                        <button @click="selected = { id: {{ $event->id }}, nama: '{{ $event->nama_event }}', tanggal: '{{ $event->tanggal_mulai->translatedFormat('d F Y') }}', selesai: '{{ $event->tanggal_selesai?->translatedFormat('d F Y') ?? '-' }}', tingkat: '{{ $event->tingkat }}', wilayah: '{{ $event->desa ?? '-' }} / {{ $event->kecamatan ?? '-' }} / {{ $event->kabupaten ?? '-' }}', status: '{{ $event->status_validasi }}', action: '{{ route('events.validate', $event) }}' }; verifyOpen = true" class="p-2 rounded-lg text-emerald-600 hover:bg-emerald-50 transition-colors" title="Verifikasi"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></button>
                                     @else
-                                        <button @click="selected = { id: {{ $event->id }}, nama: '{{ $event->nama_event }}', action: '{{ route('events.cancel-validate', $event) }}' }; unverifyOpen = true" class="p-2 rounded-lg text-red-600 hover:bg-red-50 transition-colors" title="Batalkan Verifikasi"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></button>
+                                        <button @click="selected = { id: {{ $event->id }}, nama: '{{ $event->nama_event }}', tanggal: '{{ $event->tanggal_mulai->translatedFormat('d F Y') }}', selesai: '{{ $event->tanggal_selesai?->translatedFormat('d F Y') ?? '-' }}', tingkat: '{{ $event->tingkat }}', wilayah: '{{ $event->desa ?? '-' }} / {{ $event->kecamatan ?? '-' }} / {{ $event->kabupaten ?? '-' }}', status: '{{ $event->status_validasi }}', action: '{{ route('events.cancel-validate', $event) }}' }; unverifyOpen = true" class="p-2 rounded-lg text-red-600 hover:bg-red-50 transition-colors" title="Batalkan Verifikasi"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></button>
                                     @endif
                                 @endif
                             @endauth
@@ -150,7 +150,18 @@
     <div x-show="verifyOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 backdrop-blur-sm" @click="verifyOpen = false">
         <div class="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 p-6" @click.stop>
             <h3 class="text-lg font-bold text-gray-900 mb-1">Verifikasi Event</h3>
-            <p class="text-sm text-gray-500 mb-4" x-text="selected?.nama"></p>
+            <p class="text-sm text-gray-500 mb-4">Pastikan data berikut sudah benar sebelum memverifikasi.</p>
+
+            <!-- Preview Data -->
+            <div class="bg-gray-50 rounded-lg border border-gray-200 p-4 mb-5 space-y-2 text-sm">
+                <div class="flex justify-between"><span class="text-gray-500">Nama Event</span><span class="font-semibold text-gray-900 text-right max-w-[60%]" x-text="selected?.nama"></span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Tanggal Mulai</span><span class="font-medium text-gray-900" x-text="selected?.tanggal"></span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Tanggal Selesai</span><span class="font-medium text-gray-900" x-text="selected?.selesai"></span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Tingkat</span><span class="font-medium text-gray-900" x-text="selected?.tingkat"></span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Wilayah</span><span class="font-medium text-gray-900 text-right max-w-[60%]" x-text="selected?.wilayah"></span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Status Saat Ini</span><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-700 border border-amber-100">Pending</span></div>
+            </div>
+
             <form :action="selected?.action" method="POST">
                 @csrf
                 <input type="hidden" name="_method" value="PATCH">
@@ -174,9 +185,20 @@
 
     <!-- Modal Batalkan Verifikasi -->
     <div x-show="unverifyOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 backdrop-blur-sm" @click="unverifyOpen = false">
-        <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6" @click.stop>
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 p-6" @click.stop>
             <h3 class="text-lg font-bold text-gray-900 mb-1">Batalkan Verifikasi</h3>
-            <p class="text-sm text-gray-500 mb-4" x-text="selected?.nama"></p>
+            <p class="text-sm text-gray-500 mb-4">Data yang akan dibatalkan verifikasinya:</p>
+
+            <!-- Preview Data -->
+            <div class="bg-gray-50 rounded-lg border border-gray-200 p-4 mb-5 space-y-2 text-sm">
+                <div class="flex justify-between"><span class="text-gray-500">Nama Event</span><span class="font-semibold text-gray-900 text-right max-w-[60%]" x-text="selected?.nama"></span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Tanggal Mulai</span><span class="font-medium text-gray-900" x-text="selected?.tanggal"></span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Tanggal Selesai</span><span class="font-medium text-gray-900" x-text="selected?.selesai"></span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Tingkat</span><span class="font-medium text-gray-900" x-text="selected?.tingkat"></span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Wilayah</span><span class="font-medium text-gray-900 text-right max-w-[60%]" x-text="selected?.wilayah"></span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Status Saat Ini</span><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-100">Tervalidasi</span></div>
+            </div>
+
             <form :action="selected?.action" method="POST">
                 @csrf
                 <input type="hidden" name="_method" value="PATCH">
