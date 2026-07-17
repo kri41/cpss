@@ -79,80 +79,94 @@
             select.disabled = true;
         }
 
-        function populateSelect(select, data, placeholder, selectedValue) {
+        // useKode=true  → option.value = kode (provinsi, untuk peta)
+        // useKode=false → option.value = nama (kabupaten/kecamatan/desa, untuk display)
+        // data-kode selalu berisi kode BPS untuk keperluan cascade API
+        function populateSelect(select, data, placeholder, selectedValue, useKode) {
             select.innerHTML = '<option value="">' + placeholder + '</option>';
             data.forEach(function(item) {
                 const option = document.createElement('option');
-                option.value = item.kode;
+                option.value = useKode ? item.kode : item.nama;
+                option.dataset.kode = item.kode;
                 option.textContent = item.nama;
-                if (selectedValue && String(item.id) === String(selectedValue)) {
-                    option.selected = true;
-                }
+                // Cocokkan terhadap kode DAN nama agar data lama (kode) & baru (nama) sama-sama bisa pre-select
+                const matches = selectedValue && (
+                    String(item.kode) === String(selectedValue) ||
+                    String(item.nama) === String(selectedValue)
+                );
+                if (matches) option.selected = true;
                 select.appendChild(option);
             });
             select.disabled = false;
         }
 
+        // Ambil kode dari option terpilih (disimpan di data-kode)
+        function selectedKode(select) {
+            const opt = select.options[select.selectedIndex];
+            return opt ? (opt.dataset.kode || '') : '';
+        }
+
         function loadProvinces() {
             fetch('/api/provinces')
-                .then(function(response) { return response.json(); })
+                .then(function(r) { return r.json(); })
                 .then(function(data) {
-                    populateSelect(provinsiSelect, data, 'Pilih Provinsi', provinsiSelect.dataset.selected);
+                    // Provinsi: simpan kode sebagai value (dipakai peta)
+                    populateSelect(provinsiSelect, data, 'Pilih Provinsi', provinsiSelect.dataset.selected, true);
                     if (provinsiSelect.dataset.selected) {
                         provinsiSelect.dispatchEvent(new Event('change'));
                     }
                 })
-                .catch(function(err) { console.error('Failed to load provinces:', err); });
+                .catch(function(err) { console.error('Gagal load provinsi:', err); });
         }
 
         provinsiSelect.addEventListener('change', function() {
-            const provinceId = this.value;
+            const kode = selectedKode(this) || this.value; // provinsi: value IS kode
             resetSelect(kabupatenSelect, 'Pilih Kabupaten');
             resetSelect(kecamatanSelect, 'Pilih Kecamatan');
             resetSelect(desaSelect, 'Pilih Desa');
 
-            if (provinceId) {
-                fetch('/api/kabupaten/' + provinceId)
-                    .then(function(response) { return response.json(); })
+            if (kode) {
+                fetch('/api/kabupaten/' + kode)
+                    .then(function(r) { return r.json(); })
                     .then(function(data) {
-                        populateSelect(kabupatenSelect, data, 'Pilih Kabupaten', kabupatenSelect.dataset.selected);
+                        populateSelect(kabupatenSelect, data, 'Pilih Kabupaten', kabupatenSelect.dataset.selected, false);
                         if (kabupatenSelect.dataset.selected) {
                             kabupatenSelect.dispatchEvent(new Event('change'));
                         }
                     })
-                    .catch(function(err) { console.error('Failed to load kabupaten:', err); });
+                    .catch(function(err) { console.error('Gagal load kabupaten:', err); });
             }
         });
 
         kabupatenSelect.addEventListener('change', function() {
-            const regencyId = this.value;
+            const kode = selectedKode(this);
             resetSelect(kecamatanSelect, 'Pilih Kecamatan');
             resetSelect(desaSelect, 'Pilih Desa');
 
-            if (regencyId) {
-                fetch('/api/kecamatan/' + regencyId)
-                    .then(function(response) { return response.json(); })
+            if (kode) {
+                fetch('/api/kecamatan/' + kode)
+                    .then(function(r) { return r.json(); })
                     .then(function(data) {
-                        populateSelect(kecamatanSelect, data, 'Pilih Kecamatan', kecamatanSelect.dataset.selected);
+                        populateSelect(kecamatanSelect, data, 'Pilih Kecamatan', kecamatanSelect.dataset.selected, false);
                         if (kecamatanSelect.dataset.selected) {
                             kecamatanSelect.dispatchEvent(new Event('change'));
                         }
                     })
-                    .catch(function(err) { console.error('Failed to load kecamatan:', err); });
+                    .catch(function(err) { console.error('Gagal load kecamatan:', err); });
             }
         });
 
         kecamatanSelect.addEventListener('change', function() {
-            const districtId = this.value;
+            const kode = selectedKode(this);
             resetSelect(desaSelect, 'Pilih Desa');
 
-            if (districtId) {
-                fetch('/api/desa/' + districtId)
-                    .then(function(response) { return response.json(); })
+            if (kode) {
+                fetch('/api/desa/' + kode)
+                    .then(function(r) { return r.json(); })
                     .then(function(data) {
-                        populateSelect(desaSelect, data, 'Pilih Desa', desaSelect.dataset.selected);
+                        populateSelect(desaSelect, data, 'Pilih Desa', desaSelect.dataset.selected, false);
                     })
-                    .catch(function(err) { console.error('Failed to load desa:', err); });
+                    .catch(function(err) { console.error('Gagal load desa:', err); });
             }
         });
 

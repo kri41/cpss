@@ -176,8 +176,11 @@ class PartisipasiController extends Controller
             ]);
         }
 
-        return redirect()->route('partisipasi.index')
-            ->with('success', $msg);
+        $redirect = redirect()->route('partisipasi.index')->with('success', $msg);
+        if ($tx) {
+            $redirect->with('poin_diperoleh', ['poin' => $tx->poin, 'label' => 'Partisipasi di "' . ($partisipasi->lokasi_observasi ?? '-') . '" divalidasi']);
+        }
+        return $redirect;
     }
 
     /**

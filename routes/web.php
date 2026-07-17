@@ -1,13 +1,16 @@
 <?php
 
 use App\Http\Controllers\AuditLogController;
+use App\Http\Controllers\GeoJsonController;
 use App\Http\Controllers\ClubController;
+use App\Http\Controllers\ExportController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\KalenderController;
 use App\Http\Controllers\LeaderboardController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PartisipasiController;
+use App\Http\Controllers\ProfilController;
 use App\Http\Controllers\PrasaranaController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TalentaController;
@@ -36,6 +39,7 @@ Route::get('/', function () {
    API WILAYAH
    ============================================================ */
 Route::get('/api/provinces', [WilayahController::class, 'getProvinces']);
+Route::get('/api/geojson/indonesia-provinces', [GeoJsonController::class, 'provinces']);
 Route::get('/api/kabupaten/{province_id}', [WilayahController::class, 'getKabupaten']);
 Route::get('/api/kecamatan/{regency_id}', [WilayahController::class, 'getKecamatan']);
 Route::get('/api/desa/{district_id}', [WilayahController::class, 'getDesa']);
@@ -51,6 +55,7 @@ Route::get('/clubs', [ClubController::class, 'index'])->name('clubs.index');
 Route::get('/clubs/{club}', [ClubController::class, 'show'])->name('clubs.show')->whereNumber('club');
 
 Route::get('/events', [EventController::class, 'index'])->name('events.index');
+Route::get('/events/peta', [EventController::class, 'peta'])->name('events.peta');
 Route::get('/events/{event}', [EventController::class, 'show'])->name('events.show')->whereNumber('event');
 
 Route::get('/kalender', [KalenderController::class, 'index'])->name('kalender.index');
@@ -64,6 +69,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Dashboard views (index with sidebar)
     Route::get('/dashboard/events', [EventController::class, 'index'])->name('dashboard.events');
+    Route::get('/dashboard/events/peta', [EventController::class, 'peta'])->name('dashboard.events.peta');
     Route::get('/dashboard/prasarana', [PrasaranaController::class, 'index'])->name('dashboard.prasarana');
     Route::get('/dashboard/clubs', [ClubController::class, 'index'])->name('dashboard.clubs');
     Route::get('/dashboard/kalender', [KalenderController::class, 'index'])->name('dashboard.kalender');
@@ -72,6 +78,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Profil Relawan
+    Route::get('/profil', [ProfilController::class, 'index'])->name('profil.index');
 
     // Leaderboard & Gamification (All authenticated users)
     Route::get('/leaderboard', [LeaderboardController::class, 'index'])->name('leaderboard.index');
@@ -128,6 +137,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Audit Log Routes (Admin & Super Admin)
     Route::middleware(['App\Http\Middleware\CheckRole:admin'])->group(function () {
         Route::get('/audit-logs', [AuditLogController::class, 'index'])->name('audit-logs.index');
+    });
+
+    // Export Routes (Admin & Super Admin)
+    Route::middleware(['App\Http\Middleware\CheckRole:admin'])->prefix('export')->name('export.')->group(function () {
+        Route::get('/prasarana',   [ExportController::class, 'prasarana'])->name('prasarana');
+        Route::get('/clubs',       [ExportController::class, 'clubs'])->name('clubs');
+        Route::get('/events',      [ExportController::class, 'events'])->name('events');
+        Route::get('/partisipasi', [ExportController::class, 'partisipasi'])->name('partisipasi');
+        Route::get('/leaderboard', [ExportController::class, 'leaderboard'])->name('leaderboard');
     });
 
     // Daftar Relawan (All authenticated users)

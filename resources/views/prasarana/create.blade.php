@@ -137,10 +137,31 @@
                         </div>
 
                         <!-- Foto -->
-                        <div>
-                            <label for="foto" class="block text-sm font-medium text-slate-700">Foto Fasilitas</label>
-                            <input id="foto" type="file" name="foto" accept="image/*" class="mt-1 block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-sky-50 file:text-sky-700 hover:file:bg-sky-100" />
-                            @error('foto')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                        <div x-data="fotoUpload()" class="space-y-3">
+                            <div>
+                                <label for="foto" class="block text-sm font-medium text-slate-700">Foto Utama Fasilitas</label>
+                                <input id="foto" type="file" name="foto" accept="image/*"
+                                    @change="previewUtama($event)"
+                                    class="mt-1 block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-sky-50 file:text-sky-700 hover:file:bg-sky-100" />
+                                @error('foto')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                                <template x-if="previewUrlUtama">
+                                    <img :src="previewUrlUtama" alt="" class="mt-2 h-32 w-full object-cover rounded-lg border border-slate-200">
+                                </template>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700">
+                                    Foto Tambahan <span class="text-slate-400 font-normal">(Maks 4 foto, tiap foto maks 2MB)</span>
+                                </label>
+                                <input type="file" name="foto_tambahan[]" accept="image/*" multiple
+                                    @change="previewTambahan($event)"
+                                    class="mt-1 block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-slate-50 file:text-slate-700 hover:file:bg-slate-100" />
+                                @error('foto_tambahan.*')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                                <div class="flex flex-wrap gap-2 mt-2">
+                                    <template x-for="(url, i) in previewUrlsTambahan" :key="i">
+                                        <img :src="url" alt="" class="h-20 w-20 object-cover rounded-lg border border-slate-200">
+                                    </template>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
@@ -154,6 +175,21 @@
     </div>
 
     @push('scripts')
+    <script>
+    function fotoUpload() {
+        return {
+            previewUrlUtama: null,
+            previewUrlsTambahan: [],
+            previewUtama(e) {
+                const file = e.target.files[0];
+                if (file) this.previewUrlUtama = URL.createObjectURL(file);
+            },
+            previewTambahan(e) {
+                this.previewUrlsTambahan = Array.from(e.target.files).slice(0, 4).map(f => URL.createObjectURL(f));
+            }
+        }
+    }
+    </script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {

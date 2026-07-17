@@ -4,7 +4,15 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
-        <title>@yield('title', config('app.name', 'CPSS')) - Kolaborasi Olahraga Daerah</title>
+        <title>@yield('title', config('app.name', 'Dataraga')) — Mencatat Gerak, Membangun Bangsa</title>
+        <link rel="icon" href="/storage/logo.png" type="image/png">
+        <link rel="apple-touch-icon" href="/storage/logo.png">
+        <link rel="manifest" href="/manifest.json">
+        <meta name="theme-color" content="#2563eb">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="default">
+        <meta name="apple-mobile-web-app-title" content="Dataraga">
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=inter:300,400,500,600,700&display=swap" rel="stylesheet" />
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -27,12 +35,10 @@
                 <!-- Logo Area -->
                 <div class="p-5 border-b border-gray-100">
                     <a href="{{ route('dashboard') }}" class="flex items-center space-x-3">
-                        <div class="w-9 h-9 bg-gradient-to-br from-blue-600 to-sky-500 rounded-lg flex items-center justify-center shadow-sm">
-                            <span class="text-white font-bold text-sm">C</span>
-                        </div>
+                        <img src="/storage/logo.png" alt="Dataraga" class="h-10 w-10 object-contain">
                         <div>
-                            <h1 class="text-lg font-bold text-gray-900 tracking-tight">CPSS</h1>
-                            <p class="text-[10px] text-gray-400 font-medium">Kolaborasi Olahraga</p>
+                            <h1 class="text-lg font-bold text-gray-900 tracking-tight">Dataraga</h1>
+                            <p class="text-[10px] text-gray-400 font-medium">Mencatat Gerak</p>
                         </div>
                     </a>
                 </div>
@@ -72,9 +78,10 @@
                         @endauth
                     </a>
 
-                    <a href="{{ route('dashboard.events') }}" class="flex items-center justify-between px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 {{ request()->routeIs('dashboard.events','events.*') ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                    @php $eventsActive = request()->routeIs('dashboard.events') || (request()->routeIs('events.*') && !request()->routeIs('events.peta')); @endphp
+                    <a href="{{ route('dashboard.events') }}" class="flex items-center justify-between px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 {{ $eventsActive ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
                         <span class="flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 {{ request()->routeIs('dashboard.events','events.*') ? 'text-blue-600' : 'text-gray-400' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 {{ $eventsActive ? 'text-blue-600' : 'text-gray-400' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                             Events
                         </span>
                         @auth
@@ -83,6 +90,12 @@
                                 <span class="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">{{ $pendingEvents }}</span>
                             @endif
                         @endauth
+                    </a>
+
+                    @php $petaActive = request()->routeIs('dashboard.events.peta', 'events.peta'); @endphp
+                    <a href="{{ route('dashboard.events.peta') }}" class="flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 {{ $petaActive ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 {{ $petaActive ? 'text-blue-600' : 'text-gray-400' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
+                        Peta Event
                     </a>
 
                     <a href="{{ route('dashboard.kalender') }}" class="flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 {{ request()->routeIs('dashboard.kalender','kalender.*') ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
@@ -159,8 +172,9 @@
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
                         </button>
                         <div x-show="dropdownOpen.profile" @click.away="dropdownOpen.profile = false" x-transition x-cloak class="absolute bottom-full left-0 right-0 mb-2 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden">
+                            <a href="{{ route('profil.index') }}" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">Profil Saya</a>
                             <a href="{{ route('leaderboard.my-points') }}" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">Poin & Lencana Saya</a>
-                            <a href="{{ route('profile.edit') }}" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">Profile</a>
+                            <a href="{{ route('profile.edit') }}" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">Pengaturan Akun</a>
                             <form method="POST" action="{{ route('logout') }}">@csrf<button type="submit" class="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50">Log Out</button></form>
                         </div>
                     </div>
@@ -180,7 +194,7 @@
                         <button @click="sidebarOpen = !sidebarOpen" class="p-2 rounded-lg text-gray-600 hover:bg-gray-100">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
                         </button>
-                        <span class="text-lg font-bold text-gray-800">CPSS</span>
+                        <img src="/storage/logo.png" alt="Dataraga" class="h-8 object-contain">
                         <div class="w-8"></div>
                     </div>
                 </header>
@@ -242,5 +256,14 @@
             </div>
         </div>
         @stack('scripts')
+        <x-poin-toast />
+        <x-pwa-install />
+        <script>
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('/sw.js').catch(() => {});
+                });
+            }
+        </script>
     </body>
 </html>

@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title', $event->nama_event . ' - CPSS')
+@section('title', $event->nama_event . ' - Dataraga')
 
 @section('content')
 <div class="min-h-[calc(100vh-3.5rem)] bg-gray-50">
@@ -79,13 +79,39 @@
                                 <p class="font-semibold text-gray-900">{{ $event->tanggal_selesai?->translatedFormat('d F Y') ?? '-' }}</p>
                             </div>
                         </div>
-                        <div class="flex items-start gap-3">
+                        <div class="flex items-start gap-3 sm:col-span-2">
                             <div class="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                             </div>
-                            <div>
-                                <p class="text-xs text-gray-500">Wilayah</p>
-                                <p class="font-semibold text-gray-900">{{ $event->desa ?? '-' }} / {{ $event->kecamatan ?? '-' }} / {{ $event->kabupaten ?? '-' }}</p>
+                            <div class="flex-1">
+                                <p class="text-xs text-gray-500 mb-2">Lokasi Kegiatan</p>
+                                @php
+                                    $levels = [
+                                        ['label' => 'Provinsi',   'kode' => $event->provinsi],
+                                        ['label' => 'Kabupaten',  'kode' => $event->kabupaten],
+                                        ['label' => 'Kecamatan',  'kode' => $event->kecamatan],
+                                        ['label' => 'Desa/Kel.',  'kode' => $event->desa],
+                                    ];
+                                    $hasLokasi = collect($levels)->filter(fn($l) => $l['kode'])->isNotEmpty();
+                                @endphp
+                                @if($hasLokasi)
+                                <div class="flex flex-wrap items-center gap-1">
+                                    @foreach($levels as $i => $level)
+                                        @if($level['kode'])
+                                            @php $nama = $wilayahNama[$level['kode']] ?? $level['kode']; @endphp
+                                            @if($i > 0)
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                                            @endif
+                                            <span class="inline-flex flex-col">
+                                                <span class="text-[9px] text-gray-400 leading-none">{{ $level['label'] }}</span>
+                                                <span class="font-semibold text-gray-900 text-sm leading-tight">{{ $nama }}</span>
+                                            </span>
+                                        @endif
+                                    @endforeach
+                                </div>
+                                @else
+                                    <p class="font-semibold text-gray-400">Lokasi belum diisi</p>
+                                @endif
                             </div>
                         </div>
                         <div class="flex items-start gap-3">

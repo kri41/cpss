@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Kalender Kegiatan - CPSS')
+@section('title', 'Kalender Kegiatan - Dataraga')
 
 @section('content')
 @php

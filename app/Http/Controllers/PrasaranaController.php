@@ -98,6 +98,8 @@ class PrasaranaController extends Controller
             'fasilitas_ruang_ganti' => 'boolean',
             'fasilitas_tribun' => 'boolean',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'foto_tambahan' => 'nullable|array|max:4',
+            'foto_tambahan.*' => 'image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
         $validated['user_id'] = auth()->id();
@@ -107,18 +109,27 @@ class PrasaranaController extends Controller
         $validated['fasilitas_ruang_ganti'] = $request->boolean('fasilitas_ruang_ganti', false);
         $validated['fasilitas_tribun'] = $request->boolean('fasilitas_tribun', false);
 
-        // Handle file upload
+        // Handle foto utama
         if ($request->hasFile('foto')) {
             $path = $request->file('foto')->store('prasarana', 'public');
             $validated['foto_path'] = $path;
         }
+
+        // Handle foto tambahan (maks 4 foto)
+        $fotoPaths = [];
+        if ($request->hasFile('foto_tambahan')) {
+            foreach ($request->file('foto_tambahan') as $file) {
+                $fotoPaths[] = $file->store('prasarana', 'public');
+            }
+        }
+        $validated['foto_tambahan'] = !empty($fotoPaths) ? $fotoPaths : null;
 
         $prasarana = Prasarana::create($validated);
 
         // Audit Log
         AuditLogger::logCreate('prasarana', $prasarana->id, $validated);
 
-        return redirect()->route('prasarana.index')
+        return redirect()->route('dashboard.prasarana')
             ->with('success', 'Data prasarana berhasil ditambahkan. Menunggu validasi admin untuk kredit poin.');
     }
 
@@ -177,6 +188,10 @@ class PrasaranaController extends Controller
             'fasilitas_ruang_ganti' => 'boolean',
             'fasilitas_tribun' => 'boolean',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'foto_tambahan' => 'nullable|array|max:4',
+            'foto_tambahan.*' => 'image|mimes:jpeg,png,jpg|max:2048',
+            'hapus_foto_tambahan' => 'nullable|array',
+            'hapus_foto_tambahan.*' => 'nullable|string',
         ]);
 
         $validated['akses_disabilitas'] = $request->boolean('akses_disabilitas', false);
@@ -188,9 +203,8 @@ class PrasaranaController extends Controller
         // Simpan data lama untuk audit log
         $oldData = $prasarana->toArray();
 
-        // Handle file upload
+        // Handle foto utama
         if ($request->hasFile('foto')) {
-            // Hapus foto lama jika ada
             if ($prasarana->foto_path) {
                 Storage::disk('public')->delete($prasarana->foto_path);
             }
@@ -198,12 +212,29 @@ class PrasaranaController extends Controller
             $validated['foto_path'] = $path;
         }
 
+        // Handle hapus foto tambahan yang dipilih
+        $existingFoto = $prasarana->foto_tambahan ?? [];
+        $toDelete = $request->input('hapus_foto_tambahan', []);
+        foreach ($toDelete as $path) {
+            Storage::disk('public')->delete($path);
+            $existingFoto = array_values(array_filter($existingFoto, fn($p) => $p !== $path));
+        }
+
+        // Handle upload foto tambahan baru
+        if ($request->hasFile('foto_tambahan')) {
+            $sisa = 4 - count($existingFoto);
+            foreach (array_slice($request->file('foto_tambahan'), 0, $sisa) as $file) {
+                $existingFoto[] = $file->store('prasarana', 'public');
+            }
+        }
+        $validated['foto_tambahan'] = !empty($existingFoto) ? array_values($existingFoto) : null;
+
         $prasarana->update($validated);
 
         // Audit Log
         AuditLogger::logUpdate('prasarana', $prasarana->id, $oldData, $prasarana->fresh()->toArray());
 
-        return redirect()->route('prasarana.index')
+        return redirect()->route('dashboard.prasarana')
             ->with('success', 'Data prasarana berhasil diperbarui.');
     }
 
@@ -229,7 +260,7 @@ class PrasaranaController extends Controller
         // Audit Log
         AuditLogger::logDelete('prasarana', $prasarana->id, $oldData);
 
-        return redirect()->route('prasarana.index')
+        return redirect()->route('dashboard.prasarana')
             ->with('success', 'Data prasarana berhasil dihapus.');
     }
 
@@ -270,8 +301,12 @@ class PrasaranaController extends Controller
             ]);
         }
 
-        return redirect()->route('prasarana.index')
-            ->with('success', $msg);
+        $redirect = redirect()->route('dashboard.prasarana')->with('success', $msg);
+        if ($tx) {
+            $label = $tx->jenis_aksi === 'baru' ? 'Prasarana baru "' . $prasarana->nama_fasilitas . '" divalidasi' : 'Update prasarana "' . $prasarana->nama_fasilitas . '" divalidasi';
+            $redirect->with('poin_diperoleh', ['poin' => $tx->poin, 'label' => $label]);
+        }
+        return $redirect;
     }
 
     /**
@@ -298,7 +333,8 @@ class PrasaranaController extends Controller
             GamificationService::batalkanPoin($tx->id, auth()->id(), 'Validasi dibatalkan oleh Super Admin');
         }
 
-        return redirect()->route('prasarana.index')
+        return redirect()->route('dashboard.prasarana')
             ->with('success', 'Validasi prasarana dibatalkan. Poin relawan telah ditarik.');
     }
 }
+

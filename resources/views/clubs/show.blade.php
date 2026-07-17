@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title', $club->nama_club . ' - CPSS')
+@section('title', $club->nama_club . ' - Dataraga')
 
 @section('content')
 <div class="min-h-[calc(100vh-3.5rem)] bg-gray-50">

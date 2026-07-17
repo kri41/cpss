@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title', 'Prasarana Olahraga - CPSS')
+@section('title', 'Prasarana Olahraga - Dataraga')
 
 @section('content')
 <!-- Sticky Stats & Filter Bar -->

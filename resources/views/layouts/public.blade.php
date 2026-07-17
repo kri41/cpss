@@ -4,7 +4,14 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', config('app.name', 'CPSS'))</title>
+    <title>@yield('title', config('app.name', 'Dataraga'))</title>
+    <link rel="icon" href="/storage/logo.png" type="image/png">
+    <link rel="apple-touch-icon" href="/storage/logo.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Dataraga">
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:300,400,500,600,700&display=swap" rel="stylesheet" />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -20,14 +27,15 @@
             <div class="flex justify-between items-center h-14">
                 <!-- Logo -->
                 <a href="{{ url('/') }}" class="flex items-center gap-2.5">
-                    <div class="w-8 h-8 bg-gradient-to-br from-blue-600 to-sky-400 rounded-lg shadow-sm flex items-center justify-center text-white font-bold text-sm">C</div>
-                    <span class="font-bold text-lg text-gray-900 tracking-tight">CPSS</span>
+                    <img src="/storage/logo.png" alt="Dataraga" class="h-9 w-9 object-contain">
+                    <span class="font-bold text-lg text-gray-900 tracking-tight">Dataraga</span>
                 </a>
 
                 <!-- Desktop Menu -->
                 <div class="hidden md:flex items-center space-x-1">
                     <a href="{{ route('prasarana.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg transition {{ request()->routeIs('prasarana.*') ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50/50' }}">Prasarana</a>
-                    <a href="{{ route('events.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg transition {{ request()->routeIs('events.*') ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50/50' }}">Event</a>
+                    <a href="{{ route('events.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg transition {{ request()->routeIs('events.index') ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50/50' }}">Event</a>
+                    <a href="{{ route('events.peta') }}" class="px-3 py-2 text-sm font-medium rounded-lg transition {{ request()->routeIs('events.peta') ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50/50' }}">Peta Event</a>
                     <a href="{{ route('clubs.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg transition {{ request()->routeIs('clubs.*') ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50/50' }}">Klub</a>
                     <a href="{{ route('kalender.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg transition {{ request()->routeIs('kalender.*') ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50/50' }}">Kalender</a>
                 </div>
@@ -54,7 +62,8 @@
         <div x-show="mobileMenu" @click.away="mobileMenu = false" x-cloak x-transition class="md:hidden bg-white border-t border-gray-100 shadow-lg">
             <div class="px-4 py-3 space-y-1">
                 <a href="{{ route('prasarana.index') }}" class="block px-4 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('prasarana.*') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-blue-50' }}">Prasarana</a>
-                <a href="{{ route('events.index') }}" class="block px-4 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('events.*') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-blue-50' }}">Event</a>
+                <a href="{{ route('events.index') }}" class="block px-4 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('events.index') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-blue-50' }}">Event</a>
+                <a href="{{ route('events.peta') }}" class="block px-4 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('events.peta') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-blue-50' }}">Peta Event</a>
                 <a href="{{ route('clubs.index') }}" class="block px-4 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('clubs.*') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-blue-50' }}">Klub</a>
                 <a href="{{ route('kalender.index') }}" class="block px-4 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('kalender.*') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-blue-50' }}">Kalender</a>
                 <div class="pt-2 border-t border-gray-100">
@@ -75,5 +84,13 @@
     </main>
 
     @stack('scripts')
+    <x-pwa-install />
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').catch(() => {});
+            });
+        }
+    </script>
 </body>
 </html>

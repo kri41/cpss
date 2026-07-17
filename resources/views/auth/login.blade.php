@@ -4,7 +4,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Log In - CPSS Dispora</title>
+    <title>Log In - Dataraga</title>
+    <link rel="icon" href="/storage/logo.png" type="image/png">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -41,9 +42,7 @@
     <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-md overflow-hidden relative z-10 p-8">
 
         <div class="text-center mb-8">
-            <div
-                class="w-16 h-16 bg-gradient-to-tr from-teal-400 to-emerald-300 rounded-2xl shadow-lg flex items-center justify-center text-white font-bold text-3xl mx-auto mb-4">
-                C</div>
+            <img src="/storage/logo.png" alt="Dataraga" class="w-24 h-24 object-contain mx-auto mb-4">
             <h3 class="text-2xl font-black text-indigo-900 mb-2">Log In Relawan</h3>
             <p class="text-gray-500 text-sm">Sesi Anda telah diatur ulang. Silakan masuk kembali.</p>
         </div>

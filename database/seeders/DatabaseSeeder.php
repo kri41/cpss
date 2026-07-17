@@ -17,12 +17,12 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // ============================================================
-        // AKUN DUMMY - FASE 1 PROTOTIPE CPSS
+        // AKUN DUMMY - FASE 1 PROTOTIPE DATARAGA
         // ============================================================
 
         // 1. Super Admin
         User::create([
-            'name' => 'Super Admin CPSS',
+            'name' => 'Super Admin Dataraga',
             'email' => 'superadmin@cpss.test',
             'password' => Hash::make('password'),
             'role' => 'super_admin',

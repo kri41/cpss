@@ -1,6 +1,6 @@
 ﻿@extends('layouts.public')
 
-@section('title', 'Klub Olahraga - CPSS')
+@section('title', 'Klub Olahraga - Dataraga')
 
 @section('content')
 @php

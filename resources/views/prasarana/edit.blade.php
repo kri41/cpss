@@ -141,16 +141,56 @@
                         </div>
 
                         <!-- Foto -->
-                        <div>
-                            <label for="foto" class="block text-sm font-medium text-slate-700">Foto Fasilitas</label>
-                            @if($prasarana->foto_path)
-                                <div class="mt-2 mb-2">
-                                    <img src="{{ Storage::url($prasarana->foto_path) }}" alt="Foto {{ $prasarana->nama_fasilitas }}" class="h-32 object-cover rounded-lg">
+                        <div x-data="fotoUpload()" class="space-y-4">
+                            <div>
+                                <label for="foto" class="block text-sm font-medium text-slate-700">Foto Utama Fasilitas</label>
+                                @if($prasarana->foto_path)
+                                    <div class="mt-2 mb-2">
+                                        <img src="{{ Storage::url($prasarana->foto_path) }}" alt="Foto Utama" class="h-32 object-cover rounded-lg border border-slate-200">
+                                    </div>
+                                @endif
+                                <input id="foto" type="file" name="foto" accept="image/*"
+                                    @change="previewUtama($event)"
+                                    class="mt-1 block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-sky-50 file:text-sky-700 hover:file:bg-sky-100" />
+                                <p class="text-xs text-slate-500 mt-1">Kosongkan jika tidak ingin mengubah foto utama</p>
+                                @error('foto')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                                <template x-if="previewUrlUtama">
+                                    <img :src="previewUrlUtama" alt="" class="mt-2 h-32 w-full object-cover rounded-lg border border-slate-200">
+                                </template>
+                            </div>
+
+                            @if($prasarana->foto_tambahan && count($prasarana->foto_tambahan) > 0)
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-2">Foto Tambahan Saat Ini</label>
+                                <div class="flex flex-wrap gap-2">
+                                    @foreach($prasarana->foto_tambahan as $fotoPath)
+                                    <div class="relative group">
+                                        <img src="{{ Storage::url($fotoPath) }}" alt="" class="h-20 w-20 object-cover rounded-lg border border-slate-200">
+                                        <label class="absolute inset-0 flex items-center justify-center bg-red-500/70 opacity-0 group-hover:opacity-100 rounded-lg cursor-pointer transition">
+                                            <input type="checkbox" name="hapus_foto_tambahan[]" value="{{ $fotoPath }}" class="sr-only" @change="$el.closest('.relative').classList.toggle('opacity-50', $el.checked)">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                        </label>
+                                    </div>
+                                    @endforeach
                                 </div>
+                                <p class="text-xs text-slate-400 mt-1">Hover foto dan centang ikon hapus untuk menghapus</p>
+                            </div>
                             @endif
-                            <input id="foto" type="file" name="foto" accept="image/*" class="mt-1 block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-sky-50 file:text-sky-700 hover:file:bg-sky-100" />
-                            <p class="text-xs text-slate-500 mt-1">Kosongkan jika tidak ingin mengubah foto</p>
-                            @error('foto')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700">
+                                    Tambah Foto Baru <span class="text-slate-400 font-normal">(Maks 4 foto total, tiap foto maks 2MB)</span>
+                                </label>
+                                <input type="file" name="foto_tambahan[]" accept="image/*" multiple
+                                    @change="previewTambahan($event)"
+                                    class="mt-1 block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-slate-50 file:text-slate-700 hover:file:bg-slate-100" />
+                                @error('foto_tambahan.*')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                                <div class="flex flex-wrap gap-2 mt-2">
+                                    <template x-for="(url, i) in previewUrlsTambahan" :key="i">
+                                        <img :src="url" alt="" class="h-20 w-20 object-cover rounded-lg border border-slate-200">
+                                    </template>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
@@ -164,6 +204,21 @@
     </div>
 
     @push('scripts')
+    <script>
+    function fotoUpload() {
+        return {
+            previewUrlUtama: null,
+            previewUrlsTambahan: [],
+            previewUtama(e) {
+                const file = e.target.files[0];
+                if (file) this.previewUrlUtama = URL.createObjectURL(file);
+            },
+            previewTambahan(e) {
+                this.previewUrlsTambahan = Array.from(e.target.files).slice(0, 4).map(f => URL.createObjectURL(f));
+            }
+        }
+    }
+    </script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {

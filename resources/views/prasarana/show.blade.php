@@ -1,6 +1,6 @@
 ﻿@extends('layouts.public')
 
-@section('title', $prasarana->nama_fasilitas . ' - CPSS')
+@section('title', $prasarana->nama_fasilitas . ' - Dataraga')
 
 @push('styles')
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
@@ -54,11 +54,47 @@
     <!-- Content -->
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         <!-- Foto -->
-        @if($prasarana->foto_path)
-        <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-            <div class="w-full h-64 sm:h-96 bg-gray-100">
-                <img src="{{ Storage::url($prasarana->foto_path) }}" alt="Foto {{ $prasarana->nama_fasilitas }}" class="w-full h-full object-cover">
+        @php
+            $semuaFoto = [];
+            if ($prasarana->foto_path) $semuaFoto[] = Storage::url($prasarana->foto_path);
+            foreach ($prasarana->foto_tambahan ?? [] as $fp) {
+                $semuaFoto[] = Storage::url($fp);
+            }
+        @endphp
+        @if(count($semuaFoto) > 0)
+        <div x-data="{ aktif: 0 }" class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+            <div class="relative w-full bg-gray-100">
+                <template x-for="(url, i) in {{ json_encode($semuaFoto) }}" :key="i">
+                    <img :src="url" :alt="'Foto ' + (i+1)" x-show="aktif === i"
+                         class="w-full h-64 sm:h-96 object-cover transition-opacity duration-300">
+                </template>
+                @if(count($semuaFoto) > 1)
+                <button @click="aktif = (aktif - 1 + {{ count($semuaFoto) }}) % {{ count($semuaFoto) }}"
+                        class="absolute left-3 top-1/2 -translate-y-1/2 p-2 bg-black/40 hover:bg-black/60 text-white rounded-full transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                </button>
+                <button @click="aktif = (aktif + 1) % {{ count($semuaFoto) }}"
+                        class="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-black/40 hover:bg-black/60 text-white rounded-full transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </button>
+                <div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+                    @for($i = 0; $i < count($semuaFoto); $i++)
+                    <button @click="aktif = {{ $i }}"
+                            :class="aktif === {{ $i }} ? 'bg-white' : 'bg-white/40'"
+                            class="w-2 h-2 rounded-full transition-colors"></button>
+                    @endfor
+                </div>
+                @endif
             </div>
+            @if(count($semuaFoto) > 1)
+            <div class="flex gap-2 p-3 overflow-x-auto">
+                @foreach($semuaFoto as $i => $url)
+                <img src="{{ $url }}" alt="" @click="aktif = {{ $i }}"
+                     :class="aktif === {{ $i }} ? 'ring-2 ring-blue-500' : 'opacity-60'"
+                     class="h-14 w-14 object-cover rounded-lg cursor-pointer shrink-0 transition hover:opacity-100">
+                @endforeach
+            </div>
+            @endif
         </div>
         @endif
 

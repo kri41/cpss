@@ -109,7 +109,7 @@ class ClubController extends Controller
             $this->createJadwal($club, $request->jadwal);
         }
 
-        return redirect()->route('clubs.index')
+        return redirect()->route('dashboard.clubs')
             ->with('success', 'Club berhasil didaftarkan. Menunggu validasi admin untuk kredit poin.');
     }
 
@@ -212,7 +212,7 @@ class ClubController extends Controller
 
         $club->delete();
 
-        return redirect()->route('clubs.index')
+        return redirect()->route('dashboard.clubs')
             ->with('success', 'Club berhasil dihapus.');
     }
 
@@ -252,8 +252,12 @@ class ClubController extends Controller
             ]);
         }
 
-        return redirect()->route('clubs.index')
-            ->with('success', $msg);
+        $redirect = redirect()->route('dashboard.clubs')->with('success', $msg);
+        if ($tx) {
+            $label = $tx->jenis_aksi === 'baru' ? 'Klub baru "' . $club->nama_club . '" divalidasi' : 'Update klub "' . $club->nama_club . '" divalidasi';
+            $redirect->with('poin_diperoleh', ['poin' => $tx->poin, 'label' => $label]);
+        }
+        return $redirect;
     }
 
     /**
@@ -279,7 +283,7 @@ class ClubController extends Controller
             GamificationService::batalkanPoin($tx->id, auth()->id(), 'Validasi dibatalkan oleh Super Admin');
         }
 
-        return redirect()->route('clubs.index')
+        return redirect()->route('dashboard.clubs')
             ->with('success', 'Validasi club dibatalkan. Poin relawan telah ditarik.');
     }
 
@@ -302,3 +306,4 @@ class ClubController extends Controller
         }
     }
 }
+

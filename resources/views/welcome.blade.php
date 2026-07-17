@@ -3,7 +3,14 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>CPSS - Kolaborasi Olahraga Daerah</title>
+    <title>Dataraga — Mencatat Gerak, Membangun Bangsa</title>
+    <link rel="icon" href="/storage/logo.png" type="image/png">
+    <link rel="apple-touch-icon" href="/storage/logo.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Dataraga">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -24,8 +31,8 @@
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between items-center h-14">
                     <a href="{{ url('/') }}" class="flex items-center gap-2.5">
-                        <div class="w-8 h-8 bg-gradient-to-br from-blue-600 to-sky-400 rounded-lg shadow-sm flex items-center justify-center text-white font-bold text-sm">C</div>
-                        <span class="font-bold text-lg text-gray-900 tracking-tight">CPSS</span>
+                        <img src="/storage/logo.png" alt="Dataraga" class="h-9 w-9 object-contain">
+                        <span class="font-bold text-lg text-gray-900 tracking-tight">Dataraga</span>
                     </a>
                     <div class="flex items-center space-x-2">
                         @guest
@@ -146,12 +153,12 @@
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex flex-col sm:flex-row justify-between items-center gap-2">
                     <div class="flex items-center gap-2">
-                        <div class="w-6 h-6 bg-gradient-to-br from-blue-500 to-sky-400 rounded-md flex items-center justify-center text-white font-bold text-[10px]">C</div>
-                        <span class="text-white font-semibold text-sm">CPSS</span>
+                        <img src="/storage/logo.png" alt="Dataraga" class="h-6 w-6 object-contain brightness-0 invert">
+                        <span class="text-white font-semibold text-sm">Dataraga</span>
                         <span class="hidden sm:inline text-gray-500 text-xs">|</span>
-                        <span class="text-xs text-gray-500 hidden sm:inline">Platform Kolaborasi Keolahragaan Daerah</span>
+                        <span class="text-xs text-gray-500 hidden sm:inline">Mencatat Gerak, Membangun Bangsa</span>
                     </div>
-                    <p class="text-xs text-center sm:text-right">&copy; {{ date('Y') }} Cloud-Participatory Sport Sensing</p>
+                    <p class="text-xs text-center sm:text-right">&copy; {{ date('Y') }} Dataraga — Mencatat Gerak, Membangun Bangsa</p>
                 </div>
             </div>
         </footer>
@@ -162,7 +169,7 @@
         <div x-show="modal === 'login'" @click.away="modal = ''" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-95 translate-y-4" x-transition:enter-end="opacity-100 scale-100 translate-y-0" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 scale-100 translate-y-0" x-transition:leave-end="opacity-0 scale-95 translate-y-4" class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden relative">
             <button @click="modal = ''" class="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition text-xl w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center"><i class="fas fa-times"></i></button>
             <div class="p-8">
-                <h3 class="text-2xl font-bold text-gray-900 mb-2">Masuk ke CPSS</h3>
+                <h3 class="text-2xl font-bold text-gray-900 mb-2">Masuk ke Dataraga</h3>
                 <p class="text-gray-500 text-sm mb-6">Silakan masuk untuk mulai memetakan data olahraga.</p>
                 @if ($errors->any() && !old('name'))
                     <div class="mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm border border-red-200">Email atau kata sandi tidak sesuai.</div>
@@ -195,7 +202,7 @@
         <div x-show="modal === 'register'" @click.away="modal = ''" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-95 translate-y-4" x-transition:enter-end="opacity-100 scale-100 translate-y-0" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 scale-100 translate-y-0" x-transition:leave-end="opacity-0 scale-95 translate-y-4" class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden relative max-h-[90vh] overflow-y-auto">
             <button @click="modal = ''" class="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition text-xl w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center"><i class="fas fa-times"></i></button>
             <div class="p-8">
-                <h3 class="text-2xl font-bold text-gray-900 mb-2">Daftar Relawan CPSS</h3>
+                <h3 class="text-2xl font-bold text-gray-900 mb-2">Daftar Relawan Dataraga</h3>
                 <p class="text-gray-500 text-sm mb-6">Bergabunglah menjadi penggerak olahraga daerah.</p>
                 @if ($errors->any() && old('name'))
                     <div class="mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm border border-red-200">Mohon periksa kembali isian Anda.</div>
@@ -237,5 +244,13 @@
         </div>
     </div>
 
+    <x-pwa-install />
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').catch(() => {});
+            });
+        }
+    </script>
 </body>
 </html>

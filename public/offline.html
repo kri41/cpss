@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tidak Ada Koneksi — Dataraga</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: Inter, system-ui, -apple-system, sans-serif;
+            background: #f9fafb;
+            color: #374151;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 24px;
+        }
+        .card {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            padding: 48px 40px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+        .icon { font-size: 64px; margin-bottom: 16px; }
+        h1 { font-size: 20px; font-weight: 700; color: #111827; margin-bottom: 8px; }
+        p { font-size: 14px; color: #6b7280; line-height: 1.6; margin-bottom: 24px; }
+        button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #2563eb;
+            color: #fff;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button:hover { background: #1d4ed8; }
+        .brand { margin-top: 32px; font-size: 12px; color: #9ca3af; }
+        .brand span { font-weight: 700; color: #6b7280; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="icon">📡</div>
+        <h1>Tidak Ada Koneksi Internet</h1>
+        <p>Perangkat kamu sedang offline. Halaman yang pernah dikunjungi mungkin masih bisa diakses. Coba periksa koneksi lalu muat ulang.</p>
+        <button onclick="window.location.reload()">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+            Coba Lagi
+        </button>
+        <div class="brand"><span>Dataraga</span> — Mencatat Gerak, Membangun Bangsa</div>
+    </div>
+</body>
+</html>

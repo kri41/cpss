@@ -8,6 +8,7 @@ use App\Models\PointTransaction;
 use App\Models\UserNotification;
 use App\Services\GamificationService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 
@@ -80,6 +81,7 @@ class EventController extends Controller
             'desa' => 'nullable|string|max:255',
             'kecamatan' => 'nullable|string|max:255',
             'kabupaten' => 'nullable|string|max:255',
+            'provinsi' => 'nullable|string|max:20',
         ]);
 
         $validated['user_id'] = auth()->id();
@@ -89,7 +91,7 @@ class EventController extends Controller
         // Audit Log
         AuditLogger::logCreate('events', $event->id, $validated);
 
-        return redirect()->route('events.index')
+        return redirect()->route('dashboard.events')
             ->with('success', 'Data event berhasil ditambahkan. Menunggu validasi admin untuk kredit poin.');
     }
 
@@ -98,7 +100,19 @@ class EventController extends Controller
      */
     public function show(Event $event): View
     {
-        return view('events.show', compact('event'));
+        // Resolve kode BPS → nama wilayah (satu query untuk semua level)
+        $kodes = array_filter([
+            $event->provinsi,
+            $event->kabupaten,
+            $event->kecamatan,
+            $event->desa,
+        ]);
+
+        $wilayahNama = $kodes
+            ? DB::table('wilayah')->whereIn('kode', $kodes)->pluck('nama', 'kode')
+            : collect();
+
+        return view('events.show', compact('event', 'wilayahNama'));
     }
 
     /**
@@ -131,6 +145,7 @@ class EventController extends Controller
             'desa' => 'nullable|string|max:255',
             'kecamatan' => 'nullable|string|max:255',
             'kabupaten' => 'nullable|string|max:255',
+            'provinsi' => 'nullable|string|max:20',
         ]);
 
         // Simpan data lama untuk audit log
@@ -141,7 +156,7 @@ class EventController extends Controller
         // Audit Log
         AuditLogger::logUpdate('events', $event->id, $oldData, $event->fresh()->toArray());
 
-        return redirect()->route('events.index')
+        return redirect()->route('dashboard.events')
             ->with('success', 'Data event berhasil diperbarui.');
     }
 
@@ -162,7 +177,7 @@ class EventController extends Controller
         // Audit Log
         AuditLogger::logDelete('events', $event->id, $oldData);
 
-        return redirect()->route('events.index')
+        return redirect()->route('dashboard.events')
             ->with('success', 'Data event berhasil dihapus.');
     }
 
@@ -201,8 +216,11 @@ class EventController extends Controller
             ]);
         }
 
-        return redirect()->route('events.index')
-            ->with('success', $msg);
+        $redirect = redirect()->route('dashboard.events')->with('success', $msg);
+        if ($tx) {
+            $redirect->with('poin_diperoleh', ['poin' => $tx->poin, 'label' => 'Event "' . $event->nama_event . '" divalidasi']);
+        }
+        return $redirect;
     }
 
     /**
@@ -228,7 +246,44 @@ class EventController extends Controller
             GamificationService::batalkanPoin($tx->id, auth()->id(), 'Validasi dibatalkan oleh Super Admin');
         }
 
-        return redirect()->route('events.index')
+        return redirect()->route('dashboard.events')
             ->with('success', 'Validasi event dibatalkan. Poin relawan telah ditarik.');
+    }
+
+    /**
+     * Peta choropleth distribusi event per provinsi.
+     */
+    public function peta(Request $request): \Illuminate\View\View
+    {
+        // Jumlah event tervalidasi per kode provinsi
+        $provinsiCounts = Event::validated()
+            ->whereNotNull('provinsi')
+            ->where('provinsi', '!=', '')
+            ->groupBy('provinsi')
+            ->selectRaw('provinsi as kode, count(*) as total')
+            ->pluck('total', 'kode');   // ['35' => 5, '33' => 2]
+
+        $maxCount = $provinsiCounts->max() ?: 1;
+
+        // Bila provinsi dipilih, ambil event-nya
+        $selectedKode     = $request->get('provinsi');
+        $selectedNama     = $request->get('nama', '');
+        $selectedEvents   = collect();
+
+        if ($selectedKode) {
+            $selectedEvents = Event::validated()
+                ->where('provinsi', $selectedKode)
+                ->latest('tanggal_mulai')
+                ->get();
+        }
+
+        $isDashboard = request()->is('dashboard/*');
+        $layout      = $isDashboard ? 'layouts.app' : 'layouts.public';
+
+        return view('events.peta', compact(
+            'provinsiCounts', 'maxCount',
+            'selectedKode', 'selectedNama', 'selectedEvents',
+            'isDashboard', 'layout'
+        ));
     }
 }
