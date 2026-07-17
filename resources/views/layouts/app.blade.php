@@ -188,8 +188,8 @@
             </aside>
 
             <!-- Main Content -->
-            <div class="lg:ml-64 flex-1 flex flex-col min-h-screen overflow-hidden">
-                <header class="lg:hidden bg-white shadow-sm border-b border-gray-200">
+            <div class="lg:ml-64 flex-1 flex flex-col min-h-screen overflow-x-hidden">
+                <header class="lg:hidden sticky top-0 z-40 bg-white shadow-sm border-b border-gray-200">
                     <div class="flex items-center justify-between px-4 py-3">
                         <button @click="sidebarOpen = !sidebarOpen" class="p-2 rounded-lg text-gray-600 hover:bg-gray-100">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
@@ -199,7 +199,7 @@
                     </div>
                 </header>
                 @isset($header)
-                    <header class="bg-white shadow-sm border-b border-gray-200">
+                    <header class="sticky top-14 lg:top-0 z-30 bg-white shadow-sm border-b border-gray-200">
                         <div class="max-w-7xl mx-auto py-5 px-4 sm:px-6 lg:px-8 flex justify-between items-center gap-4">
                             <div class="flex-1 min-w-0">{{ $header }}</div>
                             @auth
@@ -250,7 +250,7 @@
                         </div>
                     </header>
                 @endisset
-                <main class="flex-1 overflow-y-auto bg-gray-50">
+                <main class="flex-1 bg-gray-50">
                     @isset($slot){{ $slot }}@else @yield('content') @endisset
                 </main>
             </div>
