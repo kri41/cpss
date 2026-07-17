@@ -188,7 +188,7 @@
             </aside>
 
             <!-- Main Content -->
-            <div class="lg:ml-64 flex-1 flex flex-col min-h-screen overflow-x-hidden">
+            <div class="lg:ml-64 flex-1 flex flex-col min-h-screen">
                 <header class="lg:hidden sticky top-0 z-40 bg-white shadow-sm border-b border-gray-200">
                     <div class="flex items-center justify-between px-4 py-3">
                         <button @click="sidebarOpen = !sidebarOpen" class="p-2 rounded-lg text-gray-600 hover:bg-gray-100">
