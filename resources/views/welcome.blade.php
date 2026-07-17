@@ -58,12 +58,12 @@
                 <div class="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
                     <!-- Kiri: Headline + Stats -->
                     <div class="text-center lg:text-left">
-                        <span class="inline-block px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-[11px] font-semibold tracking-wide mb-4 border border-blue-100">PLATFORM KEOLAHRAGAAN BERBASIS BUKTI</span>
+                        <span class="inline-block px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-[11px] font-semibold tracking-wide mb-4 border border-blue-100">PENDATAAN KEOLAHRAGAAN BERBASIS MASYARAKAT</span>
                         <h1 class="text-4xl sm:text-5xl lg:text-[3.5rem] font-extrabold text-gray-900 leading-[1.1] mb-5">
-                            Satu Data <br><span class="text-gradient">Untuk Olahraga Daerah</span>
+                            Setiap Lapangan Tercatat,<br><span class="text-gradient">Setiap Atlet Terhitung</span>
                         </h1>
                         <p class="text-base text-gray-600 leading-relaxed mb-6 max-w-lg mx-auto lg:mx-0">
-                            Ruang kolaborasi digital bagi penggerak olahraga. Laporkan fasilitas, bagikan aktivitas komunitas, dan temukan data keolahragaan daerah Anda.
+                            Platform pelaporan data keolahragaan daerah yang menghubungkan relawan, pengurus, dan pemangku kepentingan. Dari desa hingga provinsi — dokumentasikan prasarana, catat event, dan bangun kebijakan olahraga berbasis bukti.
                         </p>
 
                         <div class="flex justify-center lg:justify-start">

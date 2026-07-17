@@ -132,6 +132,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // User Management Routes (Super Admin only)
     Route::middleware(['App\Http\Middleware\CheckRole:super_admin'])->group(function () {
         Route::resource('users', UserController::class)->except(['show']);
+        Route::get('/users/import/form',     [UserController::class, 'importForm'])->name('users.import.form');
+        Route::post('/users/import',         [UserController::class, 'import'])->name('users.import');
+        Route::get('/users/import/template', [UserController::class, 'downloadTemplate'])->name('users.import.template');
     });
 
     // Audit Log Routes (Admin & Super Admin)
