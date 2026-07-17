@@ -84,6 +84,7 @@
     </main>
 
     @stack('scripts')
+    @stack('mascot')
     <x-pwa-install />
     <script>
         if ('serviceWorker' in navigator) {

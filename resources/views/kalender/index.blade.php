@@ -84,3 +84,9 @@
     </div>
 </div>
 @endsection
+
+@push('mascot')
+<div class="hidden lg:block fixed bottom-0 left-4 z-10 pointer-events-none select-none">
+    <img src="/storage/karakter/2.png" alt="" class="h-48 xl:h-56 w-auto object-contain object-bottom drop-shadow-xl">
+</div>
+@endpush
