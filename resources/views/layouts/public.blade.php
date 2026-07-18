@@ -22,56 +22,56 @@
 <body class="font-sans antialiased text-gray-800" style="background: linear-gradient(160deg, #1e3a8a 0%, #2563eb 30%, #60a5fa 60%, #dbeafe 85%, #f0f9ff 100%); background-attachment: fixed; min-height: 100vh;" x-data="{ mobileMenu: false }">
 
     <!-- Navbar Publik -->
-    <nav class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-gray-100">
+    <nav class="sticky top-0 z-40 border-b border-white/10" style="background: rgba(15,23,42,0.45); backdrop-filter: blur(16px);">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-14">
                 <!-- Logo -->
                 <a href="{{ url('/') }}" class="flex items-center gap-2.5">
-                    <img src="/storage/logo.png" alt="Dataraga" class="h-9 w-9 object-contain">
-                    <span class="font-bold text-lg text-gray-900 tracking-tight">Dataraga</span>
+                    <img src="/storage/logo.png" alt="Dataraga" class="h-9 w-9 object-contain brightness-0 invert">
+                    <span class="font-bold text-lg text-white tracking-tight">Dataraga</span>
                 </a>
 
                 <!-- Desktop Menu -->
                 <div class="hidden md:flex items-center space-x-1">
-                    <a href="{{ route('prasarana.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg transition {{ request()->routeIs('prasarana.*') ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50/50' }}">Prasarana</a>
-                    <a href="{{ route('events.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg transition {{ request()->routeIs('events.index') ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50/50' }}">Event</a>
-                    <a href="{{ route('events.peta') }}" class="px-3 py-2 text-sm font-medium rounded-lg transition {{ request()->routeIs('events.peta') ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50/50' }}">Peta Event</a>
-                    <a href="{{ route('clubs.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg transition {{ request()->routeIs('clubs.*') ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50/50' }}">Klub</a>
-                    <a href="{{ route('kalender.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg transition {{ request()->routeIs('kalender.*') ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50/50' }}">Kalender</a>
+                    <a href="{{ route('prasarana.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg transition {{ request()->routeIs('prasarana.*') ? 'bg-white/15 text-white' : 'text-white/75 hover:text-white hover:bg-white/10' }}">Prasarana</a>
+                    <a href="{{ route('events.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg transition {{ request()->routeIs('events.index') ? 'bg-white/15 text-white' : 'text-white/75 hover:text-white hover:bg-white/10' }}">Event</a>
+                    <a href="{{ route('events.peta') }}" class="px-3 py-2 text-sm font-medium rounded-lg transition {{ request()->routeIs('events.peta') ? 'bg-white/15 text-white' : 'text-white/75 hover:text-white hover:bg-white/10' }}">Peta Event</a>
+                    <a href="{{ route('clubs.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg transition {{ request()->routeIs('clubs.*') ? 'bg-white/15 text-white' : 'text-white/75 hover:text-white hover:bg-white/10' }}">Klub</a>
+                    <a href="{{ route('kalender.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg transition {{ request()->routeIs('kalender.*') ? 'bg-white/15 text-white' : 'text-white/75 hover:text-white hover:bg-white/10' }}">Kalender</a>
                 </div>
 
                 <!-- Auth -->
                 <div class="hidden md:flex items-center space-x-2">
                     @guest
-                        <a href="{{ route('login') }}" class="text-gray-600 hover:text-blue-600 font-medium px-3 py-1.5 transition text-sm">Masuk</a>
-                        <a href="{{ route('register') }}" class="px-4 py-1.5 bg-blue-600 text-white font-medium rounded-full hover:bg-blue-700 transition-all text-sm">Daftar</a>
+                        <a href="{{ route('login') }}" class="text-white/75 hover:text-white font-medium px-3 py-1.5 transition text-sm">Masuk</a>
+                        <a href="{{ route('register') }}" class="px-4 py-1.5 bg-white text-blue-800 font-bold rounded-full hover:bg-blue-50 transition-all text-sm">Daftar</a>
                     @else
-                        <span class="text-gray-500 text-sm mr-1">{{ Auth::user()->name }}</span>
+                        <span class="text-white/70 text-sm mr-1">{{ Auth::user()->name }}</span>
                         <a href="{{ url('/dashboard') }}" class="px-4 py-1.5 bg-gradient-to-r from-blue-600 to-sky-500 text-white font-medium rounded-full shadow-sm hover:shadow-md transition text-sm">Dasbor</a>
                     @endguest
                 </div>
 
                 <!-- Mobile button -->
-                <button @click="mobileMenu = !mobileMenu" class="md:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100">
+                <button @click="mobileMenu = !mobileMenu" class="md:hidden p-2 rounded-lg text-white/80 hover:bg-white/10">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
                 </button>
             </div>
         </div>
 
         <!-- Mobile Menu -->
-        <div x-show="mobileMenu" @click.away="mobileMenu = false" x-cloak x-transition class="md:hidden bg-white border-t border-gray-100 shadow-lg">
+        <div x-show="mobileMenu" @click.away="mobileMenu = false" x-cloak x-transition class="md:hidden border-t border-white/10" style="background: rgba(15,23,42,0.55); backdrop-filter: blur(16px);">
             <div class="px-4 py-3 space-y-1">
-                <a href="{{ route('prasarana.index') }}" class="block px-4 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('prasarana.*') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-blue-50' }}">Prasarana</a>
-                <a href="{{ route('events.index') }}" class="block px-4 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('events.index') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-blue-50' }}">Event</a>
-                <a href="{{ route('events.peta') }}" class="block px-4 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('events.peta') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-blue-50' }}">Peta Event</a>
-                <a href="{{ route('clubs.index') }}" class="block px-4 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('clubs.*') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-blue-50' }}">Klub</a>
-                <a href="{{ route('kalender.index') }}" class="block px-4 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('kalender.*') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-blue-50' }}">Kalender</a>
-                <div class="pt-2 border-t border-gray-100">
+                <a href="{{ route('prasarana.index') }}" class="block px-4 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('prasarana.*') ? 'bg-white/15 text-white' : 'text-white/75 hover:bg-white/10 hover:text-white' }}">Prasarana</a>
+                <a href="{{ route('events.index') }}" class="block px-4 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('events.index') ? 'bg-white/15 text-white' : 'text-white/75 hover:bg-white/10 hover:text-white' }}">Event</a>
+                <a href="{{ route('events.peta') }}" class="block px-4 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('events.peta') ? 'bg-white/15 text-white' : 'text-white/75 hover:bg-white/10 hover:text-white' }}">Peta Event</a>
+                <a href="{{ route('clubs.index') }}" class="block px-4 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('clubs.*') ? 'bg-white/15 text-white' : 'text-white/75 hover:bg-white/10 hover:text-white' }}">Klub</a>
+                <a href="{{ route('kalender.index') }}" class="block px-4 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('kalender.*') ? 'bg-white/15 text-white' : 'text-white/75 hover:bg-white/10 hover:text-white' }}">Kalender</a>
+                <div class="pt-2 border-t border-white/10">
                     @guest
-                        <a href="{{ route('login') }}" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-blue-50 rounded-lg">Masuk</a>
-                        <a href="{{ route('register') }}" class="block px-4 py-2.5 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-lg">Daftar</a>
+                        <a href="{{ route('login') }}" class="block px-4 py-2.5 text-sm font-medium text-white/75 hover:bg-white/10 hover:text-white rounded-lg">Masuk</a>
+                        <a href="{{ route('register') }}" class="block px-4 py-2.5 text-sm font-bold text-white hover:bg-white/10 rounded-lg">Daftar</a>
                     @else
-                        <a href="{{ url('/dashboard') }}" class="block px-4 py-2.5 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-lg">Buka Dasbor</a>
+                        <a href="{{ url('/dashboard') }}" class="block px-4 py-2.5 text-sm font-bold text-white hover:bg-white/10 rounded-lg">Buka Dasbor</a>
                     @endguest
                 </div>
             </div>
