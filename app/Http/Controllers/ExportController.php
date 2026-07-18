@@ -14,7 +14,16 @@ class ExportController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['auth', 'App\Http\Middleware\CheckRole:admin']);
+        $this->middleware(['auth', 'App\Http\Middleware\CheckRole:admin,relawan']);
+    }
+
+    private function scopeToUser($query, string $userIdColumn = 'user_id')
+    {
+        $user = auth()->user();
+        if ($user->isRelawan()) {
+            $query->where($userIdColumn, $user->id);
+        }
+        return $query;
     }
 
     /* ================================================================
@@ -51,7 +60,7 @@ class ExportController extends Controller
 
     public function prasarana(Request $request): StreamedResponse
     {
-        $query = Prasarana::with('user')->latest();
+        $query = $this->scopeToUser(Prasarana::with('user')->latest());
 
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
@@ -97,7 +106,7 @@ class ExportController extends Controller
 
     public function clubs(Request $request): StreamedResponse
     {
-        $query = Club::with('user')->latest();
+        $query = $this->scopeToUser(Club::with('user')->latest());
 
         if ($request->filled('search'))    $query->where('nama_club', 'like', '%' . $request->search . '%');
         if ($request->filled('kabupaten')) $query->where('kabupaten', $request->kabupaten);
@@ -135,7 +144,7 @@ class ExportController extends Controller
 
     public function events(Request $request): StreamedResponse
     {
-        $query = Event::with('user')->latest();
+        $query = $this->scopeToUser(Event::with('user')->latest());
 
         if ($request->filled('search'))    $query->where('nama_event', 'like', '%' . $request->search . '%');
         if ($request->filled('kabupaten')) $query->where('kabupaten', $request->kabupaten);
@@ -173,7 +182,7 @@ class ExportController extends Controller
 
     public function partisipasi(Request $request): StreamedResponse
     {
-        $query = Partisipasi::with(['user', 'kehadiran'])->latest();
+        $query = $this->scopeToUser(Partisipasi::with(['user', 'kehadiran'])->latest());
 
         if ($request->filled('search'))    $query->where('lokasi_observasi', 'like', '%' . $request->search . '%');
         if ($request->filled('kabupaten')) $query->where('kabupaten', $request->kabupaten);

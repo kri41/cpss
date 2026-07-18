@@ -94,14 +94,12 @@ class KalenderController extends Controller
             }
         }
 
-        // Merge semua ke kalender
+        // Merge semua ke kalender dan tambahkan field 'date' di setiap item
         $calendarData = [];
         for ($date = $startOfMonth->copy(); $date->lte($endOfMonth); $date->addDay()) {
-            $key = $date->format('Y-m-d');
-            $calendarData[$key] = array_merge(
-                $eventsByDate[$key] ?? [],
-                $schedulesByDate[$key] ?? []
-            );
+            $key   = $date->format('Y-m-d');
+            $items = array_merge($eventsByDate[$key] ?? [], $schedulesByDate[$key] ?? []);
+            $calendarData[$key] = array_map(fn($item) => array_merge($item, ['date' => $key]), $items);
         }
 
         // Days grid (mulai dari hari Senin)
