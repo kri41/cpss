@@ -204,8 +204,13 @@
                             <div class="flex-1 min-w-0">{{ $header }}</div>
                             @auth
                                 @php
-                                    $notifUnreadCount = \App\Models\UserNotification::where('user_id', auth()->id())->whereNull('read_at')->count();
-                                    $notifRecent = \App\Models\UserNotification::where('user_id', auth()->id())->latest()->take(5)->get();
+                                    try {
+                                        $notifUnreadCount = \App\Models\UserNotification::where('user_id', auth()->id())->whereNull('read_at')->count();
+                                        $notifRecent = \App\Models\UserNotification::where('user_id', auth()->id())->latest()->take(5)->get();
+                                    } catch (\Exception $e) {
+                                        $notifUnreadCount = 0;
+                                        $notifRecent = collect();
+                                    }
                                 @endphp
                                 <div class="relative shrink-0" x-data="{ notifOpen: false }">
                                     <button @click="notifOpen = !notifOpen" class="relative p-2.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-xl transition-all">
