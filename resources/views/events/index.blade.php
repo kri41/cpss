@@ -13,31 +13,31 @@
 
 <!-- Sticky Stats & Filter Bar -->
 <div class="sticky top-14 z-30 bg-white/90 backdrop-blur border-b border-gray-200/80">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-4">
         <!-- Stats Cards -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-3 flex items-center gap-3">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 mb-2 sm:mb-4">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-2 sm:p-3 flex items-center gap-2 sm:gap-3">
                 <div class="p-2 bg-blue-100 rounded-lg text-blue-600"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg></div>
                 <div>
                     <p class="text-xs text-gray-500">Total Event</p>
                     <p class="text-lg font-bold text-gray-900">{{ $totalEvents }}</p>
                 </div>
             </div>
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-3 flex items-center gap-3">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-2 sm:p-3 flex items-center gap-2 sm:gap-3">
                 <div class="p-2 bg-amber-100 rounded-lg text-amber-600"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
                 <div>
                     <p class="text-xs text-gray-500">Akan Datang</p>
                     <p class="text-lg font-bold text-gray-900">{{ $upcomingEvents }}</p>
                 </div>
             </div>
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-3 flex items-center gap-3">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-2 sm:p-3 flex items-center gap-2 sm:gap-3">
                 <div class="p-2 bg-green-100 rounded-lg text-green-600"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg></div>
                 <div>
                     <p class="text-xs text-gray-500">Berlangsung</p>
                     <p class="text-lg font-bold text-gray-900">{{ $ongoingEvents }}</p>
                 </div>
             </div>
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-3 flex items-center gap-3">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-2 sm:p-3 flex items-center gap-2 sm:gap-3">
                 <div class="p-2 bg-emerald-100 rounded-lg text-emerald-600"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
                 <div>
                     <p class="text-xs text-gray-500">Tervalidasi</p>
@@ -47,12 +47,12 @@
         </div>
 
         <!-- Filter Row -->
-        <form method="GET" action="{{ route('events.index') }}" class="flex flex-wrap items-end gap-3">
-            <div class="flex-1 min-w-[200px]">
+        <form method="GET" action="{{ route('events.index') }}" class="flex flex-wrap items-end gap-2 sm:gap-3">
+            <div class="w-full">
                 <label class="block text-xs font-medium text-gray-500 mb-1">Cari Event</label>
                 <input type="text" name="search" value="{{ request('search') }}" placeholder="Nama event..." class="w-full rounded-lg border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500 shadow-sm">
             </div>
-            <div class="w-44">
+            <div class="flex-1 min-w-[calc(50%-4px)] sm:flex-none sm:w-44">
                 <label class="block text-xs font-medium text-gray-500 mb-1">Kabupaten</label>
                 <select name="kabupaten" class="w-full rounded-lg border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500 shadow-sm" onchange="this.form.submit()">
                     <option value="">Semua</option>
@@ -61,7 +61,7 @@
                     @endforeach
                 </select>
             </div>
-            <div class="w-44">
+            <div class="flex-1 min-w-[calc(50%-4px)] sm:flex-none sm:w-44">
                 <label class="block text-xs font-medium text-gray-500 mb-1">Kecamatan</label>
                 <select name="kecamatan" class="w-full rounded-lg border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500 shadow-sm" onchange="this.form.submit()">
                     <option value="">Semua</option>
@@ -70,7 +70,7 @@
                     @endforeach
                 </select>
             </div>
-            <div class="w-40">
+            <div class="flex-1 min-w-[calc(50%-4px)] sm:flex-none sm:w-40">
                 <label class="block text-xs font-medium text-gray-500 mb-1">Tingkat</label>
                 <select name="tingkat" class="w-full rounded-lg border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500 shadow-sm" onchange="this.form.submit()">
                     <option value="">Semua</option>
@@ -79,7 +79,7 @@
                     @endforeach
                 </select>
             </div>
-            <div class="flex gap-2">
+            <div class="w-full sm:w-auto flex flex-wrap gap-2">
                 <button type="submit" class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition shadow-sm">Filter</button>
                 <a href="{{ route('events.index') }}" class="px-4 py-2 bg-white border border-gray-300 text-gray-600 text-sm font-medium rounded-lg hover:bg-gray-50 transition shadow-sm">Reset</a>
             </div>
