@@ -12,15 +12,15 @@
     "icons": [
         {
             "src": "/storage/logo.png",
-            "sizes": "192x192",
+            "sizes": "2000x2000",
             "type": "image/png",
-            "purpose": "any maskable"
+            "purpose": "any"
         },
         {
             "src": "/storage/logo.png",
-            "sizes": "512x512",
+            "sizes": "2000x2000",
             "type": "image/png",
-            "purpose": "any maskable"
+            "purpose": "maskable"
         }
     ],
     "screenshots": [],
