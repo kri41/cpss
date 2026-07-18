@@ -96,6 +96,12 @@
                 </div>
             @endif
 
+            @if(session('error'))
+                <div class="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
+                    {{ session('error') }}
+                </div>
+            @endif
+
             <form method="POST" action="{{ route('users.import.preview') }}" enctype="multipart/form-data"
                   x-data="{ file: null, dragging: false }">
                 @csrf

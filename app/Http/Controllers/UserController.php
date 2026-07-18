@@ -109,12 +109,16 @@ class UserController extends Controller
     public function importPreview(Request $request): RedirectResponse
     {
         $request->validate([
-            'file' => 'required|file|mimes:csv,txt|max:2048',
+            'file' => 'required|file|max:5120',
         ], [
             'file.required' => 'File CSV wajib diunggah.',
-            'file.mimes'    => 'File harus berformat CSV.',
-            'file.max'      => 'Ukuran file maksimal 2MB.',
+            'file.max'      => 'Ukuran file maksimal 5MB.',
         ]);
+
+        $ext = strtolower($request->file('file')->getClientOriginalExtension());
+        if (!in_array($ext, ['csv', 'txt'])) {
+            return back()->withErrors(['file' => 'File harus berformat CSV (.csv atau .txt).']);
+        }
 
         $handle = fopen($request->file('file')->getRealPath(), 'r');
 
