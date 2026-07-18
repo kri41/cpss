@@ -9,6 +9,8 @@ use App\Models\Talenta;
 use App\Models\TenagaAhli;
 use App\Models\AuditLog;
 use App\Models\Club;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\Response;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\DB;
 
@@ -72,5 +74,37 @@ class DashboardController extends Controller
             'partisipasiByUsia',
             'recentAuditLogs'
         ));
+    }
+
+    public function laporanPdf(): Response
+    {
+        $user      = auth()->user();
+        $isRelawan = $user->isRelawan();
+
+        $baseScope = fn($query) => $isRelawan ? $query->where('user_id', $user->id) : $query;
+
+        $prasarana   = $baseScope(Prasarana::with('user')->latest())->get();
+        $events      = $baseScope(Event::with('user')->latest())->get();
+        $clubs       = $baseScope(Club::with('user')->latest())->get();
+        $partisipasi = $baseScope(Partisipasi::with('user')->latest())->get();
+
+        $stats = [
+            'prasarana'            => $prasarana->count(),
+            'prasarana_validated'  => $prasarana->where('status_validasi', 'validated')->count(),
+            'events'               => $events->count(),
+            'events_validated'     => $events->where('status_validasi', 'validated')->count(),
+            'clubs'                => $clubs->count(),
+            'clubs_validated'      => $clubs->where('status_validasi', 'validated')->count(),
+            'partisipasi'          => $partisipasi->count(),
+            'partisipasi_validated'=> $partisipasi->where('status_validasi', 'validated')->count(),
+        ];
+
+        $pdf = Pdf::loadView('dashboard.laporan-pdf', compact('user', 'isRelawan', 'stats', 'prasarana', 'events', 'clubs', 'partisipasi'))
+            ->setPaper('a4', 'portrait');
+
+        $label    = $isRelawan ? str_replace(' ', '_', $user->name) : 'semua_data';
+        $filename = 'laporan_dataraga_' . $label . '_' . now()->format('Ymd') . '.pdf';
+
+        return $pdf->download($filename);
     }
 }

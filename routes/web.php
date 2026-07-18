@@ -66,6 +66,7 @@ Route::get('/kalender', [KalenderController::class, 'index'])->name('kalender.in
 Route::middleware(['auth', 'verified'])->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard/laporan-pdf', [DashboardController::class, 'laporanPdf'])->name('dashboard.laporan-pdf');
 
     // Dashboard views (index with sidebar)
     Route::get('/dashboard/events', [EventController::class, 'index'])->name('dashboard.events');
