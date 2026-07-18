@@ -16,6 +16,9 @@
     <style>
         [x-cloak] { display: none !important; }
         html, body { height: 100%; overflow: hidden; }
+        @media (max-width: 1023px) {
+            html, body { height: auto !important; overflow: auto !important; }
+        }
         .hero-bg {
             background: linear-gradient(145deg, #0f172a 0%, #1e3a8a 45%, #075985 100%);
         }
@@ -40,7 +43,7 @@
 <body class="antialiased font-sans hero-bg"
       x-data="{ modal: '{{ $errors->any() ? (old('name') ? 'register' : 'login') : '' }}' }">
 
-    <div class="h-screen flex flex-col">
+    <div class="min-h-screen lg:h-screen flex flex-col">
 
         <!-- ── NAVBAR ─────────────────────────────────────────────────── -->
         <nav class="shrink-0 bg-white/5 backdrop-blur border-b border-white/10 z-30">
@@ -67,7 +70,7 @@
         </nav>
 
         <!-- ── HERO (satu screen penuh) ───────────────────────────────── -->
-        <main class="flex-1 flex overflow-hidden">
+        <main class="flex-1 flex lg:overflow-hidden">
 
             {{-- GIRL — KIRI --}}
             <div class="hidden lg:flex w-52 xl:w-64 2xl:w-72 shrink-0 items-end justify-center overflow-hidden">
@@ -78,7 +81,7 @@
             </div>
 
             {{-- KONTEN TENGAH --}}
-            <div class="flex-1 flex flex-col items-center justify-center px-4 sm:px-8 text-center py-6 overflow-hidden">
+            <div class="flex-1 flex flex-col items-center justify-center px-4 sm:px-8 text-center py-4 sm:py-6">
 
                 {{-- Badge --}}
                 <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/15 text-white/80 text-[11px] font-semibold tracking-widest mb-5">
@@ -88,14 +91,13 @@
 
                 {{-- Headline --}}
                 <h1 class="text-3xl sm:text-4xl xl:text-5xl font-extrabold text-white leading-[1.15] mb-4">
-                    Olahraga Rakyat<br>
-                    Dicatat, Didata,<br>
-                    <span class="text-glow">Dibanggakan!</span>
+                    Kamu Gerak,<br>
+                    <span class="text-glow">Indonesia Tahu</span>
                 </h1>
 
                 {{-- Desc --}}
                 <p class="text-white/70 text-sm sm:text-base max-w-md leading-relaxed mb-6">
-                    Jadilah relawan data — laporkan lapangan, catat event, dan dukung kebijakan olahraga daerahmu dari tingkat RT hingga provinsi.
+                    Jadi relawan data olahraga. Ceritakan apa yang terjadi di lapanganmu, dari RT sampai provinsi, lewat catatan sederhana yang berdampak nyata.
                 </p>
 
                 {{-- Stats row --}}

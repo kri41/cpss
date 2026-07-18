@@ -4,7 +4,7 @@
 
 @section('content')
 <!-- Sticky Stats & Filter Bar -->
-<div class="sticky top-14 z-30 bg-gray-50/95 backdrop-blur border-b border-gray-200">
+<div class="sticky top-14 z-30 bg-white/90 backdrop-blur border-b border-gray-200/80">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         @php
             $items = $prasarana instanceof \Illuminate\Contracts\Pagination\Paginator ? $prasarana->getCollection() : $prasarana;

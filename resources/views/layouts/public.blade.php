@@ -19,7 +19,7 @@
     <style>[x-cloak]{display:none!important}</style>
     @stack('styles')
 </head>
-<body class="font-sans antialiased bg-gray-50 text-gray-800" x-data="{ mobileMenu: false }">
+<body class="font-sans antialiased text-gray-800" style="background: linear-gradient(160deg, #eff6ff 0%, #dbeafe 25%, #e0f9ff 55%, #d1fae5 85%, #eff6ff 100%); background-attachment: fixed; min-height: 100vh;" x-data="{ mobileMenu: false }">
 
     <!-- Navbar Publik -->
     <nav class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-gray-100">
