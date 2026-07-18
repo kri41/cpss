@@ -26,7 +26,7 @@
             .sidebar-scroll { scrollbar-width: thin; scrollbar-color: rgba(0,0,0,0.1) transparent; }
         </style>
     </head>
-    <body class="font-sans antialiased text-gray-800" style="background: linear-gradient(160deg, #eff6ff 0%, #dbeafe 25%, #e0f9ff 55%, #d1fae5 85%, #eff6ff 100%); background-attachment: fixed; min-height: 100vh;">
+    <body class="font-sans antialiased text-gray-800" style="background: linear-gradient(160deg, #1e3a8a 0%, #2563eb 30%, #60a5fa 60%, #dbeafe 85%, #f0f9ff 100%); background-attachment: fixed; min-height: 100vh;">
         <div x-data="{ sidebarOpen: false, dropdownOpen: {} }" class="min-h-screen">
             <div x-show="sidebarOpen" x-transition.opacity.duration.300ms @click="sidebarOpen = false" class="fixed inset-0 bg-gray-900/50 z-40 lg:hidden"></div>
 
