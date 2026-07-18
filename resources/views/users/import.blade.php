@@ -35,7 +35,7 @@
                 </li>
                 <li class="flex items-start gap-2">
                     <span class="shrink-0 w-5 h-5 rounded-full bg-blue-200 text-blue-800 text-[11px] font-bold flex items-center justify-center mt-0.5">4</span>
-                    <span>Upload file CSV dan klik <strong>Proses Import</strong>.</span>
+                    <span>Upload file CSV, klik <strong>Proses &amp; Preview</strong>, cek hasil validasi, lalu konfirmasi import.</span>
                 </li>
             </ol>
         </div>
@@ -96,7 +96,7 @@
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('users.import') }}" enctype="multipart/form-data"
+            <form method="POST" action="{{ route('users.import.preview') }}" enctype="multipart/form-data"
                   x-data="{ file: null, dragging: false }">
                 @csrf
 
@@ -133,7 +133,7 @@
                             :disabled="!file"
                             :class="file ? 'bg-blue-600 hover:bg-blue-700 cursor-pointer' : 'bg-gray-300 cursor-not-allowed'"
                             class="flex-1 py-3 text-white font-semibold rounded-xl transition text-sm shadow-sm">
-                        Proses Import
+                        Proses &amp; Preview
                     </button>
                     <a href="{{ route('users.index') }}" class="px-5 py-3 text-sm font-medium text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 transition">
                         Batal

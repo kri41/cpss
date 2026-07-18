@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -102,12 +101,120 @@ class UserController extends Controller
             ->with('success', 'Pengguna berhasil dihapus.');
     }
 
-    /**
-     * Form import bulk user.
-     */
     public function importForm(): View
     {
         return view('users.import');
+    }
+
+    public function importPreview(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:csv,txt|max:2048',
+        ], [
+            'file.required' => 'File CSV wajib diunggah.',
+            'file.mimes'    => 'File harus berformat CSV.',
+            'file.max'      => 'Ukuran file maksimal 2MB.',
+        ]);
+
+        $handle = fopen($request->file('file')->getRealPath(), 'r');
+
+        $bom = fread($handle, 3);
+        if ($bom !== "\xEF\xBB\xBF") rewind($handle);
+
+        $header = fgetcsv($handle);
+        if (!$header) return back()->with('error', 'File CSV kosong atau tidak valid.');
+
+        $header = array_map(fn($h) => strtolower(trim($h)), $header);
+        foreach (['name', 'email', 'password', 'role'] as $col) {
+            if (!in_array($col, $header))
+                return back()->with('error', "Kolom wajib \"{$col}\" tidak ditemukan di header CSV.");
+        }
+
+        $valid      = [];
+        $invalid    = [];
+        $baris      = 1;
+        $emailsSeen = [];
+
+        while (($row = fgetcsv($handle)) !== false) {
+            $baris++;
+            if (empty(array_filter($row))) continue;
+
+            $data = array_combine($header, array_pad($row, count($header), ''));
+
+            $name      = trim($data['name']      ?? '');
+            $email     = strtolower(trim($data['email']     ?? ''));
+            $password  = trim($data['password']  ?? '');
+            $role      = trim($data['role']      ?? 'relawan');
+            $provinsi  = trim($data['provinsi']  ?? '');
+            $kabupaten = trim($data['kabupaten'] ?? '');
+            $kecamatan = trim($data['kecamatan'] ?? '');
+            $desa      = trim($data['desa']      ?? '');
+
+            $errors = [];
+            if (empty($name))                                              $errors[] = 'Nama kosong';
+            if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = 'Email tidak valid';
+            if (strlen($password) < 8)                                     $errors[] = 'Password minimal 8 karakter';
+            if (!in_array($role, ['super_admin', 'admin', 'relawan']))     $errors[] = "Role \"{$role}\" tidak dikenal";
+            if (!empty($email) && isset($emailsSeen[$email]))              $errors[] = 'Email duplikat dalam file';
+            elseif (!empty($email) && filter_var($email, FILTER_VALIDATE_EMAIL) && User::where('email', $email)->exists())
+                                                                            $errors[] = 'Email sudah terdaftar';
+
+            if ($errors) {
+                $invalid[] = ['baris' => $baris, 'name' => $name ?: '-', 'email' => $email ?: '-', 'role' => $role, 'errors' => $errors];
+            } else {
+                $emailsSeen[$email] = true;
+                $valid[] = compact('name', 'email', 'password', 'role', 'provinsi', 'kabupaten', 'kecamatan', 'desa');
+            }
+        }
+
+        fclose($handle);
+
+        session(['import_valid' => $valid, 'import_invalid' => $invalid]);
+
+        return redirect()->route('users.import.confirm');
+    }
+
+    public function importConfirm(): View|RedirectResponse
+    {
+        $valid   = session('import_valid',   []);
+        $invalid = session('import_invalid', []);
+
+        if (empty($valid) && empty($invalid)) {
+            return redirect()->route('users.import.form')->with('error', 'Sesi habis. Silakan upload file lagi.');
+        }
+
+        return view('users.import-preview', compact('valid', 'invalid'));
+    }
+
+    public function importConfirmStore(): RedirectResponse
+    {
+        $valid = session('import_valid', []);
+
+        if (empty($valid)) {
+            return redirect()->route('users.import.form')->with('error', 'Tidak ada data valid untuk diimport.');
+        }
+
+        $berhasil = 0;
+        foreach ($valid as $data) {
+            if (User::where('email', $data['email'])->doesntExist()) {
+                User::create([
+                    'name'      => $data['name'],
+                    'email'     => $data['email'],
+                    'password'  => Hash::make($data['password']),
+                    'role'      => $data['role'],
+                    'provinsi'  => $data['provinsi'] ?: null,
+                    'kabupaten' => $data['kabupaten'] ?: null,
+                    'kecamatan' => $data['kecamatan'] ?: null,
+                    'desa'      => $data['desa'] ?: null,
+                ]);
+                $berhasil++;
+            }
+        }
+
+        session()->forget(['import_valid', 'import_invalid']);
+
+        return redirect()->route('users.index')
+            ->with('success', "{$berhasil} pengguna berhasil diimport.");
     }
 
     /**
@@ -137,98 +244,5 @@ class UserController extends Controller
         }, 200, $headers);
     }
 
-    /**
-     * Proses import bulk user dari file CSV.
-     */
-    public function import(Request $request): RedirectResponse
-    {
-        $request->validate([
-            'file' => 'required|file|mimes:csv,txt|max:2048',
-        ], [
-            'file.required' => 'File CSV wajib diunggah.',
-            'file.mimes'    => 'File harus berformat CSV.',
-            'file.max'      => 'Ukuran file maksimal 2MB.',
-        ]);
 
-        $path   = $request->file('file')->getRealPath();
-        $handle = fopen($path, 'r');
-
-        // Deteksi dan skip BOM
-        $bom = fread($handle, 3);
-        if ($bom !== "\xEF\xBB\xBF") {
-            rewind($handle);
-        }
-
-        // Skip header row
-        $header = fgetcsv($handle);
-        if (!$header) {
-            return back()->with('error', 'File CSV kosong atau tidak valid.');
-        }
-
-        // Normalisasi header (lowercase, trim)
-        $header = array_map(fn($h) => strtolower(trim($h)), $header);
-        $expected = ['name', 'email', 'password', 'role'];
-        foreach ($expected as $col) {
-            if (!in_array($col, $header)) {
-                return back()->with('error', "Kolom wajib \"{$col}\" tidak ditemukan di header CSV.");
-            }
-        }
-
-        $berhasil = 0;
-        $gagal    = [];
-        $baris    = 1;
-
-        while (($row = fgetcsv($handle)) !== false) {
-            $baris++;
-            if (count($row) < 4 || empty(array_filter($row))) continue;
-
-            $data = array_combine($header, array_pad($row, count($header), ''));
-
-            $name      = trim($data['name']     ?? '');
-            $email     = trim($data['email']    ?? '');
-            $password  = trim($data['password'] ?? '');
-            $role      = trim($data['role']     ?? 'relawan');
-            $provinsi  = trim($data['provinsi'] ?? '');
-            $kabupaten = trim($data['kabupaten'] ?? '');
-            $kecamatan = trim($data['kecamatan'] ?? '');
-            $desa      = trim($data['desa']     ?? '');
-
-            // Validasi per baris
-            $errors = [];
-            if (empty($name))                                         $errors[] = 'name kosong';
-            if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = 'email tidak valid';
-            if (strlen($password) < 8)                                $errors[] = 'password < 8 karakter';
-            if (!in_array($role, ['super_admin', 'admin', 'relawan'])) $errors[] = "role \"{$role}\" tidak dikenal";
-            if (User::where('email', $email)->exists())               $errors[] = 'email sudah terdaftar';
-
-            if (!empty($errors)) {
-                $gagal[] = "Baris {$baris} ({$email}): " . implode(', ', $errors);
-                continue;
-            }
-
-            User::create([
-                'name'      => $name,
-                'email'     => $email,
-                'password'  => Hash::make($password),
-                'role'      => $role,
-                'provinsi'  => $provinsi  ?: null,
-                'kabupaten' => $kabupaten ?: null,
-                'kecamatan' => $kecamatan ?: null,
-                'desa'      => $desa      ?: null,
-            ]);
-
-            $berhasil++;
-        }
-
-        fclose($handle);
-
-        $msg = "{$berhasil} pengguna berhasil diimpor.";
-        if (!empty($gagal)) {
-            $msg .= ' ' . count($gagal) . ' baris dilewati: ' . implode(' | ', array_slice($gagal, 0, 5));
-            if (count($gagal) > 5) $msg .= ' ... dan ' . (count($gagal) - 5) . ' lainnya.';
-        }
-
-        return redirect()->route('users.index')
-            ->with($berhasil > 0 ? 'success' : 'error', $msg);
-    }
 }
