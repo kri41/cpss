@@ -60,18 +60,21 @@
 
         {{-- ===== STATISTIK KONTRIBUSI ===== --}}
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-            <h2 class="text-base font-bold text-gray-900 mb-4">Statistik Kontribusi</h2>
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-base font-bold text-gray-900">Statistik Kontribusi</h2>
+                <span class="text-xs text-gray-400">Klik "Laporan" untuk unduh PDF</span>
+            </div>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 @php
                 $kontribusiItems = [
-                    ['label' => 'Prasarana',   'total' => $stats['prasarana'],   'validated' => $stats['prasarana_validated'],   'color' => 'blue',    'icon' => 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4'],
-                    ['label' => 'Klub',        'total' => $stats['clubs'],       'validated' => $stats['clubs_validated'],       'color' => 'indigo',  'icon' => 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z'],
-                    ['label' => 'Event',       'total' => $stats['events'],      'validated' => $stats['events_validated'],      'color' => 'sky',     'icon' => 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'],
-                    ['label' => 'Partisipasi', 'total' => $stats['partisipasi'], 'validated' => $stats['partisipasi_validated'], 'color' => 'emerald', 'icon' => 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z'],
+                    ['label' => 'Prasarana',   'jenis' => 'prasarana',   'total' => $stats['prasarana'],   'validated' => $stats['prasarana_validated'],   'color' => 'blue',    'icon' => 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4'],
+                    ['label' => 'Klub',        'jenis' => 'clubs',       'total' => $stats['clubs'],       'validated' => $stats['clubs_validated'],       'color' => 'indigo',  'icon' => 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z'],
+                    ['label' => 'Event',       'jenis' => 'events',      'total' => $stats['events'],      'validated' => $stats['events_validated'],      'color' => 'sky',     'icon' => 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'],
+                    ['label' => 'Partisipasi', 'jenis' => 'partisipasi', 'total' => $stats['partisipasi'], 'validated' => $stats['partisipasi_validated'], 'color' => 'emerald', 'icon' => 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z'],
                 ];
                 @endphp
                 @foreach($kontribusiItems as $item)
-                <div class="bg-{{ $item['color'] }}-50 rounded-xl p-4 border border-{{ $item['color'] }}-100">
+                <div class="bg-{{ $item['color'] }}-50 rounded-xl p-4 border border-{{ $item['color'] }}-100 flex flex-col">
                     <div class="flex items-center gap-2 mb-2">
                         <div class="p-1.5 bg-{{ $item['color'] }}-100 rounded-lg">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-{{ $item['color'] }}-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $item['icon'] }}"/></svg>
@@ -85,6 +88,17 @@
                             <div class="h-full bg-{{ $item['color'] }}-500 rounded-full" style="width: {{ min(100, round(($item['validated'] / $item['total']) * 100)) }}%"></div>
                         </div>
                     @endif
+                    <div class="mt-3 pt-3 border-t border-{{ $item['color'] }}-100">
+                        @if($item['total'] > 0)
+                            <a href="{{ route('profil.laporan', $item['jenis']) }}"
+                               class="flex items-center justify-center gap-1.5 w-full py-1.5 text-xs font-semibold rounded-lg bg-{{ $item['color'] }}-100 text-{{ $item['color'] }}-700 hover:bg-{{ $item['color'] }}-200 transition">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                Laporan PDF
+                            </a>
+                        @else
+                            <span class="flex items-center justify-center w-full py-1.5 text-xs text-gray-400">Belum ada data</span>
+                        @endif
+                    </div>
                 </div>
                 @endforeach
             </div>

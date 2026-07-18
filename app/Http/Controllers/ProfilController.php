@@ -9,6 +9,8 @@ use App\Models\Partisipasi;
 use App\Models\PointTransaction;
 use App\Models\Prasarana;
 use App\Models\User;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\Response;
 use Illuminate\View\View;
 
 class ProfilController extends Controller
@@ -58,5 +60,31 @@ class ProfilController extends Controller
             'totalActiveUsers',
             'recentTransactions'
         ));
+    }
+
+    public function laporan(string $jenis): Response
+    {
+        $user = auth()->user();
+
+        $judul = match($jenis) {
+            'prasarana'  => 'Laporan Prasarana Olahraga',
+            'events'     => 'Laporan Event Olahraga',
+            'clubs'      => 'Laporan Klub Olahraga',
+            'partisipasi'=> 'Laporan Partisipasi',
+        };
+
+        $items = match($jenis) {
+            'prasarana'  => Prasarana::where('user_id', $user->id)->latest()->get(),
+            'events'     => Event::where('user_id', $user->id)->latest()->get(),
+            'clubs'      => Club::where('user_id', $user->id)->latest()->get(),
+            'partisipasi'=> Partisipasi::where('user_id', $user->id)->latest()->get(),
+        };
+
+        $pdf = Pdf::loadView('profil.laporan-pdf', compact('user', 'judul', 'jenis', 'items'))
+            ->setPaper('a4', 'portrait');
+
+        $filename = $jenis . '_' . str_replace(' ', '_', $user->name) . '_' . now()->format('Ymd') . '.pdf';
+
+        return $pdf->download($filename);
     }
 }

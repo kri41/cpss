@@ -81,6 +81,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Profil Relawan
     Route::get('/profil', [ProfilController::class, 'index'])->name('profil.index');
+    Route::get('/profil/laporan/{jenis}', [ProfilController::class, 'laporan'])->name('profil.laporan')
+        ->where('jenis', 'prasarana|events|clubs|partisipasi');
 
     // Leaderboard & Gamification (All authenticated users)
     Route::get('/leaderboard', [LeaderboardController::class, 'index'])->name('leaderboard.index');
