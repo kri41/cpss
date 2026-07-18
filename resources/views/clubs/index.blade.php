@@ -52,7 +52,7 @@
                 <label class="block text-xs font-medium text-gray-500 mb-1">Cari Klub</label>
                 <input type="text" name="search" value="{{ request('search') }}" placeholder="Nama club..." class="w-full rounded-lg border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500 shadow-sm">
             </div>
-            <div class="flex-1 min-w-[calc(50%-4px)] sm:flex-none sm:w-44">
+            <div class="flex-1 min-w-[calc(50%-4px)] sm:flex-none sm:min-w-0 sm:w-44">
                 <label class="block text-xs font-medium text-gray-500 mb-1">Kabupaten</label>
                 <select name="kabupaten" class="w-full rounded-lg border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500 shadow-sm" onchange="this.form.submit()">
                     <option value="">Semua</option>
@@ -61,7 +61,7 @@
                     @endforeach
                 </select>
             </div>
-            <div class="flex-1 min-w-[calc(50%-4px)] sm:flex-none sm:w-44">
+            <div class="flex-1 min-w-[calc(50%-4px)] sm:flex-none sm:min-w-0 sm:w-44">
                 <label class="block text-xs font-medium text-gray-500 mb-1">Kecamatan</label>
                 <select name="kecamatan" class="w-full rounded-lg border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500 shadow-sm" onchange="this.form.submit()">
                     <option value="">Semua</option>
@@ -70,7 +70,7 @@
                     @endforeach
                 </select>
             </div>
-            <div class="flex-1 min-w-[calc(50%-4px)] sm:flex-none sm:w-32">
+            <div class="flex-1 min-w-[calc(50%-4px)] sm:flex-none sm:min-w-0 sm:w-32">
                 <label class="block text-xs font-medium text-gray-500 mb-1">Status</label>
                 <select name="aktif" class="w-full rounded-lg border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500 shadow-sm" onchange="this.form.submit()">
                     <option value="">Semua</option>
