@@ -125,7 +125,21 @@ class UserController extends Controller
         $bom = fread($handle, 3);
         if ($bom !== "\xEF\xBB\xBF") rewind($handle);
 
-        $header = fgetcsv($handle);
+        // Auto-detect delimiter (comma vs semicolon vs tab — Excel Indonesia pakai semicolon)
+        $firstLine = fgets($handle);
+        if (!$firstLine) return back()->with('error', 'File CSV kosong atau tidak valid.');
+        $delimiter = ',';
+        $counts = [
+            ','  => substr_count($firstLine, ','),
+            ';'  => substr_count($firstLine, ';'),
+            "\t" => substr_count($firstLine, "\t"),
+        ];
+        arsort($counts);
+        $delimiter = array_key_first($counts);
+        // Kembali ke awal baris header (setelah BOM sudah di-skip)
+        fseek($handle, -strlen($firstLine), SEEK_CUR);
+
+        $header = fgetcsv($handle, 0, $delimiter);
         if (!$header) return back()->with('error', 'File CSV kosong atau tidak valid.');
 
         $header = array_map(fn($h) => strtolower(trim($h)), $header);
@@ -139,7 +153,7 @@ class UserController extends Controller
         $baris      = 1;
         $emailsSeen = [];
 
-        while (($row = fgetcsv($handle)) !== false) {
+        while (($row = fgetcsv($handle, 0, $delimiter)) !== false) {
             $baris++;
             if (empty(array_filter($row))) continue;
 
