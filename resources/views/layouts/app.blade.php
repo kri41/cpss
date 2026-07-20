@@ -127,6 +127,19 @@
                             Daftar Relawan
                         </a>
 
+                        @if(auth()->user()->isAdmin() || auth()->user()->isRelawan())
+                        <a href="{{ route('kampung.index') }}" class="flex items-center justify-between px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 {{ request()->routeIs('kampung.*') ? 'bg-white/15 text-white' : 'text-white/75 hover:bg-white/10 hover:text-white' }}">
+                            <span class="flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 {{ request()->routeIs('kampung.*') ? 'text-sky-300' : 'text-white/40' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+                                Kampung Olahraga
+                            </span>
+                            @if(\App\Models\KampungOlahraga::where('status_validasi','pending')->count() > 0 && auth()->user()->isAdmin())
+                                @php $pendingKampung = \App\Models\KampungOlahraga::where('status_validasi','pending')->count(); @endphp
+                                <span class="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">{{ $pendingKampung }}</span>
+                            @endif
+                        </a>
+                        @endif
+
                         @if(auth()->user()->isAdmin() || auth()->user()->isSuperAdmin())
                             <div class="pt-3 mt-2 border-t border-white/10">
                                 <p class="px-3 text-[10px] font-bold text-white/40 uppercase tracking-widest mb-2">Manajemen</p>
@@ -139,6 +152,11 @@
                                 <a href="{{ route('tenaga-ahli.index') }}" class="flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 {{ request()->routeIs('tenaga-ahli.*') ? 'bg-white/15 text-white' : 'text-white/75 hover:bg-white/10 hover:text-white' }}">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 {{ request()->routeIs('tenaga-ahli.*') ? 'text-sky-300' : 'text-white/40' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
                                     Tenaga Ahli
+                                </a>
+
+                                <a href="{{ route('komponen-syarat.index') }}" class="flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 {{ request()->routeIs('komponen-syarat.*') ? 'bg-white/15 text-white' : 'text-white/75 hover:bg-white/10 hover:text-white' }}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 {{ request()->routeIs('komponen-syarat.*') ? 'text-sky-300' : 'text-white/40' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 8h6M9 16h6"/></svg>
+                                    Komponen Syarat
                                 </a>
 
                                 <a href="{{ route('audit-logs.index') }}" class="flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 {{ request()->routeIs('audit-logs.*') ? 'bg-white/15 text-white' : 'text-white/75 hover:bg-white/10 hover:text-white' }}">

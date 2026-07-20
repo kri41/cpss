@@ -7,6 +7,8 @@ use App\Http\Controllers\ExportController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\KalenderController;
+use App\Http\Controllers\KampungController;
+use App\Http\Controllers\KomponenSyaratController;
 use App\Http\Controllers\LeaderboardController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PartisipasiController;
@@ -162,6 +164,22 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Notifications
     Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
+
+    // Kampung Olahraga (Admin & Relawan)
+    Route::middleware(['App\Http\Middleware\CheckRole:admin,relawan'])->group(function () {
+        Route::resource('kampung', KampungController::class);
+        Route::patch('/kampung/{kampung}/validate',        [KampungController::class, 'validate'])->name('kampung.validate');
+        Route::patch('/kampung/{kampung}/reject',          [KampungController::class, 'reject'])->name('kampung.reject');
+        Route::patch('/kampung/{kampung}/cancel-validate', [KampungController::class, 'cancelValidate'])->name('kampung.cancel-validate');
+    });
+
+    // Komponen Syarat (Admin only)
+    Route::middleware(['App\Http\Middleware\CheckRole:admin'])->group(function () {
+        Route::get('/komponen-syarat', [KomponenSyaratController::class, 'index'])->name('komponen-syarat.index');
+        Route::post('/komponen-syarat', [KomponenSyaratController::class, 'store'])->name('komponen-syarat.store');
+        Route::put('/komponen-syarat/{komponenSyarat}', [KomponenSyaratController::class, 'update'])->name('komponen-syarat.update');
+        Route::delete('/komponen-syarat/{komponenSyarat}', [KomponenSyaratController::class, 'destroy'])->name('komponen-syarat.destroy');
+    });
 });
 
 /* ============================================================
@@ -170,5 +188,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::get('/partisipasi/{partisipasi}/qr', [PartisipasiController::class, 'showQr'])->name('partisipasi.qr.show');
 Route::get('/partisipasi/{partisipasi}/daftar', [PartisipasiController::class, 'daftarPublik'])->name('partisipasi.daftar');
 Route::post('/partisipasi/{partisipasi}/daftar', [PartisipasiController::class, 'daftarPublik']);
+
+/* ============================================================
+   KAMPUNG OLAHRAGA — QR CHECK-IN PUBLIK (Tanpa Login)
+   ============================================================ */
+Route::get('/qr/{token}',        [KampungController::class, 'checkinForm'])->name('kampung.checkin.form');
+Route::post('/qr/{token}',       [KampungController::class, 'checkinStore'])->name('kampung.checkin.store');
+Route::get('/qr/{token}/sukses', [KampungController::class, 'checkinSukses'])->name('kampung.checkin.sukses');
+Route::get('/api/jenis-olahraga',[KampungController::class, 'apiJenisOlahraga'])->name('api.jenis-olahraga');
 
 require __DIR__.'/auth.php';
