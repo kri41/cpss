@@ -249,7 +249,7 @@ class GamificationService
             ],
             [
                 'kode' => 'penjaga_sarpras',
-                'nama' => 'Penjaga Sarpras',
+                'nama' => 'Duta Sarpras',
                 'deskripsi' => 'Melaporkan minimal 5 prasarana unik tervalidasi.',
                 'syarat_otomatis' => ['type' => 'prasarana_count', 'min' => 5],
             ],
