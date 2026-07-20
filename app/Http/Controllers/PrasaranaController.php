@@ -19,11 +19,19 @@ class PrasaranaController extends Controller
      */
     public function index(Request $request): View
     {
+        $isDashboard = request()->is('dashboard/*');
+        $user = auth()->user();
+
         $query = Prasarana::with('user')->latest();
 
         // Guest (publik) hanya lihat yang sudah divalidasi
         if (!auth()->check()) {
             $query->validated();
+        }
+
+        // Relawan di dashboard hanya lihat data di wilayahnya sendiri
+        if ($isDashboard && $user?->isRelawan()) {
+            $user->scopeToOwnWilayah($query);
         }
 
         // Filter: search nama
@@ -50,11 +58,13 @@ class PrasaranaController extends Controller
 
         // Data untuk dropdown filter (hanya dari data yang visible)
         $filterQuery = auth()->check() ? Prasarana::query() : Prasarana::validated();
+        if ($isDashboard && $user?->isRelawan()) {
+            $user->scopeToOwnWilayah($filterQuery);
+        }
         $kabupatenList = (clone $filterQuery)->distinct()->orderBy('kabupaten')->pluck('kabupaten')->filter();
         $kecamatanList = (clone $filterQuery)->when($request->filled('kabupaten'), fn($q) => $q->where('kabupaten', $request->kabupaten))->distinct()->orderBy('kecamatan')->pluck('kecamatan')->filter();
         $kategoriList = (clone $filterQuery)->distinct()->orderBy('kategori_olahraga')->pluck('kategori_olahraga')->filter();
 
-        $isDashboard = request()->is('dashboard/*');
         $view = $isDashboard ? 'prasarana.index-dashboard' : 'prasarana.index';
         return view($view, compact('prasarana', 'kabupatenList', 'kecamatanList', 'kategoriList'));
     }

@@ -11,9 +11,9 @@
 |----------|-------|
 | **Proyek** | CPSS - Disertasi Fase 1 Prototipe |
 | **Versi Target** | v2.2+ (Post-Fase 1) |
-| **Terakhir Update** | 20 Juli 2026 |
+| **Terakhir Update** | 21 Juli 2026 |
 | **Total Fitur Utama** | 19 |
-| **Status Keseluruhan** | Fase 1 + Filter/Notif/Kalender Done, Kampung Olahraga v2 Done |
+| **Status Keseluruhan** | Fase 1 + Filter/Notif/Kalender Done, Kampung Olahraga v2 Done, Google Auth Live di Produksi |
 
 ---
 
@@ -219,6 +219,24 @@ Lihat `prd-addendum-v4.md` untuk detail lengkap konsep & rasional. Ringkasan imp
 
 ---
 
+## 4.9 Perbaikan Lanjutan Pasca-Redesign (21 Juli 2026)
+
+- [x] URL slug per-fasil, per-kampung, dsb menggunakan `kode unik` (bukan lagi nama+slug) — lihat `HasSlug` trait, kode acak 10 karakter, konsisten di semua model publik (Prasarana, Club, Event, KampungOlahraga, User)
+- [x] Fix bug dashboard: klik "Detail" dari dashboard sempat melempar ke layout publik (nav landing), bukan tetap di sidebar dashboard — `prasarana.show`/`clubs.show`/`events.show` sekarang pilih layout sesuai status login
+- [x] Fix dropdown wilayah tidak ter-prefill saat edit data lama + command `wilayah:normalize` untuk data legacy
+- [x] Fix redirect `ClubController@update` yang keluar dari dashboard ke halaman publik
+- [x] **RBAC dashboard**: relawan yang login di dashboard Prasarana/Klub-Komunitas/Events sekarang hanya melihat data di wilayahnya sendiri (kabupaten+kecamatan cocok dengan data user) — admin tetap melihat semua wilayah. Tombol "Verifikasi" yang sebelumnya ikut tampil untuk relawan (meski backend sudah menolak/403) kini disembunyikan, hanya admin yang melihatnya. Kampung Olahraga & Daftar Relawan/Leaderboard sengaja dibiarkan lintas-wilayah (direktori & kompetisi nasional).
+- [x] Redesain halaman QR check-in: 2 kolom (foto+info fasil | form), tema biru konsisten, fit 1 layar di desktop, responsif di mobile; fix Alpine.js tidak ter-load (bug lama, bikin auto-isi klub & upload foto tidak berfungsi)
+- [x] Redesain "Komponen Syarat Kemenpora" jadi roadmap bertingkat (bukan progress bar polos) — tetap tersirat sebagai syarat resmi Kemenpora RI
+- [x] Kampung Olahraga bisa didaftarkan per RT/RW (skala kecil) — relawan lain di desa yang sama tidak lagi "kehabisan" kesempatan mendaftar & dapat poin
+- [x] Rename lencana "Penjaga Sarpras" → "Duta Sarpras" (menghindari kesan merendahkan)
+- [x] Google OAuth live di produksi (`dataraga.my.id`) — catatan deploy penting di shared hosting (Rumah Web/cPanel):
+  - `composer` tidak ada di PATH → pakai `composer.phar` lokal (`php composer-setup.php` lalu `php composer.phar install`)
+  - Redirect URI Google **wajib** domain publik asli atau literal `localhost` — custom domain lokal (`cpss.test` dsb) selalu ditolak Google, dipakai `http://localhost:8002/...` untuk trial lokal
+  - Redirect URI produksi harus persis `/auth/google/callback` (bukan `/auth/google/redirect`) di Google Cloud Console
+
+---
+
 ## 5. DATA DUMMY & TESTING
 
 ### 5.1 Akun Dummy (password: `password`)
@@ -416,6 +434,10 @@ npm run dev
 | 27 Juni 2026 | Semua perubahan di-commit terpisah (7 commits) |
 | 20 Juli 2026 | Kampung Olahraga di-redesign: QR per-fasil (bukan per-kampung), integrasi Klub/Komunitas, Google OAuth, leaderboard kampung & klub, poin kampung masuk GamificationService |
 | 20 Juli 2026 | Partisipasi diarsipkan (bukan dihapus) — digantikan check-in QR Kampung Olahraga sebagai sumber data partisipasi resmi |
+| 21 Juli 2026 | URL publik pindah dari id berurutan ke kode unik acak 10 karakter (anti tebak-tebakan/enumerasi) |
+| 21 Juli 2026 | Dashboard relawan dibatasi per wilayah sendiri (kabupaten/kecamatan); tombol Verifikasi disembunyikan dari relawan, hanya admin |
+| 21 Juli 2026 | Kampung Olahraga boleh didaftarkan per RT/RW agar tidak terbatas satu per desa |
+| 21 Juli 2026 | Google OAuth berhasil live di produksi (dataraga.my.id) setelah fix composer.phar + redirect URI di hosting Rumah Web |
 
 ---
 

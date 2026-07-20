@@ -21,11 +21,19 @@ class ClubController extends Controller
      */
     public function index(Request $request): View
     {
+        $isDashboard = request()->is('dashboard/*');
+        $user = auth()->user();
+
         $query = Club::with(['user', 'prasarana'])->latest();
 
         // Guest (publik) hanya lihat yang sudah divalidasi
         if (!auth()->check()) {
             $query->validated();
+        }
+
+        // Relawan di dashboard hanya lihat data di wilayahnya sendiri
+        if ($isDashboard && $user?->isRelawan()) {
+            $user->scopeToOwnWilayah($query);
         }
 
         // Filter: search nama
@@ -52,6 +60,9 @@ class ClubController extends Controller
 
         // Data untuk dropdown filter
         $filterQuery = auth()->check() ? Club::query() : Club::validated();
+        if ($isDashboard && $user?->isRelawan()) {
+            $user->scopeToOwnWilayah($filterQuery);
+        }
         $kabupatenList = (clone $filterQuery)->distinct()->orderBy('kabupaten')->pluck('kabupaten')->filter();
         $kecamatanList = (clone $filterQuery)->when($request->filled('kabupaten'), fn($q) => $q->where('kabupaten', $request->kabupaten))->distinct()->orderBy('kecamatan')->pluck('kecamatan')->filter();
 
@@ -59,7 +70,6 @@ class ClubController extends Controller
         $activeClubs = (clone $query)->where('aktif', true)->count();
         $clubsWithPrasarana = (clone $query)->whereNotNull('prasarana_id')->count();
 
-        $isDashboard = request()->is('dashboard/*');
         $view = $isDashboard ? 'clubs.index-dashboard' : 'clubs.index';
         return view($view, compact('clubs', 'totalClubs', 'activeClubs', 'clubsWithPrasarana', 'kabupatenList', 'kecamatanList'));
     }

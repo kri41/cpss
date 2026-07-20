@@ -223,4 +223,20 @@ class User extends Authenticatable
 
         return true;
     }
+
+    /**
+     * Batasi query ke wilayah (kabupaten/kecamatan) milik user ini —
+     * dipakai agar relawan di dashboard hanya melihat data di daerahnya sendiri.
+     */
+    public function scopeToOwnWilayah($query)
+    {
+        if (!empty($this->kabupaten)) {
+            $query->whereRaw('LOWER(TRIM(kabupaten)) = ?', [strtolower(trim($this->kabupaten))]);
+        }
+        if (!empty($this->kecamatan)) {
+            $query->whereRaw('LOWER(TRIM(kecamatan)) = ?', [strtolower(trim($this->kecamatan))]);
+        }
+
+        return $query;
+    }
 }

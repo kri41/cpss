@@ -126,7 +126,7 @@
                                 @if(auth()->user()->canEdit($event))
                                     <a href="{{ route('events.edit', $event) }}" class="p-2 rounded-lg text-amber-600 hover:bg-amber-50 transition-colors" title="Edit"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg></a>
                                 @endif
-                                @if(auth()->user()->isAdmin() || auth()->user()->isRelawan())
+                                @if(auth()->user()->isAdmin())
                                     @if($event->status_validasi === 'pending')
                                         <button @click="selected = { id: {{ $event->id }}, nama: '{{ $event->nama_event }}', tanggal: '{{ $event->tanggal_mulai->translatedFormat('d F Y') }}', selesai: '{{ $event->tanggal_selesai?->translatedFormat('d F Y') ?? '-' }}', tingkat: '{{ $event->tingkat }}', wilayah: '{{ $event->desa ?? '-' }} / {{ $event->kecamatan ?? '-' }} / {{ $event->kabupaten ?? '-' }}', status: '{{ $event->status_validasi }}', action: '{{ route('events.validate', $event) }}' }; verifyOpen = true" class="p-2 rounded-lg text-emerald-600 hover:bg-emerald-50 transition-colors" title="Verifikasi"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></button>
                                     @else
