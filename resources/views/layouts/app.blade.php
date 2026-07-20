@@ -25,6 +25,7 @@
             .sidebar-scroll::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.2); }
             .sidebar-scroll { scrollbar-width: thin; scrollbar-color: rgba(0,0,0,0.1) transparent; }
         </style>
+        @stack('styles')
     </head>
     <body class="font-sans antialiased text-gray-800" style="background: linear-gradient(160deg, #1e3a8a 0%, #2563eb 30%, #60a5fa 60%, #dbeafe 85%, #f0f9ff 100%); background-attachment: fixed; min-height: 100vh;">
         <div x-data="{ sidebarOpen: false, dropdownOpen: {} }" class="min-h-screen">
