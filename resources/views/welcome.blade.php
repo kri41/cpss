@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Dataraga — Mencatat Gerak, Membangun Bangsa</title>
+    <title>Dataraga — Kamu Gerak, Indonesia Tahu</title>
     <link rel="icon" href="/storage/logo.png" type="image/png">
     <link rel="apple-touch-icon" href="/storage/logo.png">
     <link rel="manifest" href="/manifest.json">
@@ -137,6 +137,13 @@
                     @endauth
                 </div>
 
+                {{-- Cara Penggunaan --}}
+                <button @click="modal = 'tutorial'"
+                    class="flex items-center gap-1.5 text-white/60 hover:text-white text-xs font-medium mb-6 transition">
+                    <i class="fas fa-circle-info"></i>
+                    Cara Penggunaan
+                </button>
+
                 {{-- 4 Menu Cards --}}
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 w-full max-w-sm sm:max-w-lg">
                     <a href="{{ route('prasarana.index') }}"
@@ -260,6 +267,18 @@
                         Masuk Sekarang
                     </button>
                 </form>
+
+                <div class="mt-4 flex items-center gap-3">
+                    <div class="flex-1 h-px bg-gray-200"></div>
+                    <span class="text-[10px] font-semibold text-gray-400 uppercase">Atau</span>
+                    <div class="flex-1 h-px bg-gray-200"></div>
+                </div>
+                <a href="{{ route('google.redirect') }}"
+                    class="mt-4 w-full flex items-center justify-center gap-2.5 py-2.5 bg-white border border-gray-200 text-gray-700 font-bold rounded-xl hover:bg-gray-50 shadow-sm transition text-sm">
+                    <i class="fa-brands fa-google text-red-500"></i>
+                    Masuk dengan Google
+                </a>
+
                 <p class="mt-5 text-center text-xs text-gray-500">
                     Belum punya akun?
                     <button @click="modal = 'register'" class="text-blue-600 font-bold hover:underline">Daftar di sini</button>
@@ -352,10 +371,71 @@
                         Daftar &amp; Langsung Masuk
                     </button>
                 </form>
+
+                <div class="mt-4 flex items-center gap-3">
+                    <div class="flex-1 h-px bg-gray-200"></div>
+                    <span class="text-[10px] font-semibold text-gray-400 uppercase">Atau</span>
+                    <div class="flex-1 h-px bg-gray-200"></div>
+                </div>
+                <a href="{{ route('google.redirect') }}"
+                    class="mt-4 w-full flex items-center justify-center gap-2.5 py-2.5 bg-white border border-gray-200 text-gray-700 font-bold rounded-xl hover:bg-gray-50 shadow-sm transition text-sm">
+                    <i class="fa-brands fa-google text-red-500"></i>
+                    Daftar dengan Google
+                </a>
+
                 <p class="mt-4 text-center text-xs text-gray-500">
                     Sudah punya akun?
                     <button @click="modal = 'login'" class="text-teal-600 font-bold hover:underline">Masuk di sini</button>
                 </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================
+         TUTORIAL MODAL — Cara Penggunaan
+    ================================================================ -->
+    <div x-show="modal === 'tutorial'" x-cloak
+         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/70 backdrop-blur-sm">
+        <div x-show="modal === 'tutorial'" @click.away="modal = ''"
+             x-transition:enter="transition ease-out duration-250"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-95"
+             class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden relative">
+
+            <div class="p-7 pb-6" style="background: linear-gradient(160deg,#1e3a8a 0%,#1d4ed8 50%,#0284c7 100%)">
+                <button @click="modal = ''"
+                    class="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/15 flex items-center justify-center text-white/80 hover:bg-white/25 transition text-xs">
+                    <i class="fas fa-times"></i>
+                </button>
+                <h3 class="text-xl font-black text-white mb-1">Cara Penggunaan Dataraga</h3>
+                <p class="text-blue-100 text-xs">4 langkah singkat mengumpulkan data olahraga daerahmu.</p>
+            </div>
+
+            <div class="p-7 space-y-4">
+                <div class="flex gap-3">
+                    <span class="shrink-0 w-7 h-7 rounded-full bg-blue-100 text-blue-700 font-black text-xs flex items-center justify-center">1</span>
+                    <p class="text-sm text-gray-600"><strong class="text-gray-900">Daftar sebagai relawan</strong> — pakai email atau langsung dengan akun Google.</p>
+                </div>
+                <div class="flex gap-3">
+                    <span class="shrink-0 w-7 h-7 rounded-full bg-blue-100 text-blue-700 font-black text-xs flex items-center justify-center">2</span>
+                    <p class="text-sm text-gray-600"><strong class="text-gray-900">Laporkan data lapangan</strong> — Prasarana, Klub/Komunitas, dan Event olahraga di daerahmu.</p>
+                </div>
+                <div class="flex gap-3">
+                    <span class="shrink-0 w-7 h-7 rounded-full bg-blue-100 text-blue-700 font-black text-xs flex items-center justify-center">3</span>
+                    <p class="text-sm text-gray-600"><strong class="text-gray-900">Daftarkan Kampung Olahraga</strong> — setelah diverifikasi admin, tiap fasilitas dapat QR check-in sendiri untuk ditempel di lokasi.</p>
+                </div>
+                <div class="flex gap-3">
+                    <span class="shrink-0 w-7 h-7 rounded-full bg-blue-100 text-blue-700 font-black text-xs flex items-center justify-center">4</span>
+                    <p class="text-sm text-gray-600"><strong class="text-gray-900">Warga scan QR</strong> saat berolahraga — otomatis tercatat sebagai partisipasi dan poin di leaderboard.</p>
+                </div>
+
+                <button @click="modal = ''"
+                    class="w-full py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 shadow-lg transition active:scale-95 text-sm mt-2">
+                    Mengerti
+                </button>
             </div>
         </div>
     </div>

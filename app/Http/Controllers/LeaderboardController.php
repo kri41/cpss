@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Club;
+use App\Models\KampungOlahraga;
 use App\Models\PointTransaction;
 use App\Models\User;
 use Illuminate\View\View;
@@ -10,10 +12,32 @@ use Illuminate\Http\Request;
 class LeaderboardController extends Controller
 {
     /**
-     * Display leaderboard with tabs: mingguan, bulanan, total
+     * Display leaderboard with tabs: relawan (mingguan/bulanan/total), kampung, klub
      */
     public function index(Request $request): View
     {
+        $tab = $request->get('tab', 'relawan'); // relawan | kampung | klub
+
+        if ($tab === 'kampung') {
+            $kampungLeaderboard = KampungOlahraga::validated()
+                ->with('fasil')
+                ->withCount('checkins')
+                ->get()
+                ->sortByDesc(fn($k) => $k->skorPoin())
+                ->values();
+
+            return view('leaderboard.index', compact('tab', 'kampungLeaderboard'));
+        }
+
+        if ($tab === 'klub') {
+            $klubLeaderboard = Club::validated()->aktif()
+                ->withCount('checkins')
+                ->orderByDesc('checkins_count')
+                ->get();
+
+            return view('leaderboard.index', compact('tab', 'klubLeaderboard'));
+        }
+
         $periode = $request->get('periode', 'bulanan'); // mingguan | bulanan | total
 
         $mingguAwal = now()->startOfWeek();
@@ -77,7 +101,7 @@ class LeaderboardController extends Controller
             $personalRank = $sortQuery !== false ? $sortQuery + 1 : null;
         }
 
-        return view('leaderboard.index', compact('leaderboard', 'periode', 'personalRank'));
+        return view('leaderboard.index', compact('tab', 'leaderboard', 'periode', 'personalRank'));
     }
 
     /**

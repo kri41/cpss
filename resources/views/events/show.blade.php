@@ -1,4 +1,4 @@
-@extends('layouts.public')
+@extends(auth()->check() ? 'layouts.app' : 'layouts.public')
 
 @section('title', $event->nama_event . ' - Dataraga')
 

@@ -21,11 +21,14 @@
                             <x-nav-link :href="route('prasarana.index')" :active="request()->routeIs('prasarana.*')">
                                 {{ __('Prasarana') }}
                             </x-nav-link>
-                            <x-nav-link :href="route('partisipasi.index')" :active="request()->routeIs('partisipasi.*')">
-                                {{ __('Partisipasi') }}
+                            <x-nav-link :href="route('clubs.index')" :active="request()->routeIs('clubs.*')">
+                                {{ __('Klub/Komunitas') }}
                             </x-nav-link>
                             <x-nav-link :href="route('events.index')" :active="request()->routeIs('events.*')">
                                 {{ __('Events') }}
+                            </x-nav-link>
+                            <x-nav-link :href="route('kampung.index')" :active="request()->routeIs('kampung.*')">
+                                {{ __('Kampung Olahraga') }}
                             </x-nav-link>
                         @endif
 
@@ -108,11 +111,14 @@
                     <x-responsive-nav-link :href="route('prasarana.index')" :active="request()->routeIs('prasarana.*')">
                         {{ __('Prasarana') }}
                     </x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('partisipasi.index')" :active="request()->routeIs('partisipasi.*')">
-                        {{ __('Partisipasi') }}
+                    <x-responsive-nav-link :href="route('clubs.index')" :active="request()->routeIs('clubs.*')">
+                        {{ __('Klub/Komunitas') }}
                     </x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('events.index')" :active="request()->routeIs('events.*')">
                         {{ __('Events') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('kampung.index')" :active="request()->routeIs('kampung.*')">
+                        {{ __('Kampung Olahraga') }}
                     </x-responsive-nav-link>
                 @endif
 

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasSlug;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,13 +11,13 @@ use Illuminate\Support\Str;
 
 class KampungOlahraga extends Model
 {
-    use HasFactory;
+    use HasFactory, HasSlug;
 
     protected $table = 'kampung_olahraga';
 
     protected $fillable = [
         'user_id', 'nama_kampung', 'alamat',
-        'provinsi', 'kabupaten', 'kecamatan', 'desa',
+        'provinsi', 'kabupaten', 'kecamatan', 'desa', 'rt', 'rw',
         'status_validasi', 'qr_token', 'catatan_admin',
         'latitude', 'longitude',
     ];
@@ -34,6 +35,16 @@ class KampungOlahraga extends Model
     public function checkins(): HasMany
     {
         return $this->hasMany(CheckinKampung::class);
+    }
+
+    public function fasil(): HasMany
+    {
+        return $this->hasMany(Prasarana::class, 'kampung_olahraga_id');
+    }
+
+    public function klubKomunitas(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Club::class, 'kampung_klub', 'kampung_olahraga_id', 'club_id');
     }
 
     public static function generateQrToken(): string
@@ -67,5 +78,14 @@ class KampungOlahraga extends Model
     public function scopeValidated($query)
     {
         return $query->where('status_validasi', 'validated');
+    }
+
+    public function getRtRwLabelAttribute(): ?string
+    {
+        if (!$this->rt && !$this->rw) {
+            return null;
+        }
+
+        return 'RT ' . ($this->rt ?: '-') . ' / RW ' . ($this->rw ?: '-');
     }
 }

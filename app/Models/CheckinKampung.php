@@ -13,7 +13,7 @@ class CheckinKampung extends Model
     protected $table = 'checkin_kampung';
 
     protected $fillable = [
-        'kampung_olahraga_id', 'nama_peserta', 'umur',
+        'kampung_olahraga_id', 'prasarana_id', 'club_id', 'nama_peserta', 'umur',
         'jenis_olahraga_id', 'jenis_olahraga_nama', 'foto',
     ];
 
@@ -29,5 +29,15 @@ class CheckinKampung extends Model
     public function jenisOlahraga(): BelongsTo
     {
         return $this->belongsTo(JenisOlahraga::class);
+    }
+
+    public function prasarana(): BelongsTo
+    {
+        return $this->belongsTo(Prasarana::class, 'prasarana_id');
+    }
+
+    public function club(): BelongsTo
+    {
+        return $this->belongsTo(Club::class, 'club_id');
     }
 }

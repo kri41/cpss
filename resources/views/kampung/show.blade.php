@@ -8,9 +8,11 @@
     $maxPoin = $komponenList->sum('poin');
     $isAdmin = auth()->user()->isAdmin();
     $isOwner = $kampung->user_id === auth()->id();
+    $canManage = $isAdmin || $isOwner;
 @endphp
 
-<div x-data="{ rejectOpen: false }" class="max-w-5xl mx-auto px-4 py-4 sm:px-6">
+<div x-data="{ rejectOpen: false, qrOpen: false, qrShown: null, attachFasilOpen: false, attachKlubOpen: false }">
+<div class="max-w-5xl mx-auto px-4 py-4 sm:px-6">
 
     {{-- Back --}}
     <div class="mb-4">
@@ -35,6 +37,9 @@
                     <div class="flex-1 min-w-0">
                         <h1 class="text-xl font-bold text-gray-900">{{ $kampung->nama_kampung }}</h1>
                         <p class="text-sm text-gray-500 mt-1">
+                            @if($kampung->rt_rw_label)
+                            <span class="font-medium text-gray-600">{{ $kampung->rt_rw_label }}</span> &middot;
+                            @endif
                             {{ collect([$kampung->desa, $kampung->kecamatan, $kampung->kabupaten, $kampung->provinsi])->filter()->implode(', ') ?: 'Lokasi belum diisi' }}
                         </p>
                     </div>
@@ -101,45 +106,161 @@
                 @endif
             </div>
 
-            {{-- Komponen Syarat Progress --}}
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-sm font-bold text-gray-800">Komponen Syarat Kemenpora</h2>
-                    <span class="text-xs font-bold text-blue-700 bg-blue-50 px-3 py-1 rounded-full">Skor: {{ $skor }} / {{ $maxPoin }} poin</span>
-                </div>
-                @if($komponenList->isEmpty())
-                <p class="text-sm text-gray-400 text-center py-3">Belum ada komponen syarat yang ditetapkan.</p>
-                @else
-                <div class="space-y-3">
-                    @foreach($komponenList as $k)
-                    @php
-                        $fulfilled = $totalCheckin >= $k->target_checkin;
-                        $pct = $k->target_checkin > 0 ? min(100, round($totalCheckin / $k->target_checkin * 100)) : 0;
-                    @endphp
+            {{-- Fasil Terdaftar --}}
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="px-5 py-4 border-b border-gray-50 flex items-center justify-between">
                     <div>
-                        <div class="flex items-center justify-between mb-1">
-                            <div class="flex items-center gap-2">
-                                @if($fulfilled)
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                @else
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                @endif
-                                <span class="text-xs font-medium {{ $fulfilled ? 'text-emerald-700' : 'text-gray-700' }}">{{ $k->nama }}</span>
-                            </div>
-                            <span class="text-xs {{ $fulfilled ? 'text-emerald-600 font-bold' : 'text-gray-400' }}">
-                                {{ number_format($totalCheckin) }} / {{ number_format($k->target_checkin) }} &middot; {{ $k->poin }}pt
-                            </span>
+                        <h2 class="text-sm font-bold text-gray-800">Fasil Terdaftar</h2>
+                        <p class="text-xs text-gray-400 mt-0.5">Fasilitas (dari menu Prasarana) yang menjadi bagian rumah kampung ini. Tiap fasil punya QR check-in sendiri.</p>
+                    </div>
+                    @if($canManage)
+                    <button @click="attachFasilOpen = true" class="shrink-0 px-3 py-1.5 text-xs font-semibold bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg transition">+ Daftarkan Fasil</button>
+                    @endif
+                </div>
+                @if($kampung->fasil->isEmpty())
+                <div class="text-center py-8 text-sm text-gray-400">Belum ada fasil yang terdaftar di kampung ini.</div>
+                @else
+                <div class="divide-y divide-gray-50">
+                    @foreach($kampung->fasil as $fasil)
+                    <div class="px-5 py-3 flex items-center justify-between gap-3">
+                        <div class="min-w-0">
+                            <p class="text-sm font-semibold text-gray-900 truncate">{{ $fasil->nama_fasilitas }}</p>
+                            <p class="text-xs text-gray-500">{{ $fasil->kategori_olahraga }}</p>
                         </div>
-                        <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                            <div class="h-full rounded-full transition-all {{ $fulfilled ? 'bg-emerald-500' : 'bg-blue-400' }}" style="width: {{ $pct }}%"></div>
+                        <div class="flex items-center gap-2 shrink-0">
+                            @if(isset($fasilQr[$fasil->id]))
+                            <button @click="qrShown = {{ $fasil->id }}; qrOpen = true" class="px-3 py-1.5 text-xs font-semibold bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg transition">Lihat QR</button>
+                            @else
+                            <span class="px-3 py-1.5 text-xs font-medium bg-amber-50 text-amber-600 rounded-lg">QR belum aktif</span>
+                            @endif
+                            @if($canManage)
+                            <form method="POST" action="{{ route('kampung.fasil.detach', [$kampung, $fasil]) }}" onsubmit="return confirm('Lepas fasil ini dari kampung? QR akan dinonaktifkan.')">
+                                @csrf @method('DELETE')
+                                <button type="submit" class="px-2.5 py-1.5 text-xs font-semibold bg-red-50 hover:bg-red-100 text-red-700 rounded-lg transition">Lepas</button>
+                            </form>
+                            @endif
                         </div>
-                        @if($k->deskripsi)
-                        <p class="text-[10px] text-gray-400 mt-0.5">{{ $k->deskripsi }}</p>
-                        @endif
                     </div>
                     @endforeach
                 </div>
                 @endif
+            </div>
+
+            {{-- Klub/Komunitas Terdaftar --}}
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="px-5 py-4 border-b border-gray-50 flex items-center justify-between">
+                    <div>
+                        <h2 class="text-sm font-bold text-gray-800">Klub/Komunitas Terdaftar</h2>
+                        <p class="text-xs text-gray-400 mt-0.5">Muncul sebagai pilihan saat peserta check-in via QR di kampung ini.</p>
+                    </div>
+                    @if($canManage)
+                    <button @click="attachKlubOpen = true" class="shrink-0 px-3 py-1.5 text-xs font-semibold bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg transition">+ Daftarkan Klub</button>
+                    @endif
+                </div>
+                @if($kampung->klubKomunitas->isEmpty())
+                <div class="text-center py-8 text-sm text-gray-400">Belum ada klub/komunitas yang terdaftar di kampung ini.</div>
+                @else
+                <div class="p-5 flex flex-wrap gap-2">
+                    @foreach($kampung->klubKomunitas as $klub)
+                    <span class="inline-flex items-center gap-2 pl-3 pr-1.5 py-1.5 bg-gray-50 border border-gray-200 rounded-full text-xs font-medium text-gray-700">
+                        {{ $klub->nama_club }}
+                        @if($canManage)
+                        <form method="POST" action="{{ route('kampung.klub.detach', [$kampung, $klub]) }}" onsubmit="return confirm('Lepas klub/komunitas ini dari kampung?')">
+                            @csrf @method('DELETE')
+                            <button type="submit" class="w-5 h-5 inline-flex items-center justify-center rounded-full hover:bg-red-100 text-gray-400 hover:text-red-600 transition">&times;</button>
+                        </form>
+                        @endif
+                    </span>
+                    @endforeach
+                </div>
+                @endif
+            </div>
+
+            {{-- Komponen Syarat Progress --}}
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="px-5 py-4 relative overflow-hidden" style="background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 55%, #0369a1 100%);">
+                    <div style="position:absolute; top:-30px; right:-20px; width:120px; height:120px; background:rgba(255,255,255,0.06); border-radius:9999px;"></div>
+                    <div class="relative flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-3">
+                            <div class="shrink-0 w-10 h-10 rounded-2xl bg-white/15 backdrop-blur flex items-center justify-center">
+                                <i class="fas fa-shield-halved text-amber-300"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-sm font-bold text-white leading-tight">Seberapa Aktif Kampung Olahragamu?</h2>
+                                <p class="text-[11px] text-blue-200">Menuju pengakuan resmi Kemenpora RI</p>
+                            </div>
+                        </div>
+                        <div class="shrink-0 text-right">
+                            <p class="text-[10px] text-blue-200 uppercase tracking-wide">Skor</p>
+                            <p class="text-lg font-black text-white leading-tight">{{ $skor }}<span class="text-xs font-medium text-blue-200">/{{ $maxPoin }}</span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-5">
+                    @if($komponenList->isEmpty())
+                    <p class="text-sm text-gray-400 text-center py-3">Belum ada komponen syarat yang ditetapkan.</p>
+                    @else
+                    @php
+                        $nextIndex = $komponenList->search(fn($k) => $totalCheckin < $k->target_checkin);
+                    @endphp
+                    <div class="relative space-y-5">
+                        @foreach($komponenList as $i => $k)
+                        @php
+                            $fulfilled = $totalCheckin >= $k->target_checkin;
+                            $isNext = $i === $nextIndex;
+                            $pct = $k->target_checkin > 0 ? min(100, round($totalCheckin / $k->target_checkin * 100)) : 0;
+                        @endphp
+                        <div class="relative flex gap-3">
+                            {{-- Tangga / connector --}}
+                            <div class="flex flex-col items-center shrink-0">
+                                <div class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm shrink-0
+                                    {{ $fulfilled ? 'bg-emerald-500 text-white shadow-md shadow-emerald-200' : ($isNext ? 'bg-white border-2 border-blue-400 text-blue-600 animate-pulse' : 'bg-gray-100 text-gray-400') }}">
+                                    @if($fulfilled)
+                                    <i class="fas fa-check text-xs"></i>
+                                    @else
+                                    {{ $i + 1 }}
+                                    @endif
+                                </div>
+                                @if(!$loop->last)
+                                <div class="w-0.5 flex-1 mt-1 rounded-full {{ $fulfilled ? 'bg-emerald-300' : 'bg-gray-100' }}" style="min-height: 1.75rem;"></div>
+                                @endif
+                            </div>
+
+                            <div class="flex-1 pb-1 min-w-0">
+                                <div class="flex items-start justify-between gap-2">
+                                    <div class="min-w-0">
+                                        <div class="flex items-center gap-1.5 flex-wrap">
+                                            <span class="text-sm font-bold {{ $fulfilled ? 'text-emerald-700' : 'text-gray-800' }}">{{ $k->nama }}</span>
+                                            @if($fulfilled)
+                                            <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full">Tercapai</span>
+                                            @elseif($isNext)
+                                            <span class="text-[10px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded-full">Target berikutnya</span>
+                                            @endif
+                                        </div>
+                                        @if($k->deskripsi)
+                                        <p class="text-xs text-gray-400 mt-0.5">{{ $k->deskripsi }}</p>
+                                        @endif
+                                    </div>
+                                    <span class="shrink-0 inline-flex items-center gap-1 text-[11px] font-bold {{ $fulfilled ? 'text-emerald-600' : 'text-amber-600' }}">
+                                        <i class="fas fa-medal text-[10px]"></i> +{{ $k->poin }}
+                                    </span>
+                                </div>
+
+                                <div class="mt-2 flex items-center gap-2">
+                                    <div class="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+                                        <div class="h-full rounded-full transition-all {{ $fulfilled ? 'bg-emerald-500' : 'bg-gradient-to-r from-blue-400 to-sky-400' }}" style="width: {{ $pct }}%"></div>
+                                    </div>
+                                    <span class="text-[11px] shrink-0 {{ $fulfilled ? 'text-emerald-600 font-bold' : 'text-gray-400' }}">
+                                        {{ number_format($totalCheckin) }}/{{ number_format($k->target_checkin) }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                    @endif
+                </div>
             </div>
 
             {{-- Recent Check-ins --}}
@@ -189,37 +310,24 @@
 
         </div>
 
-        {{-- RIGHT: QR Code --}}
+        {{-- RIGHT: QR Info --}}
         <div class="space-y-4">
 
-            @if($kampung->status_validasi === 'validated' && $qrSvg)
+            @if($kampung->status_validasi === 'validated')
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 text-center">
-                <div class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 text-xs font-bold px-3 py-1 rounded-full mb-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 3.5c0 1.5-1.5 3-3 3s-3-1.5-3-3 1.5-3 3-3 3 1.5 3 3z"/></svg>
-                    QR Check-in Aktif
+                <div class="w-12 h-12 bg-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 3.5c0 1.5-1.5 3-3 3s-3-1.5-3-3 1.5-3 3-3 3 1.5 3 3z"/></svg>
                 </div>
-
-                <div class="inline-block p-3 bg-white rounded-xl border border-gray-200 shadow-inner mb-3">
-                    {!! $qrSvg !!}
-                </div>
-
-                <p class="text-xs text-gray-500 mb-3">Scan QR code ini untuk check-in olahraga di kampung ini.</p>
-
-                <a href="{{ $qrUrl }}" target="_blank" class="block w-full px-3 py-2 text-xs font-semibold bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl transition mb-2">
-                    Buka Link Check-in
-                </a>
-
-                <button onclick="window.print()" class="block w-full px-3 py-2 text-xs font-semibold bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-xl transition">
-                    Print QR Code
-                </button>
+                <p class="text-sm font-medium text-gray-700 mb-1">QR Aktif per Fasil</p>
+                <p class="text-xs text-gray-500">Setiap fasil yang terdaftar punya QR check-in sendiri. Lihat tombol "Lihat QR" pada daftar Fasil Terdaftar di samping.</p>
             </div>
-            @elseif($kampung->status_validasi !== 'validated')
+            @else
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 text-center">
                 <div class="w-12 h-12 bg-amber-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
                 <p class="text-sm font-medium text-gray-700 mb-1">QR Belum Aktif</p>
-                <p class="text-xs text-gray-500">QR Code akan aktif setelah kampung ini diverifikasi oleh admin.</p>
+                <p class="text-xs text-gray-500">QR fasil akan aktif setelah kampung ini diverifikasi oleh admin.</p>
             </div>
             @endif
 
@@ -250,6 +358,72 @@
     </div>
 
 </div>
+{{-- /max-w-5xl content wrapper --}}
+
+{{-- Per-Fasil QR Modal --}}
+@foreach($fasilQr as $fasilId => $qr)
+<div x-show="qrOpen && qrShown === {{ $fasilId }}" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+    <div @click.away="qrOpen = false" class="bg-white rounded-2xl shadow-2xl max-w-xs w-full p-6 text-center">
+        <div class="inline-block p-3 bg-white rounded-xl border border-gray-200 shadow-inner mb-3">
+            {!! $qr['svg'] !!}
+        </div>
+        <p class="text-xs text-gray-500 mb-3">Scan QR code ini untuk check-in olahraga di fasil ini.</p>
+        <a href="{{ $qr['url'] }}" target="_blank" class="block w-full px-3 py-2 text-xs font-semibold bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl transition mb-2">Buka Link Check-in</a>
+        <button onclick="window.print()" class="block w-full px-3 py-2 text-xs font-semibold bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-xl transition mb-2">Print QR Code</button>
+        <button type="button" @click="qrOpen = false" class="block w-full px-3 py-2 text-xs font-semibold bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl transition">Tutup</button>
+    </div>
+</div>
+@endforeach
+
+{{-- Attach Fasil Modal --}}
+@if($canManage)
+<div x-show="attachFasilOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+    <div @click.away="attachFasilOpen = false" class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6">
+        <h3 class="text-base font-bold text-gray-900 mb-1">Daftarkan Fasil</h3>
+        <p class="text-sm text-gray-500 mb-4">Pilih fasilitas (dari menu Prasarana) yang se-wilayah dan belum terdaftar di kampung lain.</p>
+        <form method="POST" action="{{ route('kampung.fasil.attach', $kampung) }}">
+            @csrf
+            <select name="prasarana_id" required class="w-full rounded-xl border-gray-300 focus:border-blue-500 focus:ring-blue-500 text-sm mb-4">
+                <option value="">Pilih fasil...</option>
+                @foreach($candidateFasil as $f)
+                <option value="{{ $f->id }}">{{ $f->nama_fasilitas }} ({{ $f->kategori_olahraga }})</option>
+                @endforeach
+            </select>
+            @if($candidateFasil->isEmpty())
+            <p class="text-xs text-amber-600 mb-4">Tidak ada fasil kandidat. Pastikan Prasarana sudah divalidasi, berada di wilayah (kabupaten/kecamatan/desa) yang sama dengan kampung ini, dan belum terdaftar di kampung lain.</p>
+            @endif
+            <div class="flex gap-2">
+                <button type="submit" class="flex-1 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition">Daftarkan</button>
+                <button type="button" @click="attachFasilOpen = false" class="flex-1 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-semibold rounded-xl transition">Batal</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{-- Attach Klub Modal --}}
+<div x-show="attachKlubOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+    <div @click.away="attachKlubOpen = false" class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6">
+        <h3 class="text-base font-bold text-gray-900 mb-1">Daftarkan Klub/Komunitas</h3>
+        <p class="text-sm text-gray-500 mb-4">Pilih klub/komunitas yang se-wilayah dan belum terdaftar di kampung ini.</p>
+        <form method="POST" action="{{ route('kampung.klub.attach', $kampung) }}">
+            @csrf
+            <select name="club_id" required class="w-full rounded-xl border-gray-300 focus:border-blue-500 focus:ring-blue-500 text-sm mb-4">
+                <option value="">Pilih klub/komunitas...</option>
+                @foreach($candidateKlub as $k)
+                <option value="{{ $k->id }}">{{ $k->nama_club }}</option>
+                @endforeach
+            </select>
+            @if($candidateKlub->isEmpty())
+            <p class="text-xs text-amber-600 mb-4">Tidak ada klub/komunitas kandidat. Pastikan sudah divalidasi, aktif, dan berada di wilayah yang sama dengan kampung ini.</p>
+            @endif
+            <div class="flex gap-2">
+                <button type="submit" class="flex-1 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition">Daftarkan</button>
+                <button type="button" @click="attachKlubOpen = false" class="flex-1 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-semibold rounded-xl transition">Batal</button>
+            </div>
+        </form>
+    </div>
+</div>
+@endif
 
 {{-- Reject Modal --}}
 <div x-show="rejectOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
@@ -266,6 +440,9 @@
         </form>
     </div>
 </div>
+
+</div>
+{{-- /x-data scope --}}
 
 <style>
 @media print {

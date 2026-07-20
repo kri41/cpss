@@ -79,6 +79,16 @@
             select.disabled = true;
         }
 
+        // Normalisasi nama wilayah agar data lama yang pakai prefix singkatan
+        // ("Kab. Banyuwangi", "Kec. Glagah", "Desa Sumber Agung") tetap cocok
+        // dengan nama baku di tabel wilayah ("Kabupaten Banyuwangi", "Glagah", "Sumber Agung").
+        function normalizeWilayahName(s) {
+            return String(s || '')
+                .toLowerCase()
+                .replace(/^(kab\.?|kabupaten|kota|kec\.?|kecamatan|desa|kel\.?|kelurahan)\s+/, '')
+                .trim();
+        }
+
         // useKode=true  → option.value = kode (provinsi, untuk peta)
         // useKode=false → option.value = nama (kabupaten/kecamatan/desa, untuk display)
         // data-kode selalu berisi kode BPS untuk keperluan cascade API
@@ -89,10 +99,11 @@
                 option.value = useKode ? item.kode : item.nama;
                 option.dataset.kode = item.kode;
                 option.textContent = item.nama;
-                // Cocokkan terhadap kode DAN nama agar data lama (kode) & baru (nama) sama-sama bisa pre-select
+                // Cocokkan terhadap kode, nama persis, atau nama ternormalisasi (tanpa prefix)
                 const matches = selectedValue && (
                     String(item.kode) === String(selectedValue) ||
-                    String(item.nama) === String(selectedValue)
+                    String(item.nama) === String(selectedValue) ||
+                    normalizeWilayahName(item.nama) === normalizeWilayahName(selectedValue)
                 );
                 if (matches) option.selected = true;
                 select.appendChild(option);

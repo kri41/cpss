@@ -13,7 +13,7 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             <div class="bg-white rounded-xl shadow-sm p-6">
                 <div class="flex items-center">
-                    <div class="p-3 rounded-full bg-indigo-100 text-indigo-600">
+                    <div class="p-3 rounded-full bg-blue-100 text-blue-600">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                     </div>
                     <div class="ml-4">
@@ -60,7 +60,7 @@
                     </div>
                     <h3 class="text-sm font-semibold text-gray-900">{{ $badge->nama }}</h3>
                     <p class="text-xs text-gray-500 mt-1">{{ $badge->deskripsi }}</p>
-                    <p class="text-xs text-indigo-500 mt-1">{{ \Carbon\Carbon::parse($badge->pivot->earned_at)->format('d M Y') }}</p>
+                    <p class="text-xs text-blue-500 mt-1">{{ \Carbon\Carbon::parse($badge->pivot->earned_at)->format('d M Y') }}</p>
                 </div>
                 @endforeach
             </div>

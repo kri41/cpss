@@ -27,7 +27,7 @@ Route::get('/', function () {
         'totalPrasarana' => \App\Models\Prasarana::validated()->count(),
         'totalClubs' => \App\Models\Club::validated()->where('aktif', true)->count(),
         'totalEvents' => \App\Models\Event::validated()->count(),
-        'totalPartisipasi' => \App\Models\Partisipasi::where('status_validasi', 'validated')->sum('estimasi_jumlah_orang') ?? 0,
+        'totalPartisipasi' => \App\Models\CheckinKampung::whereHas('kampung', fn($q) => $q->where('status_validasi', 'validated'))->count(),
     ];
 
     $latestPrasarana = \App\Models\Prasarana::validated()->latest()->take(3)->get();
@@ -51,14 +51,14 @@ Route::get('/api/kehadiran/autocomplete-nama', [\App\Http\Controllers\KehadiranC
    AKSES PUBLIK (Tanpa Login)
    ============================================================ */
 Route::get('/prasarana', [PrasaranaController::class, 'index'])->name('prasarana.index');
-Route::get('/prasarana/{prasarana}', [PrasaranaController::class, 'show'])->name('prasarana.show')->whereNumber('prasarana');
+Route::get('/prasarana/{prasarana}', [PrasaranaController::class, 'show'])->name('prasarana.show');
 
 Route::get('/clubs', [ClubController::class, 'index'])->name('clubs.index');
-Route::get('/clubs/{club}', [ClubController::class, 'show'])->name('clubs.show')->whereNumber('club');
+Route::get('/clubs/{club}', [ClubController::class, 'show'])->name('clubs.show');
 
 Route::get('/events', [EventController::class, 'index'])->name('events.index');
 Route::get('/events/peta', [EventController::class, 'peta'])->name('events.peta');
-Route::get('/events/{event}', [EventController::class, 'show'])->name('events.show')->whereNumber('event');
+Route::get('/events/{event}', [EventController::class, 'show'])->name('events.show');
 
 Route::get('/kalender', [KalenderController::class, 'index'])->name('kalender.index');
 
@@ -171,6 +171,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::patch('/kampung/{kampung}/validate',        [KampungController::class, 'validate'])->name('kampung.validate');
         Route::patch('/kampung/{kampung}/reject',          [KampungController::class, 'reject'])->name('kampung.reject');
         Route::patch('/kampung/{kampung}/cancel-validate', [KampungController::class, 'cancelValidate'])->name('kampung.cancel-validate');
+
+        Route::post('/kampung/{kampung}/fasil',                [KampungController::class, 'attachFasil'])->name('kampung.fasil.attach');
+        Route::delete('/kampung/{kampung}/fasil/{prasarana}',  [KampungController::class, 'detachFasil'])->name('kampung.fasil.detach');
+        Route::post('/kampung/{kampung}/klub',                 [KampungController::class, 'attachKlub'])->name('kampung.klub.attach');
+        Route::delete('/kampung/{kampung}/klub/{club}',        [KampungController::class, 'detachKlub'])->name('kampung.klub.detach');
     });
 
     // Komponen Syarat (Admin only)

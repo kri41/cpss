@@ -32,7 +32,7 @@
             <img src="/storage/logo.png" alt="Dataraga" class="h-10 w-10 object-contain brightness-0 invert">
             <div>
                 <p class="text-white font-black text-xl tracking-tight">Dataraga</p>
-                <p class="text-teal-200 text-[10px] font-medium tracking-widest uppercase">Membangun Bangsa</p>
+                <p class="text-teal-200 text-[10px] font-medium tracking-widest uppercase">Kamu Gerak, Indonesia Tahu</p>
             </div>
         </div>
 
@@ -149,6 +149,18 @@
                     </button>
                 </div>
             </form>
+
+            <div class="mt-6 flex items-center gap-3">
+                <div class="flex-1 h-px bg-gray-200"></div>
+                <span class="text-xs font-semibold text-gray-400 uppercase">Atau</span>
+                <div class="flex-1 h-px bg-gray-200"></div>
+            </div>
+
+            <a href="{{ route('google.redirect') }}"
+                class="mt-6 w-full flex items-center justify-center gap-3 py-3.5 bg-white border border-gray-200 text-gray-700 font-bold rounded-2xl hover:bg-gray-50 shadow-sm transition-all active:scale-[0.98] text-sm">
+                <i class="fa-brands fa-google text-red-500"></i>
+                Daftar dengan Google
+            </a>
 
             <div class="mt-7 pt-6 border-t border-gray-100 text-center">
                 <p class="text-sm text-gray-500">

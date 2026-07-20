@@ -2,19 +2,23 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasSlug;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 class Prasarana extends Model
 {
-    use HasFactory;
+    use HasFactory, HasSlug;
 
     protected $table = 'prasarana';
 
     protected $fillable = [
         'user_id',
+        'kampung_olahraga_id',
+        'qr_token',
         'nama_fasilitas',
         'club_komunitas',
         'kategori_olahraga',
@@ -99,6 +103,42 @@ class Prasarana extends Model
     public function clubs(): HasMany
     {
         return $this->hasMany(Club::class);
+    }
+
+    /**
+     * Relasi ke Kampung Olahraga (fasil ini terdaftar di rumah kampung mana)
+     */
+    public function kampungOlahraga(): BelongsTo
+    {
+        return $this->belongsTo(KampungOlahraga::class, 'kampung_olahraga_id');
+    }
+
+    /**
+     * Relasi ke check-in QR yang terjadi di fasil ini
+     */
+    public function checkins(): HasMany
+    {
+        return $this->hasMany(CheckinKampung::class, 'prasarana_id');
+    }
+
+    public static function generateQrToken(): string
+    {
+        do {
+            $token = Str::random(16);
+        } while (static::where('qr_token', $token)->exists());
+
+        return $token;
+    }
+
+    /**
+     * Scope: fasil yang berada di wilayah (kabupaten+kecamatan+desa) yang sama dengan Kampung Olahraga
+     */
+    public function scopeSameWilayahAs($query, KampungOlahraga $kampung)
+    {
+        return $query
+            ->when($kampung->kabupaten, fn($q) => $q->whereRaw('LOWER(TRIM(kabupaten)) = ?', [strtolower(trim($kampung->kabupaten))]))
+            ->when($kampung->kecamatan, fn($q) => $q->whereRaw('LOWER(TRIM(kecamatan)) = ?', [strtolower(trim($kampung->kecamatan))]))
+            ->when($kampung->desa, fn($q) => $q->whereRaw('LOWER(TRIM(desa)) = ?', [strtolower(trim($kampung->desa))]));
     }
 
     /**

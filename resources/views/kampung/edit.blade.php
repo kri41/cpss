@@ -49,6 +49,19 @@
 
             <div class="grid grid-cols-2 gap-3">
                 <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">RT <span class="text-xs text-gray-400">(opsional)</span></label>
+                    <input type="text" name="rt" value="{{ old('rt', $kampung->rt) }}" placeholder="Cth: 003" maxlength="5"
+                        class="w-full rounded-xl border-gray-300 focus:border-blue-500 focus:ring-blue-500 text-sm shadow-sm">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">RW <span class="text-xs text-gray-400">(opsional)</span></label>
+                    <input type="text" name="rw" value="{{ old('rw', $kampung->rw) }}" placeholder="Cth: 005" maxlength="5"
+                        class="w-full rounded-xl border-gray-300 focus:border-blue-500 focus:ring-blue-500 text-sm shadow-sm">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Latitude</label>
                     <input type="number" name="latitude" value="{{ old('latitude', $kampung->latitude) }}" step="0.00000001"
                         class="w-full rounded-xl border-gray-300 focus:border-blue-500 focus:ring-blue-500 text-sm shadow-sm">

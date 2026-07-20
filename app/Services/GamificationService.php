@@ -21,6 +21,7 @@ class GamificationService
         'club_update'      => ['poin' => 10, 'batas' => '1x_per_entitas'],
         'event_baru'       => ['poin' => 20, 'batas' => 'tidak_dibatasi'],
         'partisipasi_valid'=> ['poin' =>  3, 'batas' => '1x_per_lokasi_tanggal'],
+        'kampung_baru'     => ['poin' => 30, 'batas' => '1x_per_entitas'],
     ];
 
     /**

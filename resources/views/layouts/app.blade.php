@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
-        <title>@yield('title', config('app.name', 'Dataraga')) — Mencatat Gerak, Membangun Bangsa</title>
+        <title>@yield('title', config('app.name', 'Dataraga')) — Kamu Gerak, Indonesia Tahu</title>
         <link rel="icon" href="/storage/logo.png" type="image/png">
         <link rel="apple-touch-icon" href="/storage/logo.png">
         <link rel="manifest" href="/manifest.json">
@@ -38,7 +38,7 @@
                         <img src="/storage/logo.png" alt="Dataraga" class="h-10 w-10 object-contain brightness-0 invert">
                         <div>
                             <h1 class="text-lg font-bold text-white tracking-tight">Dataraga</h1>
-                            <p class="text-[10px] text-white/45 font-medium">Mencatat Gerak</p>
+                            <p class="text-[10px] text-white/45 font-medium">Kamu Gerak, Indonesia Tahu</p>
                         </div>
                     </a>
                 </div>
@@ -68,7 +68,7 @@
                     <a href="{{ route('dashboard.clubs') }}" class="flex items-center justify-between px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 {{ request()->routeIs('dashboard.clubs','clubs.*') ? 'bg-white/15 text-white' : 'text-white/75 hover:bg-white/10 hover:text-white' }}">
                         <span class="flex items-center">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 {{ request()->routeIs('dashboard.clubs','clubs.*') ? 'text-sky-300' : 'text-white/40' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
-                            Clubs
+                            Klub/Komunitas
                         </span>
                         @auth
                             @php $pendingClubs = \App\Models\Club::where('status_validasi','pending')->count(); @endphp
@@ -104,19 +104,6 @@
                     </a>
 
                     @auth
-                        @if(auth()->user()->isAdmin() || auth()->user()->isRelawan())
-                            <a href="{{ route('partisipasi.index') }}" class="flex items-center justify-between px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 {{ request()->routeIs('partisipasi.*') ? 'bg-white/15 text-white' : 'text-white/75 hover:bg-white/10 hover:text-white' }}">
-                                <span class="flex items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 {{ request()->routeIs('partisipasi.*') ? 'text-sky-300' : 'text-white/40' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-                                    Partisipasi
-                                </span>
-                                @php $pendingPartisipasi = \App\Models\Partisipasi::where('status_validasi','pending')->count(); @endphp
-                                @if($pendingPartisipasi > 0 && auth()->user()->isAdmin())
-                                    <span class="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">{{ $pendingPartisipasi }}</span>
-                                @endif
-                            </a>
-                        @endif
-
                         <a href="{{ route('leaderboard.index') }}" class="flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 {{ request()->routeIs('leaderboard.*') ? 'bg-white/15 text-white' : 'text-white/75 hover:bg-white/10 hover:text-white' }}">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 {{ request()->routeIs('leaderboard.*') ? 'text-sky-300' : 'text-white/40' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
                             Leaderboard

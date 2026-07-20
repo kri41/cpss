@@ -4,171 +4,304 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Check-in Olahraga — {{ $kampung->nama_kampung }}</title>
+    <title>Check-in Olahraga — {{ $fasil->nama_fasilitas }}</title>
     <link rel="icon" href="/storage/logo.png" type="image/png">
     <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700&display=swap" rel="stylesheet">
-    @vite(['resources/css/app.css'])
+    <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700,800&display=swap" rel="stylesheet">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         [x-cloak] { display: none !important; }
-        body { font-family: 'Inter', sans-serif; background: #f0fdf4; min-height: 100vh; }
+        html, body { height: auto; overflow: auto; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(160deg, #eff6ff 0%, #f0f9ff 45%, #ffffff 100%);
+            min-height: 100vh;
+        }
+        @media (min-width: 1024px) {
+            html, body { height: 100%; overflow: hidden; }
+        }
         .form-input {
-            display: block; width: 100%; padding: 0.625rem 0.875rem;
-            border: 1.5px solid #d1d5db; border-radius: 0.75rem;
+            display: block; width: 100%; padding: 0.75rem 1rem;
+            border: 1.5px solid #dbeafe; border-radius: 0.9rem;
             font-size: 1rem; outline: none; background: #fff;
             transition: border-color 0.15s, box-shadow 0.15s;
             -webkit-appearance: none;
         }
-        .form-input:focus { border-color: #22c55e; box-shadow: 0 0 0 3px rgba(34,197,94,0.15); }
-        .dropdown-item { padding: 0.5rem 0.875rem; cursor: pointer; }
-        .dropdown-item:hover { background: #f0fdf4; }
+        .form-input:focus { border-color: #2563eb; box-shadow: 0 0 0 4px rgba(37,99,235,0.12); }
+        .dropdown-item { padding: 0.6rem 1rem; cursor: pointer; }
+        .dropdown-item:hover { background: #eff6ff; }
+        .select-wrap { position: relative; }
+        .select-wrap::after {
+            content: ''; position: absolute; right: 1rem; top: 50%; width: 0.55rem; height: 0.55rem;
+            border-right: 2px solid #93c5fd; border-bottom: 2px solid #93c5fd;
+            transform: translateY(-70%) rotate(45deg); pointer-events: none;
+        }
+        .select-wrap select { appearance: none; padding-right: 2.5rem; }
+        @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+        .floaty { animation: floaty 3s ease-in-out infinite; }
     </style>
 </head>
 <body>
 
-<div x-data="checkinApp()" class="min-h-screen">
+<div x-data="checkinApp()" class="min-h-screen lg:h-screen flex flex-col">
 
-    {{-- Header --}}
-    <div style="background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%); padding: 1.5rem 1rem 3rem;">
-        <div class="max-w-md mx-auto">
-            <div class="flex items-center gap-3 mb-2">
-                <img src="/storage/logo.png" alt="Dataraga" class="h-8 w-8 object-contain brightness-0 invert opacity-90">
-                <span class="text-white/80 text-sm font-medium">Dataraga</span>
-            </div>
-            <h1 class="text-white text-xl font-bold leading-tight">{{ $kampung->nama_kampung }}</h1>
-            <p class="text-green-100 text-sm mt-1">
-                {{ collect([$kampung->desa, $kampung->kecamatan, $kampung->kabupaten])->filter()->implode(', ') }}
-            </p>
-            <div class="mt-3 inline-flex items-center gap-1.5 bg-white/20 backdrop-blur text-white text-xs font-semibold px-3 py-1 rounded-full">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                Kampung Olahraga Terverifikasi
-            </div>
+    {{-- Header: logo + Dataraga saja --}}
+    <div class="shrink-0" style="background: linear-gradient(145deg, #0f172a 0%, #1e3a8a 45%, #0369a1 100%);">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex items-center gap-2.5">
+            <img src="/storage/logo.png" alt="Dataraga" class="h-7 w-7 object-contain brightness-0 invert opacity-90">
+            <span class="text-white font-bold text-sm">Dataraga</span>
         </div>
     </div>
 
-    {{-- Form Card --}}
-    <div class="max-w-md mx-auto px-4" style="margin-top: -1.5rem;">
-        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-            <div class="px-5 py-4 border-b border-gray-50">
-                <h2 class="font-bold text-gray-900 text-base">Daftar Aktivitas Olahraga</h2>
-                <p class="text-xs text-gray-500 mt-0.5">Isi data di bawah untuk tercatat sebagai peserta aktif.</p>
+    {{-- 2 Kolom: Info Fasil (kiri) + Form Check-in (kanan) --}}
+    <div class="max-w-5xl mx-auto px-4 py-4 w-full lg:flex-1 lg:min-h-0 lg:flex lg:items-center">
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-5 items-start lg:max-h-full w-full">
+
+            {{-- KOLOM 1: Foto & Informasi Fasil --}}
+            <div class="lg:col-span-2 lg:max-h-full lg:overflow-y-auto">
+                <div class="bg-white rounded-3xl shadow-xl border border-blue-50 overflow-hidden">
+                    @if($fasil->foto_path)
+                    <img src="{{ asset('storage/' . $fasil->foto_path) }}" alt="{{ $fasil->nama_fasilitas }}"
+                         class="w-full h-48 sm:h-56 lg:h-44 object-cover">
+                    @else
+                    <div class="w-full h-40 flex items-center justify-center" style="background: linear-gradient(135deg, #dbeafe 0%, #eff6ff 100%);">
+                        <div class="floaty w-16 h-16 rounded-2xl bg-white/70 flex items-center justify-center">
+                            <i class="fas fa-person-running text-blue-400 text-2xl"></i>
+                        </div>
+                    </div>
+                    @endif
+
+                    <div class="p-5">
+                        <h1 class="text-lg font-extrabold text-gray-900 leading-tight">
+                            {{ $fasil->nama_fasilitas }}
+                            <i class="fas fa-circle-check text-emerald-500 text-sm align-middle ml-1" title="Kampung Olahraga Terverifikasi"></i>
+                        </h1>
+                        <p class="text-sm text-blue-600 font-semibold mt-0.5">{{ $fasil->kategori_olahraga }}</p>
+
+                        <div class="mt-3 pt-3 border-t border-gray-50 space-y-2 text-sm text-gray-600">
+                            <div class="flex gap-2">
+                                <i class="fas fa-house text-blue-300 w-4 mt-0.5"></i>
+                                <span>{{ $kampung->nama_kampung }}</span>
+                            </div>
+                            @if($fasil->alamat)
+                            <div class="flex gap-2">
+                                <i class="fas fa-location-dot text-blue-300 w-4 mt-0.5"></i>
+                                <span>{{ $fasil->alamat }}</span>
+                            </div>
+                            @endif
+                            <div class="flex gap-2">
+                                <i class="fas fa-map text-blue-300 w-4 mt-0.5"></i>
+                                <span>
+                                    @if($kampung->rt_rw_label){{ $kampung->rt_rw_label }} &middot; @endif
+                                    {{ collect([$kampung->desa, $kampung->kecamatan, $kampung->kabupaten])->filter()->implode(', ') }}
+                                </span>
+                            </div>
+                            @if($fasil->getAverageKondisiAttribute() > 0)
+                            <div class="flex gap-2 items-center">
+                                <i class="fas fa-star text-amber-400 w-4"></i>
+                                <span>Kondisi rata-rata: <strong class="text-gray-800">{{ $fasil->getAverageKondisiAttribute() }}/5</strong></span>
+                            </div>
+                            @endif
+                        </div>
+
+                        @php
+                            $aksesBadges = collect([
+                                $fasil->akses_disabilitas ? 'Akses Disabilitas' : null,
+                                $fasil->akses_parkir ? 'Parkir' : null,
+                                $fasil->akses_transportasi ? 'Akses Transportasi' : null,
+                                $fasil->fasilitas_ruang_ganti ? 'Ruang Ganti' : null,
+                                $fasil->fasilitas_tribun ? 'Tribun' : null,
+                            ])->filter();
+                        @endphp
+                        @if($aksesBadges->isNotEmpty())
+                        <div class="mt-3 pt-3 border-t border-gray-50 flex flex-wrap gap-1.5">
+                            @foreach($aksesBadges as $badge)
+                            <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 text-emerald-700 text-[11px] font-semibold rounded-full">
+                                <i class="fas fa-check text-[9px]"></i> {{ $badge }}
+                            </span>
+                            @endforeach
+                        </div>
+                        @endif
+                    </div>
+                </div>
+
+                <p class="hidden lg:block text-center text-xs text-gray-400 mt-4">Data ini akan digunakan untuk program Kampung Olahraga Kemenpora RI</p>
             </div>
 
-            <form method="POST" action="{{ route('kampung.checkin.store', $kampung->qr_token) }}"
-                  enctype="multipart/form-data" @submit.prevent="submitForm($event)" class="p-5 space-y-4">
-                @csrf
-
-                @if($errors->any())
-                <div class="p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
-                    <ul class="list-disc list-inside space-y-0.5">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul>
-                </div>
-                @endif
-
-                {{-- Nama --}}
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Nama Lengkap <span class="text-red-500">*</span></label>
-                    <input type="text" name="nama_peserta" value="{{ old('nama_peserta') }}" placeholder="Masukkan nama lengkap Anda" required
-                           autocomplete="name" class="form-input @error('nama_peserta') border-red-400 @enderror">
-                </div>
-
-                {{-- Umur --}}
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Umur <span class="text-red-500">*</span></label>
-                    <input type="number" name="umur" value="{{ old('umur') }}" placeholder="Umur Anda (tahun)" required
-                           min="1" max="120" inputmode="numeric" class="form-input @error('umur') border-red-400 @enderror">
-                </div>
-
-                {{-- Jenis Olahraga: searchable dropdown --}}
-                <div x-data="olahragaDropdown()" class="relative">
-                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Jenis Olahraga <span class="text-red-500">*</span></label>
-
-                    <input type="hidden" name="jenis_olahraga_id" x-model="selectedId">
-                    <input type="hidden" name="jenis_olahraga_baru" x-model="newName">
-
-                    <div @click.away="open = false">
-                        <input type="text" x-model="search" @focus="open = true" @input="filterList()"
-                               placeholder="Cari jenis olahraga..." autocomplete="off"
-                               class="form-input cursor-pointer"
-                               :value="selectedLabel || search">
-
-                        {{-- Dropdown --}}
-                        <div x-show="open" x-cloak class="absolute z-30 mt-1 w-full bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden max-h-52 overflow-y-auto">
-
-                            {{-- Existing options --}}
-                            <template x-for="opt in filtered" :key="opt.id">
-                                <div class="dropdown-item text-sm text-gray-700" @click="select(opt)">
-                                    <span x-text="opt.nama"></span>
-                                </div>
-                            </template>
-
-                            {{-- Add new if no match --}}
-                            <template x-if="search.trim() && !filtered.length">
-                                <div class="dropdown-item text-sm text-green-700 font-semibold" @click="addNew()">
-                                    <span class="mr-1">+</span> Tambah "<span x-text="search.trim()"></span>"
-                                </div>
-                            </template>
-
-                            <template x-if="!search.trim() && !filtered.length">
-                                <div class="px-4 py-3 text-sm text-gray-400">Tidak ada pilihan</div>
-                            </template>
+            {{-- KOLOM 2: Form Check-in --}}
+            <div class="lg:col-span-3 lg:max-h-full lg:overflow-y-auto">
+                <div class="bg-white rounded-3xl shadow-xl border border-blue-50 overflow-hidden">
+                    <div class="px-5 py-4 border-b border-gray-50 flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-xl bg-blue-50 flex items-center justify-center">
+                            <i class="fas fa-clipboard-check text-blue-600 text-sm"></i>
+                        </div>
+                        <div>
+                            <h2 class="font-bold text-gray-900 text-base">Daftar Aktivitas Olahraga</h2>
+                            <p class="text-xs text-gray-500">Isi data di bawah untuk tercatat sebagai peserta aktif.</p>
                         </div>
                     </div>
 
-                    <p x-show="newName" class="mt-1 text-xs text-green-600">
-                        Akan ditambahkan: "<span x-text="newName" class="font-semibold"></span>" (olahraga baru)
-                    </p>
-                </div>
+                    <form method="POST" action="{{ route('kampung.checkin.store', $fasil->qr_token) }}"
+                          enctype="multipart/form-data" @submit.prevent="submitForm($event)" class="p-5 space-y-4">
+                        @csrf
 
-                {{-- Foto --}}
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Foto Aktivitas <span class="text-xs font-normal text-gray-400">(opsional, maks 200KB)</span></label>
+                        @if($errors->any())
+                        <div class="p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
+                            <ul class="list-disc list-inside space-y-0.5">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul>
+                        </div>
+                        @endif
 
-                    <div x-data="photoUpload()" class="space-y-2">
-                        <input type="file" name="foto" accept="image/*" capture="environment"
-                               id="foto-input" class="hidden" @change="onFile($event)">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {{-- Nama --}}
+                            <div class="sm:col-span-2">
+                                <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+                                    <i class="fas fa-user text-blue-400 mr-1"></i> Nama Lengkap <span class="text-red-500">*</span>
+                                </label>
+                                <input type="text" name="nama_peserta" value="{{ old('nama_peserta') }}" placeholder="Masukkan nama lengkap Anda" required
+                                       autocomplete="name" class="form-input @error('nama_peserta') border-red-400 @enderror">
+                            </div>
 
-                        <template x-if="!preview">
-                            <label for="foto-input" class="flex flex-col items-center justify-center w-full h-28 border-2 border-dashed border-gray-200 rounded-xl cursor-pointer hover:border-green-400 hover:bg-green-50 transition">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-300 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                                <span class="text-xs text-gray-400">Klik untuk ambil foto</span>
-                            </label>
-                        </template>
+                            {{-- Umur --}}
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+                                    <i class="fas fa-cake-candles text-blue-400 mr-1"></i> Umur <span class="text-red-500">*</span>
+                                </label>
+                                <input type="number" name="umur" value="{{ old('umur') }}" placeholder="Umur (tahun)" required
+                                       min="1" max="120" inputmode="numeric" class="form-input @error('umur') border-red-400 @enderror">
+                            </div>
 
-                        <template x-if="preview">
-                            <div class="relative">
-                                <img :src="preview" class="w-full h-40 object-cover rounded-xl border border-gray-200">
-                                <button type="button" @click="clearPhoto()" class="absolute top-2 right-2 bg-white rounded-full p-1 shadow text-red-500 hover:text-red-700">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                                </button>
-                                <span x-show="sizeText" class="absolute bottom-2 left-2 text-[10px] bg-black/50 text-white px-2 py-0.5 rounded-full" x-text="sizeText"></span>
+                            {{-- Klub/Komunitas --}}
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+                                    <i class="fas fa-people-group text-blue-400 mr-1"></i> Klub/Komunitas
+                                </label>
+                                <div class="select-wrap">
+                                    <select name="club_id" x-model="clubId" class="form-input @error('club_id') border-red-400 @enderror">
+                                        <option value="">Belum bergabung</option>
+                                        @foreach($klubList as $k)
+                                        <option value="{{ $k->id }}" {{ old('club_id') == $k->id ? 'selected' : '' }}>{{ $k->nama_club }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <template x-if="clubId && clubSport(clubId)">
+                            <div class="flex items-center gap-2 bg-emerald-50 border border-emerald-100 rounded-xl px-3 py-2">
+                                <i class="fas fa-check-circle text-emerald-500"></i>
+                                <p class="text-xs text-emerald-700">Olahraga otomatis terisi: <span class="font-bold" x-text="clubSport(clubId)"></span></p>
                             </div>
                         </template>
 
-                        {{-- Hidden canvas for compression --}}
-                        <canvas id="compressCanvas" class="hidden"></canvas>
-                        {{-- Compressed file will be set via JS --}}
-                        <input type="hidden" name="_compressed" value="1">
-                    </div>
+                        {{-- Jenis Olahraga: searchable dropdown (hanya jika belum bergabung) --}}
+                        <div x-data="olahragaDropdown()" x-show="!clubId" x-cloak class="relative">
+                            <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+                                <i class="fas fa-volleyball text-blue-400 mr-1"></i> Jenis Olahraga
+                            </label>
+
+                            <input type="hidden" name="jenis_olahraga_id" x-model="selectedId">
+                            <input type="hidden" name="jenis_olahraga_baru" x-model="newName">
+
+                            <div @click.away="open = false">
+                                <input type="text" x-model="search" @focus="open = true" @input="filterList()"
+                                       placeholder="Cari jenis olahraga..." autocomplete="off"
+                                       class="form-input cursor-pointer"
+                                       :value="selectedLabel || search">
+
+                                {{-- Dropdown --}}
+                                <div x-show="open" x-cloak class="absolute z-30 mt-1 w-full bg-white rounded-xl shadow-xl border border-blue-100 overflow-hidden max-h-52 overflow-y-auto">
+
+                                    {{-- Existing options --}}
+                                    <template x-for="opt in filtered" :key="opt.id">
+                                        <div class="dropdown-item text-sm text-gray-700" @click="select(opt)">
+                                            <span x-text="opt.nama"></span>
+                                        </div>
+                                    </template>
+
+                                    {{-- Add new if no match --}}
+                                    <template x-if="search.trim() && !filtered.length">
+                                        <div class="dropdown-item text-sm text-blue-700 font-semibold" @click="addNew()">
+                                            <span class="mr-1">+</span> Tambah "<span x-text="search.trim()"></span>"
+                                        </div>
+                                    </template>
+
+                                    <template x-if="!search.trim() && !filtered.length">
+                                        <div class="px-4 py-3 text-sm text-gray-400">Tidak ada pilihan</div>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <p x-show="newName" x-cloak class="mt-1 text-xs text-blue-600">
+                                Akan ditambahkan: "<span x-text="newName" class="font-semibold"></span>" (olahraga baru)
+                            </p>
+                        </div>
+
+                        {{-- Foto --}}
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+                                <i class="fas fa-camera text-blue-400 mr-1"></i> Foto Aktivitas
+                                <span class="text-xs font-normal text-gray-400">(opsional, maks 200KB)</span>
+                            </label>
+
+                            <div x-data="photoUpload()" class="space-y-2">
+                                <input type="file" name="foto" accept="image/*" capture="environment"
+                                       id="foto-input" class="hidden" @change="onFile($event)">
+
+                                <label x-show="!preview" x-cloak for="foto-input"
+                                       class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-blue-200 rounded-2xl cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition">
+                                    <div class="w-11 h-11 rounded-2xl bg-blue-50 flex items-center justify-center mb-2">
+                                        <i class="fas fa-camera-retro text-blue-400"></i>
+                                    </div>
+                                    <span class="text-sm font-semibold text-blue-600">Ambil / Unggah Foto</span>
+                                    <span class="text-xs text-gray-400 mt-0.5">Otomatis dikompres agar ringan</span>
+                                </label>
+
+                                <div x-show="preview" x-cloak class="relative">
+                                    <img :src="preview" class="w-full h-44 object-cover rounded-2xl border border-blue-100">
+                                    <button type="button" @click="clearPhoto()" class="absolute top-2 right-2 bg-white rounded-full p-1.5 shadow text-red-500 hover:text-red-700">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                    </button>
+                                    <span x-show="sizeText" class="absolute bottom-2 left-2 text-[10px] bg-black/50 text-white px-2 py-0.5 rounded-full" x-text="sizeText"></span>
+                                </div>
+
+                                {{-- Hidden canvas for compression --}}
+                                <canvas id="compressCanvas" class="hidden"></canvas>
+                            </div>
+                        </div>
+
+                        <button type="submit" :disabled="submitting"
+                                class="w-full py-3.5 text-sm font-bold text-white rounded-2xl transition shadow-lg"
+                                :class="submitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 hover:shadow-blue-500/30 active:scale-[0.98]'">
+                            <span x-show="!submitting" class="inline-flex items-center gap-2">
+                                <i class="fas fa-paper-plane"></i> Kirim Check-in
+                            </span>
+                            <span x-show="submitting" x-cloak class="inline-flex items-center gap-2">
+                                <i class="fas fa-circle-notch fa-spin"></i> Mengirim...
+                            </span>
+                        </button>
+                    </form>
                 </div>
 
-                <button type="submit" :disabled="submitting"
-                        class="w-full py-3 text-sm font-bold text-white rounded-xl transition"
-                        :class="submitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700 active:scale-[0.98]'">
-                    <span x-show="!submitting">Kirim Check-in</span>
-                    <span x-show="submitting" x-cloak>Mengirim...</span>
-                </button>
-            </form>
-        </div>
+                <p class="lg:hidden text-center text-xs text-gray-400 mt-4">Data ini akan digunakan untuk program Kampung Olahraga Kemenpora RI</p>
+            </div>
 
-        <p class="text-center text-xs text-gray-400 mt-4 pb-6">Data ini akan digunakan untuk program Kampung Olahraga Kemenpora RI</p>
+        </div>
     </div>
 </div>
 
 <script>
 const allJenis = @json($jenisOlahraga);
+const allKlub = @json($klubList->map(fn($k) => ['id' => $k->id, 'sport' => $k->jenisOlahraga?->nama]));
 
 function checkinApp() {
-    return { submitting: false,
+    return {
+        submitting: false,
+        clubId: '{{ old('club_id') }}',
+        clubSport(id) {
+            const k = allKlub.find(x => String(x.id) === String(id));
+            return k ? k.sport : null;
+        },
         submitForm(e) { this.submitting = true; e.target.submit(); }
     };
 }

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', config('app.name', 'Dataraga'))</title>
+    <title>@yield('title', config('app.name', 'Dataraga')) — Kamu Gerak, Indonesia Tahu</title>
     <link rel="icon" href="/storage/logo.png" type="image/png">
     <link rel="apple-touch-icon" href="/storage/logo.png">
     <link rel="manifest" href="/manifest.json">
@@ -36,7 +36,7 @@
                     <a href="{{ route('prasarana.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg transition {{ request()->routeIs('prasarana.*') ? 'bg-white/15 text-white' : 'text-white/75 hover:text-white hover:bg-white/10' }}">Prasarana</a>
                     <a href="{{ route('events.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg transition {{ request()->routeIs('events.index') ? 'bg-white/15 text-white' : 'text-white/75 hover:text-white hover:bg-white/10' }}">Event</a>
                     <a href="{{ route('events.peta') }}" class="px-3 py-2 text-sm font-medium rounded-lg transition {{ request()->routeIs('events.peta') ? 'bg-white/15 text-white' : 'text-white/75 hover:text-white hover:bg-white/10' }}">Peta Event</a>
-                    <a href="{{ route('clubs.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg transition {{ request()->routeIs('clubs.*') ? 'bg-white/15 text-white' : 'text-white/75 hover:text-white hover:bg-white/10' }}">Klub</a>
+                    <a href="{{ route('clubs.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg transition {{ request()->routeIs('clubs.*') ? 'bg-white/15 text-white' : 'text-white/75 hover:text-white hover:bg-white/10' }}">Klub/Komunitas</a>
                     <a href="{{ route('kalender.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg transition {{ request()->routeIs('kalender.*') ? 'bg-white/15 text-white' : 'text-white/75 hover:text-white hover:bg-white/10' }}">Kalender</a>
                 </div>
 
@@ -64,7 +64,7 @@
                 <a href="{{ route('prasarana.index') }}" class="block px-4 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('prasarana.*') ? 'bg-white/15 text-white' : 'text-white/75 hover:bg-white/10 hover:text-white' }}">Prasarana</a>
                 <a href="{{ route('events.index') }}" class="block px-4 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('events.index') ? 'bg-white/15 text-white' : 'text-white/75 hover:bg-white/10 hover:text-white' }}">Event</a>
                 <a href="{{ route('events.peta') }}" class="block px-4 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('events.peta') ? 'bg-white/15 text-white' : 'text-white/75 hover:bg-white/10 hover:text-white' }}">Peta Event</a>
-                <a href="{{ route('clubs.index') }}" class="block px-4 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('clubs.*') ? 'bg-white/15 text-white' : 'text-white/75 hover:bg-white/10 hover:text-white' }}">Klub</a>
+                <a href="{{ route('clubs.index') }}" class="block px-4 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('clubs.*') ? 'bg-white/15 text-white' : 'text-white/75 hover:bg-white/10 hover:text-white' }}">Klub/Komunitas</a>
                 <a href="{{ route('kalender.index') }}" class="block px-4 py-2.5 text-sm font-medium rounded-lg {{ request()->routeIs('kalender.*') ? 'bg-white/15 text-white' : 'text-white/75 hover:bg-white/10 hover:text-white' }}">Kalender</a>
                 <div class="pt-2 border-t border-white/10">
                     @guest

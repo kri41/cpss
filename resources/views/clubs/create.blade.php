@@ -128,6 +128,23 @@
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>
+
+                            <div class="mt-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Jenis Olahraga</label>
+                                <select name="jenis_olahraga_id"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                                    <option value="">Pilih Jenis Olahraga (Opsional)</option>
+                                    @foreach($jenisOlahragaList as $j)
+                                        <option value="{{ $j->id }}" {{ old('jenis_olahraga_id') == $j->id ? 'selected' : '' }}>
+                                            {{ $j->nama }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <p class="mt-1 text-sm text-gray-500">Digunakan untuk auto-isi olahraga saat anggota check-in QR Kampung Olahraga</p>
+                                @error('jenis_olahraga_id')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
                         </div>
                     </div>
 

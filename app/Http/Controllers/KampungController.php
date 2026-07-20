@@ -3,9 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\CheckinKampung;
+use App\Models\Club;
 use App\Models\JenisOlahraga;
 use App\Models\KampungOlahraga;
 use App\Models\KomponenSyarat;
+use App\Models\PointTransaction;
+use App\Models\Prasarana;
+use App\Services\GamificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -43,6 +47,8 @@ class KampungController extends Controller
             'kabupaten'    => 'nullable|string|max:255',
             'kecamatan'    => 'nullable|string|max:255',
             'desa'         => 'nullable|string|max:255',
+            'rt'           => 'nullable|string|max:5',
+            'rw'           => 'nullable|string|max:5',
             'latitude'     => 'nullable|numeric|between:-90,90',
             'longitude'    => 'nullable|numeric|between:-180,180',
         ]);
@@ -58,22 +64,103 @@ class KampungController extends Controller
     {
         $this->authorizeAccess($kampung);
 
-        $kampung->load(['user', 'checkins.jenisOlahraga']);
+        $kampung->load(['user', 'checkins.jenisOlahraga', 'fasil', 'klubKomunitas']);
 
         $komponenList  = KomponenSyarat::where('aktif', true)->orderBy('urutan')->get();
         $totalCheckin  = $kampung->checkins()->count();
         $recentCheckins = $kampung->checkins()->with('jenisOlahraga')->latest()->limit(20)->get();
 
-        $qrSvg  = null;
-        $qrUrl  = null;
-        if ($kampung->status_validasi === 'validated' && $kampung->qr_token) {
-            $qrUrl = route('kampung.checkin.form', $kampung->qr_token);
-            $qrSvg = (string) QrCode::size(220)->margin(1)->generate($qrUrl);
+        // QR per-fasil (bukan lagi per-kampung)
+        $fasilQr = [];
+        if ($kampung->status_validasi === 'validated') {
+            foreach ($kampung->fasil as $fasil) {
+                if ($fasil->qr_token) {
+                    $url = route('kampung.checkin.form', $fasil->qr_token);
+                    $fasilQr[$fasil->id] = [
+                        'url' => $url,
+                        'svg' => (string) QrCode::size(180)->margin(1)->generate($url),
+                    ];
+                }
+            }
+        }
+
+        // Kandidat fasil & klub/komunitas yang bisa didaftarkan ke kampung ini (se-wilayah, belum terdaftar)
+        $candidateFasil = collect();
+        $candidateKlub  = collect();
+        if ($this->canManageRegistrations($kampung)) {
+            $candidateFasil = Prasarana::validated()
+                ->sameWilayahAs($kampung)
+                ->whereNull('kampung_olahraga_id')
+                ->orderBy('nama_fasilitas')
+                ->get();
+
+            $attachedKlubIds = $kampung->klubKomunitas->pluck('id');
+            $candidateKlub = Club::validated()->aktif()
+                ->sameWilayahAs($kampung)
+                ->whereNotIn('id', $attachedKlubIds)
+                ->orderBy('nama_club')
+                ->get();
         }
 
         return view('kampung.show', compact(
-            'kampung', 'komponenList', 'totalCheckin', 'recentCheckins', 'qrSvg', 'qrUrl'
+            'kampung', 'komponenList', 'totalCheckin', 'recentCheckins', 'fasilQr',
+            'candidateFasil', 'candidateKlub'
         ));
+    }
+
+    // ── FASIL & KLUB/KOMUNITAS REGISTRATION ─────────────────────
+
+    public function attachFasil(Request $request, KampungOlahraga $kampung): RedirectResponse
+    {
+        abort_unless($this->canManageRegistrations($kampung), 403);
+
+        $request->validate(['prasarana_id' => 'required|exists:prasarana,id']);
+
+        $prasarana = Prasarana::validated()
+            ->sameWilayahAs($kampung)
+            ->whereNull('kampung_olahraga_id')
+            ->findOrFail($request->prasarana_id);
+
+        $prasarana->update([
+            'kampung_olahraga_id' => $kampung->id,
+            'qr_token' => $prasarana->qr_token ?? Prasarana::generateQrToken(),
+        ]);
+
+        return back()->with('success', 'Fasil "' . $prasarana->nama_fasilitas . '" berhasil didaftarkan ke kampung ini.');
+    }
+
+    public function detachFasil(KampungOlahraga $kampung, Prasarana $prasarana): RedirectResponse
+    {
+        abort_unless($this->canManageRegistrations($kampung), 403);
+        abort_unless($prasarana->kampung_olahraga_id === $kampung->id, 404);
+
+        $prasarana->update(['kampung_olahraga_id' => null, 'qr_token' => null]);
+
+        return back()->with('success', 'Fasil "' . $prasarana->nama_fasilitas . '" dilepas dari kampung ini. QR-nya dinonaktifkan.');
+    }
+
+    public function attachKlub(Request $request, KampungOlahraga $kampung): RedirectResponse
+    {
+        abort_unless($this->canManageRegistrations($kampung), 403);
+
+        $request->validate(['club_id' => 'required|exists:clubs,id']);
+
+        $club = Club::validated()->aktif()
+            ->sameWilayahAs($kampung)
+            ->findOrFail($request->club_id);
+
+        $kampung->klubKomunitas()->syncWithoutDetaching([$club->id]);
+
+        return back()->with('success', 'Klub/Komunitas "' . $club->nama_club . '" berhasil didaftarkan ke kampung ini.');
+    }
+
+    public function detachKlub(KampungOlahraga $kampung, Club $club): RedirectResponse
+    {
+        abort_unless($this->canManageRegistrations($kampung), 403);
+
+        $kampung->klubKomunitas()->detach($club->id);
+
+        return back()->with('success', 'Klub/Komunitas "' . $club->nama_club . '" dilepas dari kampung ini.');
     }
 
     public function edit(KampungOlahraga $kampung): View
@@ -93,6 +180,8 @@ class KampungController extends Controller
             'kabupaten'    => 'nullable|string|max:255',
             'kecamatan'    => 'nullable|string|max:255',
             'desa'         => 'nullable|string|max:255',
+            'rt'           => 'nullable|string|max:5',
+            'rw'           => 'nullable|string|max:5',
             'latitude'     => 'nullable|numeric|between:-90,90',
             'longitude'    => 'nullable|numeric|between:-180,180',
         ]);
@@ -117,11 +206,18 @@ class KampungController extends Controller
 
         $kampung->update([
             'status_validasi' => 'validated',
-            'qr_token'        => $kampung->qr_token ?? KampungOlahraga::generateQrToken(),
             'catatan_admin'   => null,
         ]);
 
-        return back()->with('success', 'Kampung Olahraga berhasil diverifikasi. QR Code sudah aktif.');
+        $kode = GamificationService::resolveKodeAktivitas('kampung_baru', $kampung->user_id, 'kampung_olahraga', $kampung->id);
+        $tx = GamificationService::awardPoints($kampung->user_id, $kode, 'kampung_olahraga', $kampung->id);
+
+        $msg = 'Kampung Olahraga berhasil diverifikasi. QR fasil yang terdaftar kini aktif.';
+        if ($tx) {
+            $msg .= ' +' . $tx->poin . ' poin diberikan ke relawan.';
+        }
+
+        return back()->with('success', $msg);
     }
 
     public function reject(Request $request, KampungOlahraga $kampung): RedirectResponse
@@ -140,47 +236,67 @@ class KampungController extends Controller
     {
         abort_unless(auth()->user()->isAdmin(), 403);
         $kampung->update(['status_validasi' => 'pending']);
-        return back()->with('success', 'Verifikasi dibatalkan, status kembali ke pending.');
+
+        $tx = PointTransaction::where('related_type', 'kampung_olahraga')
+            ->where('related_id', $kampung->id)
+            ->where('status', 'valid')
+            ->first();
+
+        if ($tx) {
+            GamificationService::batalkanPoin($tx->id, auth()->id(), 'Verifikasi Kampung Olahraga dibatalkan');
+        }
+
+        return back()->with('success', 'Verifikasi dibatalkan, status kembali ke pending. Poin relawan telah ditarik.');
     }
 
     // ── PUBLIC CHECK-IN (via QR) ──────────────────────────────
 
     public function checkinForm(string $token): View
     {
-        $kampung = KampungOlahraga::where('qr_token', $token)
-            ->where('status_validasi', 'validated')
-            ->firstOrFail();
+        $fasil = $this->resolveFasilByToken($token);
+        $kampung = $fasil->kampungOlahraga;
 
+        $klubList = $kampung->klubKomunitas()->where('aktif', true)->with('jenisOlahraga')->orderBy('nama_club')->get();
         $jenisOlahraga = JenisOlahraga::where('aktif', true)->orderBy('nama')->get();
 
-        return view('kampung.checkin', compact('kampung', 'jenisOlahraga'));
+        return view('kampung.checkin', compact('fasil', 'kampung', 'klubList', 'jenisOlahraga'));
     }
 
     public function checkinStore(Request $request, string $token): RedirectResponse
     {
-        $kampung = KampungOlahraga::where('qr_token', $token)
-            ->where('status_validasi', 'validated')
-            ->firstOrFail();
+        $fasil = $this->resolveFasilByToken($token);
+        $kampung = $fasil->kampungOlahraga;
 
         $request->validate([
-            'nama_peserta'       => 'required|string|max:255',
-            'umur'               => 'required|integer|min:1|max:120',
-            'jenis_olahraga_id'  => 'nullable|integer|exists:jenis_olahraga,id',
-            'jenis_olahraga_baru'=> 'nullable|string|max:100',
-            'foto'               => 'nullable|image|max:10240',
+            'nama_peserta'        => 'required|string|max:255',
+            'umur'                => 'required|integer|min:1|max:120',
+            'club_id'             => 'nullable|integer|exists:clubs,id',
+            'jenis_olahraga_id'   => 'nullable|integer|exists:jenis_olahraga,id',
+            'jenis_olahraga_baru' => 'nullable|string|max:100',
+            'foto'                => 'nullable|image|max:10240',
         ]);
 
-        // Resolve jenis olahraga
-        $jenisId   = $request->jenis_olahraga_id;
+        $club = null;
+        if ($request->filled('club_id')) {
+            $club = $kampung->klubKomunitas()->where('clubs.id', $request->club_id)->first();
+            abort_unless($club, 422, 'Klub/komunitas tidak terdaftar di kampung ini.');
+        }
+
+        // Resolve jenis olahraga: auto dari klub jika dipilih, manual jika "Belum bergabung"
+        $jenisId   = null;
         $jenisnama = null;
 
-        if (!$jenisId && filled($request->jenis_olahraga_baru)) {
-            $nama    = trim($request->jenis_olahraga_baru);
-            $jenis   = JenisOlahraga::firstOrCreate(['nama' => $nama], ['aktif' => true]);
-            $jenisId = $jenis->id;
-            $jenisnama = $jenis->nama;
-        } elseif ($jenisId) {
+        if ($club) {
+            $jenisId   = $club->jenis_olahraga_id;
+            $jenisnama = $club->jenisOlahraga?->nama;
+        } elseif (filled($request->jenis_olahraga_id)) {
+            $jenisId   = $request->jenis_olahraga_id;
             $jenisnama = JenisOlahraga::find($jenisId)?->nama;
+        } elseif (filled($request->jenis_olahraga_baru)) {
+            $nama      = trim($request->jenis_olahraga_baru);
+            $jenis     = JenisOlahraga::firstOrCreate(['nama' => $nama], ['aktif' => true]);
+            $jenisId   = $jenis->id;
+            $jenisnama = $jenis->nama;
         }
 
         // Handle photo
@@ -191,6 +307,8 @@ class KampungController extends Controller
 
         CheckinKampung::create([
             'kampung_olahraga_id' => $kampung->id,
+            'prasarana_id'        => $fasil->id,
+            'club_id'             => $club?->id,
             'nama_peserta'        => $request->nama_peserta,
             'umur'                => $request->umur,
             'jenis_olahraga_id'   => $jenisId,
@@ -203,11 +321,21 @@ class KampungController extends Controller
 
     public function checkinSukses(string $token): View
     {
-        $kampung = KampungOlahraga::where('qr_token', $token)
-            ->where('status_validasi', 'validated')
+        $fasil = $this->resolveFasilByToken($token);
+        $kampung = $fasil->kampungOlahraga;
+
+        return view('kampung.checkin-sukses', compact('fasil', 'kampung'));
+    }
+
+    private function resolveFasilByToken(string $token): Prasarana
+    {
+        $fasil = Prasarana::where('qr_token', $token)
+            ->whereNotNull('kampung_olahraga_id')
             ->firstOrFail();
 
-        return view('kampung.checkin-sukses', compact('kampung'));
+        abort_unless($fasil->kampungOlahraga?->status_validasi === 'validated', 404);
+
+        return $fasil;
     }
 
     public function apiJenisOlahraga(Request $request): JsonResponse
@@ -229,6 +357,12 @@ class KampungController extends Controller
         if (!$user->isAdmin() && $kampung->user_id !== $user->id) {
             abort(403);
         }
+    }
+
+    private function canManageRegistrations(KampungOlahraga $kampung): bool
+    {
+        $user = auth()->user();
+        return $user->isAdmin() || $kampung->user_id === $user->id;
     }
 
     private function compressAndStore($file): string

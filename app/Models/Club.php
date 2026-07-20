@@ -2,18 +2,21 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasSlug;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Club extends Model
 {
-    use HasFactory;
+    use HasFactory, HasSlug;
 
     protected $fillable = [
         'user_id',
         'prasarana_id',
+        'jenis_olahraga_id',
         'nama_club',
         'deskripsi',
         'ketua_club',
@@ -58,6 +61,41 @@ class Club extends Model
     public function jadwalLatihan(): HasMany
     {
         return $this->hasMany(JadwalLatihan::class);
+    }
+
+    /**
+     * Relasi ke Jenis Olahraga (untuk auto-fill saat check-in)
+     */
+    public function jenisOlahraga(): BelongsTo
+    {
+        return $this->belongsTo(JenisOlahraga::class);
+    }
+
+    /**
+     * Relasi ke Kampung Olahraga (rumah-rumah tempat klub/komunitas ini terdaftar)
+     */
+    public function kampungOlahraga(): BelongsToMany
+    {
+        return $this->belongsToMany(KampungOlahraga::class, 'kampung_klub', 'club_id', 'kampung_olahraga_id');
+    }
+
+    /**
+     * Relasi ke check-in QR peserta yang memilih klub/komunitas ini
+     */
+    public function checkins(): HasMany
+    {
+        return $this->hasMany(CheckinKampung::class, 'club_id');
+    }
+
+    /**
+     * Scope: klub/komunitas yang berada di wilayah yang sama dengan Kampung Olahraga
+     */
+    public function scopeSameWilayahAs($query, KampungOlahraga $kampung)
+    {
+        return $query
+            ->when($kampung->kabupaten, fn($q) => $q->whereRaw('LOWER(TRIM(kabupaten)) = ?', [strtolower(trim($kampung->kabupaten))]))
+            ->when($kampung->kecamatan, fn($q) => $q->whereRaw('LOWER(TRIM(kecamatan)) = ?', [strtolower(trim($kampung->kecamatan))]))
+            ->when($kampung->desa, fn($q) => $q->whereRaw('LOWER(TRIM(desa)) = ?', [strtolower(trim($kampung->desa))]));
     }
 
     /**

@@ -113,6 +113,9 @@
                     <div class="flex-1 min-w-0 mr-2">
                         <h3 class="font-bold text-gray-900 text-base truncate">{{ $kampung->nama_kampung }}</h3>
                         <p class="text-xs text-gray-500 mt-0.5">
+                            @if($kampung->rt_rw_label)
+                            {{ $kampung->rt_rw_label }} &middot;
+                            @endif
                             {{ collect([$kampung->desa, $kampung->kecamatan, $kampung->kabupaten])->filter()->implode(', ') ?: 'Lokasi belum diisi' }}
                         </p>
                     </div>

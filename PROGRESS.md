@@ -11,9 +11,9 @@
 |----------|-------|
 | **Proyek** | CPSS - Disertasi Fase 1 Prototipe |
 | **Versi Target** | v2.2+ (Post-Fase 1) |
-| **Terakhir Update** | 27 Juni 2026 |
-| **Total Fitur Utama** | 18 |
-| **Status Keseluruhan** | Fase 1 + Filter/Notif/Kalender Done |
+| **Terakhir Update** | 20 Juli 2026 |
+| **Total Fitur Utama** | 19 |
+| **Status Keseluruhan** | Fase 1 + Filter/Notif/Kalender Done, Kampung Olahraga v2 Done |
 
 ---
 
@@ -202,6 +202,23 @@
 
 ---
 
+## 4.8 Kampung Olahraga v2 — Fasil-Level QR, Klub/Komunitas, Google Auth, Dual Leaderboard (20 Juli 2026)
+
+Lihat `prd-addendum-v4.md` untuk detail lengkap konsep & rasional. Ringkasan implementasi:
+
+- [x] Login/Register via Google (Laravel Socialite) — opsi tambahan, bukan pengganti email/password
+- [x] Menu "Partisipasi" dihapus dari sidebar & nav legacy (data & route diarsipkan, tidak dihapus)
+- [x] Menu "Klub" di-rename jadi "Klub/Komunitas" di semua nav
+- [x] Prasarana (fasil) bisa didaftarkan ("ditarik") ke sebuah Kampung Olahraga — filter kandidat berdasarkan kesamaan wilayah (kabupaten/kecamatan/desa)
+- [x] Klub/Komunitas bisa didaftarkan ke Kampung Olahraga (many-to-many, boleh lintas kampung) — filter kandidat sama
+- [x] QR Code dipindah dari level Kampung ke level Fasil (`prasarana.qr_token`) — tiap fasil di dalam kampung punya QR check-in sendiri
+- [x] Form check-in QR: nama, umur, klub/komunitas (atau "Belum bergabung"), jenis olahraga (auto-isi dari klub, atau pilih/tambah manual jika belum bergabung), foto terkompresi (~200KB)
+- [x] Syarat minimal Kemenpora (Komponen Syarat) tetap dihitung di level total kampung (akumulasi seluruh fasil), bukan per-fasil
+- [x] Leaderboard tambahan: tab "Kampung Olahraga" (ranking skor syarat Kemenpora) & tab "Klub/Komunitas" (ranking total check-in lintas kampung), di samping leaderboard relawan yang sudah ada
+- [x] Kampung Olahraga kini terintegrasi ke `GamificationService` (`kampung_baru`, +30 poin ke relawan saat admin memverifikasi — sebelumnya terpisah dari sistem poin)
+
+---
+
 ## 5. DATA DUMMY & TESTING
 
 ### 5.1 Akun Dummy (password: `password`)
@@ -256,7 +273,7 @@
 
 ### 6.5 Pengembangan Lanjutan (Outside Fase 1 Scope)
 - [ ] Notifikasi in-app real-time
-- [ ] Verifikasi lokasi via QR Code scanner
+- [x] Verifikasi lokasi via QR Code scanner (Kampung Olahraga, per-fasil sejak v2)
 - [ ] Upload video
 - [ ] Forum/komunikasi komunitas
 - [ ] PWA / mode offline
@@ -397,6 +414,8 @@ npm run dev
 | 27 Juni 2026 | Form Prasarana diupdate dengan star rating interaktif |
 | 27 Juni 2026 | Implementasi filter/search publik + notifikasi inbox + kalender |
 | 27 Juni 2026 | Semua perubahan di-commit terpisah (7 commits) |
+| 20 Juli 2026 | Kampung Olahraga di-redesign: QR per-fasil (bukan per-kampung), integrasi Klub/Komunitas, Google OAuth, leaderboard kampung & klub, poin kampung masuk GamificationService |
+| 20 Juli 2026 | Partisipasi diarsipkan (bukan dihapus) — digantikan check-in QR Kampung Olahraga sebagai sumber data partisipasi resmi |
 
 ---
 

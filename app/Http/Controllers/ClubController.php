@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Club;
+use App\Models\JenisOlahraga;
 use App\Models\PointTransaction;
 use App\Models\Prasarana;
 use App\Models\JadwalLatihan;
@@ -69,7 +70,8 @@ class ClubController extends Controller
     public function create(): View
     {
         $prasarana = Prasarana::all();
-        return view('clubs.create', compact('prasarana'));
+        $jenisOlahragaList = JenisOlahraga::where('aktif', true)->orderBy('nama')->get();
+        return view('clubs.create', compact('prasarana', 'jenisOlahragaList'));
     }
 
     /**
@@ -89,6 +91,7 @@ class ClubController extends Controller
             'kecamatan' => 'nullable|string|max:255',
             'kabupaten' => 'nullable|string|max:255',
             'prasarana_id' => 'nullable|exists:prasarana,id',
+            'jenis_olahraga_id' => 'nullable|exists:jenis_olahraga,id',
             'tanggal_berdiri' => 'nullable|date',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
@@ -142,9 +145,10 @@ class ClubController extends Controller
         }
 
         $prasarana = Prasarana::all();
+        $jenisOlahragaList = JenisOlahraga::where('aktif', true)->orderBy('nama')->get();
         $club->load('jadwalLatihan');
-        
-        return view('clubs.edit', compact('club', 'prasarana'));
+
+        return view('clubs.edit', compact('club', 'prasarana', 'jenisOlahragaList'));
     }
 
     /**
@@ -168,6 +172,7 @@ class ClubController extends Controller
             'kecamatan' => 'nullable|string|max:255',
             'kabupaten' => 'nullable|string|max:255',
             'prasarana_id' => 'nullable|exists:prasarana,id',
+            'jenis_olahraga_id' => 'nullable|exists:jenis_olahraga,id',
             'tanggal_berdiri' => 'nullable|date',
             'aktif' => 'boolean',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
@@ -192,7 +197,7 @@ class ClubController extends Controller
             $this->createJadwal($club, $request->jadwal);
         }
 
-        return redirect()->route('clubs.show', $club)
+        return redirect()->route('dashboard.clubs')
             ->with('success', 'Club berhasil diperbarui.');
     }
 
