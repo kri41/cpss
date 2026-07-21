@@ -31,9 +31,13 @@
                         Kembali
                     </a>
                     @auth
-                        @if(auth()->user()->isAdmin() || auth()->user()->isRelawan())
+                        @if(auth()->user()->canEdit($club))
                             <a href="{{ route('clubs.edit', $club) }}" class="px-4 py-2 bg-amber-500 text-white rounded-lg text-sm font-medium hover:bg-amber-600 transition shadow-sm">
                                 Edit
+                            </a>
+                        @else
+                            <a href="{{ route('clubs.edit', $club) }}" class="px-4 py-2 bg-amber-50 text-amber-700 border border-amber-200 rounded-lg text-sm font-medium hover:bg-amber-100 transition">
+                                Ajukan Perubahan
                             </a>
                         @endif
                     @endauth

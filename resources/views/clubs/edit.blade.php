@@ -14,6 +14,13 @@
                 @csrf
                 @method('PUT')
 
+                @unless($canEditDirectly)
+                <div class="flex gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <p class="text-sm text-amber-800">Data ini sudah tervalidasi / bukan milik Anda. Perubahan yang Anda kirim akan diajukan sebagai <strong>usulan perubahan</strong> untuk ditinjau admin, tidak langsung diterapkan. Logo dan jadwal latihan tidak bisa diusulkan lewat form ini.</p>
+                </div>
+                @endunless
+
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <!-- Informasi Dasar -->
                     <div class="lg:col-span-2 space-y-6">
@@ -114,6 +121,7 @@
 
                     <!-- Sidebar -->
                     <div class="space-y-6">
+                        @if($canEditDirectly)
                         <!-- Logo -->
                         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                             <h3 class="text-lg font-semibold text-gray-900 mb-4">Logo Club</h3>
@@ -177,12 +185,22 @@
                                 + Tambah Jadwal
                             </button>
                         </div>
+                        @endif
+
+                        @unless($canEditDirectly)
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Alasan Usulan Perubahan <span class="text-red-500">*</span></label>
+                            <textarea name="alasan" rows="3" required minlength="10" placeholder="Jelaskan kenapa data ini perlu diubah..."
+                                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">{{ old('alasan') }}</textarea>
+                            @error('alasan')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                        </div>
+                        @endunless
 
                         <!-- Action Buttons -->
                         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                             <div class="space-y-3">
                                 <button type="submit" class="w-full py-3 px-4 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors">
-                                    Simpan Perubahan
+                                    {{ $canEditDirectly ? 'Simpan Perubahan' : 'Ajukan Perubahan' }}
                                 </button>
                                 <a href="{{ route('clubs.show', $club) }}" class="block w-full py-3 px-4 bg-gray-100 text-gray-700 text-center rounded-xl font-medium hover:bg-gray-200 transition-colors">
                                     Batal

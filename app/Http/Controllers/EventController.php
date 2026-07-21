@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\HandlesChangeRequests;
 use App\Http\Middleware\AuditLogger;
 use App\Models\Event;
 use App\Models\PointTransaction;
@@ -14,6 +15,8 @@ use Illuminate\Http\RedirectResponse;
 
 class EventController extends Controller
 {
+    use HandlesChangeRequests;
+
     /**
      * Display a listing of the resource.
      */
@@ -130,11 +133,9 @@ class EventController extends Controller
      */
     public function edit(Event $event): View
     {
-        if (!auth()->user()->canEdit($event)) {
-            abort(403, 'Anda tidak memiliki izin untuk mengedit event ini.');
-        }
+        $canEditDirectly = auth()->user()->canEdit($event);
 
-        return view('events.edit', compact('event'));
+        return view('events.edit', compact('event', 'canEditDirectly'));
     }
 
     /**
@@ -142,9 +143,7 @@ class EventController extends Controller
      */
     public function update(Request $request, Event $event): RedirectResponse
     {
-        if (!auth()->user()->canEdit($event)) {
-            abort(403, 'Anda tidak memiliki izin untuk mengedit event ini.');
-        }
+        $canEditDirectly = auth()->user()->canEdit($event);
 
         $validated = $request->validate([
             'nama_event' => 'required|string|max:255',
@@ -157,6 +156,16 @@ class EventController extends Controller
             'kabupaten' => 'nullable|string|max:255',
             'provinsi' => 'nullable|string|max:20',
         ]);
+
+        if (!$canEditDirectly) {
+            $changeRequest = $this->proposeChange($event, 'event', $validated, $request);
+            if (!$changeRequest) {
+                return back()->with('error', 'Tidak ada perubahan yang diajukan — data yang Anda masukkan sama dengan data saat ini.');
+            }
+
+            return redirect()->route('dashboard.events')
+                ->with('success', 'Usulan perubahan berhasil dikirim, menunggu tinjauan admin.');
+        }
 
         // Simpan data lama untuk audit log
         $oldData = $event->toArray();

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuditLogController;
+use App\Http\Controllers\ChangeRequestController;
 use App\Http\Controllers\GeoJsonController;
 use App\Http\Controllers\ClubController;
 use App\Http\Controllers\ExportController;
@@ -184,6 +185,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/komponen-syarat', [KomponenSyaratController::class, 'store'])->name('komponen-syarat.store');
         Route::put('/komponen-syarat/{komponenSyarat}', [KomponenSyaratController::class, 'update'])->name('komponen-syarat.update');
         Route::delete('/komponen-syarat/{komponenSyarat}', [KomponenSyaratController::class, 'destroy'])->name('komponen-syarat.destroy');
+    });
+
+    // Usulan Perubahan / Change Requests (Admin only)
+    Route::middleware(['App\Http\Middleware\CheckRole:admin'])->group(function () {
+        Route::get('/perubahan', [ChangeRequestController::class, 'index'])->name('change-requests.index');
+        Route::patch('/perubahan/{changeRequest}/approve', [ChangeRequestController::class, 'approve'])->name('change-requests.approve');
+        Route::patch('/perubahan/{changeRequest}/reject', [ChangeRequestController::class, 'reject'])->name('change-requests.reject');
     });
 });
 

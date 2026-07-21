@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\HandlesChangeRequests;
 use App\Models\Club;
 use App\Models\JenisOlahraga;
 use App\Models\PointTransaction;
@@ -16,6 +17,8 @@ use Illuminate\Http\RedirectResponse;
 
 class ClubController extends Controller
 {
+    use HandlesChangeRequests;
+
     /**
      * Display a listing of clubs.
      */
@@ -150,15 +153,13 @@ class ClubController extends Controller
      */
     public function edit(Club $club): View
     {
-        if (!auth()->user()->canEdit($club)) {
-            abort(403, 'Anda tidak memiliki izin untuk mengedit club ini.');
-        }
+        $canEditDirectly = auth()->user()->canEdit($club);
 
         $prasarana = Prasarana::all();
         $jenisOlahragaList = JenisOlahraga::where('aktif', true)->orderBy('nama')->get();
         $club->load('jadwalLatihan');
 
-        return view('clubs.edit', compact('club', 'prasarana', 'jenisOlahragaList'));
+        return view('clubs.edit', compact('club', 'prasarana', 'jenisOlahragaList', 'canEditDirectly'));
     }
 
     /**
@@ -166,9 +167,7 @@ class ClubController extends Controller
      */
     public function update(Request $request, Club $club): RedirectResponse
     {
-        if (!auth()->user()->canEdit($club)) {
-            abort(403, 'Anda tidak memiliki izin untuk mengedit club ini.');
-        }
+        $canEditDirectly = auth()->user()->canEdit($club);
 
         $validated = $request->validate([
             'nama_club' => 'required|string|max:255',
@@ -189,6 +188,18 @@ class ClubController extends Controller
         ]);
 
         $validated['aktif'] = $request->boolean('aktif', $club->aktif);
+
+        if (!$canEditDirectly) {
+            unset($validated['logo']);
+
+            $changeRequest = $this->proposeChange($club, 'club', $validated, $request);
+            if (!$changeRequest) {
+                return back()->with('error', 'Tidak ada perubahan yang diajukan — data yang Anda masukkan sama dengan data saat ini.');
+            }
+
+            return redirect()->route('dashboard.clubs')
+                ->with('success', 'Usulan perubahan berhasil dikirim, menunggu tinjauan admin.');
+        }
 
         // Handle logo upload
         if ($request->hasFile('logo')) {

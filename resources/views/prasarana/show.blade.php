@@ -44,6 +44,10 @@
                             <a href="{{ route('prasarana.edit', $prasarana) }}" class="px-4 py-2 bg-sky-600 text-white rounded-lg text-sm font-medium hover:bg-sky-700 transition shadow-sm">
                                 Edit
                             </a>
+                        @else
+                            <a href="{{ route('prasarana.edit', $prasarana) }}" class="px-4 py-2 bg-amber-50 text-amber-700 border border-amber-200 rounded-lg text-sm font-medium hover:bg-amber-100 transition">
+                                Ajukan Perubahan
+                            </a>
                         @endif
                     @endauth
                 </div>

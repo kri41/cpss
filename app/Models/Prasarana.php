@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Str;
 
 class Prasarana extends Model
@@ -103,6 +104,19 @@ class Prasarana extends Model
     public function clubs(): HasMany
     {
         return $this->hasMany(Club::class);
+    }
+
+    /**
+     * Relasi ke usulan perubahan data (dari non-pemilik)
+     */
+    public function changeRequests(): MorphMany
+    {
+        return $this->morphMany(ChangeRequest::class, 'changeable');
+    }
+
+    public function pendingChangeRequest(): ?ChangeRequest
+    {
+        return $this->changeRequests()->pending()->latest()->first();
     }
 
     /**

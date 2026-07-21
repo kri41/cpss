@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\HandlesChangeRequests;
 use App\Http\Middleware\AuditLogger;
 use App\Models\PointTransaction;
 use App\Models\Prasarana;
@@ -14,6 +15,8 @@ use Illuminate\Http\RedirectResponse;
 
 class PrasaranaController extends Controller
 {
+    use HandlesChangeRequests;
+
     /**
      * Display a listing of the resource.
      */
@@ -156,11 +159,9 @@ class PrasaranaController extends Controller
      */
     public function edit(Prasarana $prasarana): View
     {
-        if (!auth()->user()->canEdit($prasarana)) {
-            abort(403, 'Anda tidak memiliki izin untuk mengedit data prasarana ini.');
-        }
+        $canEditDirectly = auth()->user()->canEdit($prasarana);
 
-        return view('prasarana.edit', compact('prasarana'));
+        return view('prasarana.edit', compact('prasarana', 'canEditDirectly'));
     }
 
     /**
@@ -168,9 +169,7 @@ class PrasaranaController extends Controller
      */
     public function update(Request $request, Prasarana $prasarana): RedirectResponse
     {
-        if (!auth()->user()->canEdit($prasarana)) {
-            abort(403, 'Anda tidak memiliki izin untuk mengedit data prasarana ini.');
-        }
+        $canEditDirectly = auth()->user()->canEdit($prasarana);
 
         $validated = $request->validate([
             'nama_fasilitas' => 'required|string|max:255',
@@ -209,6 +208,19 @@ class PrasaranaController extends Controller
         $validated['akses_transportasi'] = $request->boolean('akses_transportasi', false);
         $validated['fasilitas_ruang_ganti'] = $request->boolean('fasilitas_ruang_ganti', false);
         $validated['fasilitas_tribun'] = $request->boolean('fasilitas_tribun', false);
+
+        if (!$canEditDirectly) {
+            // Foto tidak didukung lewat usulan perubahan — hanya field teks/angka/kondisi
+            unset($validated['foto'], $validated['foto_tambahan'], $validated['hapus_foto_tambahan']);
+
+            $changeRequest = $this->proposeChange($prasarana, 'prasarana', $validated, $request);
+            if (!$changeRequest) {
+                return back()->with('error', 'Tidak ada perubahan yang diajukan — data yang Anda masukkan sama dengan data saat ini.');
+            }
+
+            return redirect()->route('dashboard.prasarana')
+                ->with('success', 'Usulan perubahan berhasil dikirim, menunggu tinjauan admin.');
+        }
 
         // Simpan data lama untuk audit log
         $oldData = $prasarana->toArray();

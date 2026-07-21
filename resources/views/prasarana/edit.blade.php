@@ -16,6 +16,13 @@
                         @csrf
                         @method('PUT')
 
+                        @unless($canEditDirectly)
+                        <div class="flex gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            <p class="text-sm text-amber-800">Data ini sudah tervalidasi / bukan milik Anda. Perubahan yang Anda kirim akan diajukan sebagai <strong>usulan perubahan</strong> untuk ditinjau admin, tidak langsung diterapkan. Foto tidak bisa diusulkan lewat form ini.</p>
+                        </div>
+                        @endunless
+
                         <!-- Informasi Dasar -->
                         <div>
                             <h3 class="text-lg font-semibold text-slate-800 mb-4">Informasi Dasar</h3>
@@ -141,6 +148,7 @@
                         </div>
 
                         <!-- Foto -->
+                        @if($canEditDirectly)
                         <div x-data="fotoUpload()" class="space-y-4">
                             <div>
                                 <label for="foto" class="block text-sm font-medium text-slate-700">Foto Utama Fasilitas</label>
@@ -192,10 +200,21 @@
                                 </div>
                             </div>
                         </div>
+                        @endif
+
+                        @unless($canEditDirectly)
+                        <div>
+                            <label for="alasan" class="block text-sm font-medium text-slate-700">Alasan Usulan Perubahan <span class="text-red-500">*</span></label>
+                            <textarea id="alasan" name="alasan" rows="3" required minlength="10"
+                                placeholder="Jelaskan kenapa data ini perlu diubah..."
+                                class="mt-1 block w-full rounded-lg border-slate-300 focus:border-sky-500 focus:ring-sky-500 shadow-sm">{{ old('alasan') }}</textarea>
+                            @error('alasan')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                        </div>
+                        @endunless
 
                         <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
                             <a href="{{ route('prasarana.index') }}" class="px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50">Batal</a>
-                            <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-sky-600 rounded-lg hover:bg-sky-700 focus:ring-2 focus:ring-sky-500 focus:ring-offset-2">Perbarui</button>
+                            <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-sky-600 rounded-lg hover:bg-sky-700 focus:ring-2 focus:ring-sky-500 focus:ring-offset-2">{{ $canEditDirectly ? 'Perbarui' : 'Ajukan Perubahan' }}</button>
                         </div>
                     </form>
                 </div>

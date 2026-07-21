@@ -6,6 +6,7 @@ use App\Models\Concerns\HasSlug;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Event extends Model
 {
@@ -37,6 +38,19 @@ class Event extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Relasi ke usulan perubahan data (dari non-pemilik)
+     */
+    public function changeRequests(): MorphMany
+    {
+        return $this->morphMany(ChangeRequest::class, 'changeable');
+    }
+
+    public function pendingChangeRequest(): ?ChangeRequest
+    {
+        return $this->changeRequests()->pending()->latest()->first();
     }
 
     /**

@@ -234,6 +234,10 @@ Lihat `prd-addendum-v4.md` untuk detail lengkap konsep & rasional. Ringkasan imp
   - `composer` tidak ada di PATH → pakai `composer.phar` lokal (`php composer-setup.php` lalu `php composer.phar install`)
   - Redirect URI Google **wajib** domain publik asli atau literal `localhost` — custom domain lokal (`cpss.test` dsb) selalu ditolak Google, dipakai `http://localhost:8002/...` untuk trial lokal
   - Redirect URI produksi harus persis `/auth/google/callback` (bukan `/auth/google/redirect`) di Google Cloud Console
+- [x] Fix route `/prasarana/create`, `/clubs/create`, `/events/create` 404 — tertangkap route `show` karena constraint numerik dilepas untuk kode unik; dikecualikan lewat regex
+- [x] Fix data wilayah (provinsi/kabupaten/kecamatan/desa) ternyata tidak pernah ikut migration — cuma ada di DB lokal. Ditambahkan `database/data/wilayah_seed.sql` (91.599 baris, aman diimpor ulang) supaya server manapun bisa diisi datanya
+- [x] Fix peta Leaflet berantakan/tumpah keluar kotak di halaman detail yang dibuka dari dashboard — `layouts.app` belum punya `@stack('styles')` sehingga CSS Leaflet tidak pernah termuat di layout itu (JS-nya tetap jalan lewat `@stack('scripts')` yang sudah ada, makanya peta muncul tapi tanpa containment)
+- [x] **Usulan Perubahan (Change Request)**: Prasarana/Klub-Komunitas/Event yang sudah divalidasi tidak bisa diedit langsung oleh siapapun kecuali Super Admin/pemilik-sebelum-validasi (aturan lama). Sekarang non-pemilik yang login tetap bisa membuka form edit yang sama, tapi perubahannya masuk sebagai usulan (dengan kolom alasan wajib) yang ditinjau admin di menu "Usulan Perubahan" — disetujui → otomatis update data asli + notifikasi ke pengusul & pemilik data, ditolak → butuh catatan alasan, notifikasi ke pengusul. Foto/jadwal latihan/logo tidak bisa diusulkan (hanya field teks/angka/kondisi).
 
 ---
 
@@ -438,6 +442,8 @@ npm run dev
 | 21 Juli 2026 | Dashboard relawan dibatasi per wilayah sendiri (kabupaten/kecamatan); tombol Verifikasi disembunyikan dari relawan, hanya admin |
 | 21 Juli 2026 | Kampung Olahraga boleh didaftarkan per RT/RW agar tidak terbatas satu per desa |
 | 21 Juli 2026 | Google OAuth berhasil live di produksi (dataraga.my.id) setelah fix composer.phar + redirect URI di hosting Rumah Web |
+| 21 Juli 2026 | Data wilayah (91k baris) ternyata tidak pernah ter-migrate, hanya ada di lokal — ditambahkan sebagai file seed SQL di repo |
+| 21 Juli 2026 | Tambah fitur Usulan Perubahan: non-pemilik data yang sudah divalidasi tidak bisa edit langsung, tapi bisa ajukan perubahan (+alasan) untuk ditinjau admin |
 
 ---
 

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Club extends Model
 {
@@ -61,6 +62,19 @@ class Club extends Model
     public function jadwalLatihan(): HasMany
     {
         return $this->hasMany(JadwalLatihan::class);
+    }
+
+    /**
+     * Relasi ke usulan perubahan data (dari non-pemilik)
+     */
+    public function changeRequests(): MorphMany
+    {
+        return $this->morphMany(ChangeRequest::class, 'changeable');
+    }
+
+    public function pendingChangeRequest(): ?ChangeRequest
+    {
+        return $this->changeRequests()->pending()->latest()->first();
     }
 
     /**
