@@ -133,9 +133,27 @@ class EventController extends Controller
      */
     public function edit(Event $event): View
     {
-        $canEditDirectly = auth()->user()->canEdit($event);
+        if (!auth()->user()->canEdit($event)) {
+            return view('events.request-edit', compact('event'));
+        }
 
-        return view('events.edit', compact('event', 'canEditDirectly'));
+        return view('events.edit', compact('event'));
+    }
+
+    /**
+     * Ajukan permintaan akses edit (bukan usulan nilai field) untuk data yang
+     * sudah tervalidasi/bukan milik user ini.
+     */
+    public function requestEdit(Request $request, Event $event): RedirectResponse
+    {
+        if (auth()->user()->canEdit($event)) {
+            return redirect()->route('events.edit', $event);
+        }
+
+        $this->requestEditAccess($event, 'event', $request);
+
+        return redirect()->route('dashboard.events')
+            ->with('success', 'Permintaan akses edit terkirim, menunggu persetujuan admin.');
     }
 
     /**
@@ -143,7 +161,9 @@ class EventController extends Controller
      */
     public function update(Request $request, Event $event): RedirectResponse
     {
-        $canEditDirectly = auth()->user()->canEdit($event);
+        if (!auth()->user()->canEdit($event)) {
+            abort(403, 'Anda tidak memiliki izin untuk mengedit event ini. Ajukan permintaan akses edit terlebih dahulu.');
+        }
 
         $validated = $request->validate([
             'nama_event' => 'required|string|max:255',
@@ -156,16 +176,6 @@ class EventController extends Controller
             'kabupaten' => 'nullable|string|max:255',
             'provinsi' => 'nullable|string|max:20',
         ]);
-
-        if (!$canEditDirectly) {
-            $changeRequest = $this->proposeChange($event, 'event', $validated, $request);
-            if (!$changeRequest) {
-                return back()->with('error', 'Tidak ada perubahan yang diajukan — data yang Anda masukkan sama dengan data saat ini.');
-            }
-
-            return redirect()->route('dashboard.events')
-                ->with('success', 'Usulan perubahan berhasil dikirim, menunggu tinjauan admin.');
-        }
 
         // Simpan data lama untuk audit log
         $oldData = $event->toArray();

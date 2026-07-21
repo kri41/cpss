@@ -14,7 +14,7 @@ class ChangeRequestController extends Controller
     {
         abort_unless(auth()->user()->isAdmin(), 403);
 
-        $changeRequests = ChangeRequest::with(['user', 'changeable'])
+        $changeRequests = ChangeRequest::with(['user', 'changeable.user'])
             ->pending()
             ->latest()
             ->paginate(15);
@@ -22,6 +22,12 @@ class ChangeRequestController extends Controller
         return view('change-requests.index', compact('changeRequests'));
     }
 
+    /**
+     * Setujui permintaan — buka kembali akses edit untuk PEMILIK ASLI data
+     * (bukan pengaju) dengan mengembalikan status_validasi ke pending, supaya
+     * aturan canEdit() yang sudah ada otomatis mengizinkan pemilik edit lagi.
+     * Admin perlu memvalidasi ulang setelah pemilik selesai memperbaiki.
+     */
     public function approve(ChangeRequest $changeRequest): RedirectResponse
     {
         abort_unless(auth()->user()->isAdmin(), 403);
@@ -30,7 +36,7 @@ class ChangeRequestController extends Controller
         $model = $changeRequest->changeable;
         abort_if(!$model, 404, 'Data terkait sudah tidak ada.');
 
-        $model->update($changeRequest->perubahan);
+        $model->update(['status_validasi' => 'pending']);
 
         $changeRequest->update([
             'status' => 'approved',
@@ -38,25 +44,27 @@ class ChangeRequestController extends Controller
             'reviewed_at' => now(),
         ]);
 
-        UserNotification::create([
-            'user_id' => $changeRequest->user_id,
-            'type' => 'perubahan',
-            'title' => 'Usulan Perubahan Diterima',
-            'message' => 'Usulan perubahan Anda untuk "' . $this->itemName($model) . '" telah disetujui admin.',
-            'data' => ['related_type' => $changeRequest->changeable_type, 'related_id' => $changeRequest->changeable_id],
-        ]);
-
-        if ($model->user_id && $model->user_id !== $changeRequest->user_id) {
+        if ($model->user_id) {
             UserNotification::create([
                 'user_id' => $model->user_id,
                 'type' => 'perubahan',
-                'title' => 'Data Anda Diperbarui',
-                'message' => '"' . $this->itemName($model) . '" milik Anda diperbarui berdasarkan usulan perubahan yang disetujui admin.',
+                'title' => 'Akses Edit Dibuka Kembali',
+                'message' => 'Admin membuka kembali akses edit untuk "' . $this->itemName($model) . '" karena ada laporan: "' . $changeRequest->alasan . '". Data perlu divalidasi ulang setelah Anda selesai mengedit.',
                 'data' => ['related_type' => $changeRequest->changeable_type, 'related_id' => $changeRequest->changeable_id],
             ]);
         }
 
-        return back()->with('success', 'Usulan perubahan disetujui dan data telah diperbarui.');
+        if ($changeRequest->user_id !== $model->user_id) {
+            UserNotification::create([
+                'user_id' => $changeRequest->user_id,
+                'type' => 'perubahan',
+                'title' => 'Permintaan Diterima',
+                'message' => 'Permintaan Anda tentang "' . $this->itemName($model) . '" disetujui. Pemilik data akan memperbaikinya.',
+                'data' => ['related_type' => $changeRequest->changeable_type, 'related_id' => $changeRequest->changeable_id],
+            ]);
+        }
+
+        return back()->with('success', 'Permintaan disetujui — akses edit pemilik data dibuka kembali (status kembali pending, menunggu validasi ulang).');
     }
 
     public function reject(Request $request, ChangeRequest $changeRequest): RedirectResponse
@@ -76,12 +84,12 @@ class ChangeRequestController extends Controller
         UserNotification::create([
             'user_id' => $changeRequest->user_id,
             'type' => 'perubahan',
-            'title' => 'Usulan Perubahan Ditolak',
-            'message' => 'Usulan perubahan Anda untuk "' . $this->itemName($changeRequest->changeable) . '" ditolak admin. Alasan: ' . $request->catatan_admin,
+            'title' => 'Permintaan Ditolak',
+            'message' => 'Permintaan akses edit Anda untuk "' . $this->itemName($changeRequest->changeable) . '" ditolak admin. Alasan: ' . $request->catatan_admin,
             'data' => ['related_type' => $changeRequest->changeable_type, 'related_id' => $changeRequest->changeable_id],
         ]);
 
-        return back()->with('success', 'Usulan perubahan ditolak.');
+        return back()->with('success', 'Permintaan ditolak.');
     }
 
     private function itemName($model): string

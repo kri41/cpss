@@ -3,47 +3,25 @@
 namespace App\Http\Controllers\Concerns;
 
 use App\Models\ChangeRequest;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 
 trait HandlesChangeRequests
 {
     /**
-     * Bandingkan data tervalidasi dengan nilai model saat ini, simpan hanya
-     * field yang benar-benar berubah sebagai usulan (pending), untuk ditinjau admin.
-     * Return null kalau tidak ada perubahan sama sekali.
+     * Buat permintaan akses edit (bukan usulan nilai field) untuk data yang
+     * sudah tervalidasi/bukan milik user ini. Kalau disetujui admin nanti,
+     * yang mendapat akses edit kembali adalah PEMILIK ASLI data, bukan pengaju.
+     * Pemilik baru diberi tahu SETELAH admin menyetujui, bukan saat pengajuan masuk.
      */
-    protected function proposeChange(Model $model, string $type, array $validated, Request $request): ?ChangeRequest
+    protected function requestEditAccess(Model $model, string $type, Request $request): ChangeRequest
     {
         $request->validate(['alasan' => 'required|string|min:10']);
-
-        $changed = [];
-        foreach ($validated as $key => $value) {
-            $current = $model->{$key};
-
-            if ($current instanceof \DateTimeInterface) {
-                $current = Carbon::parse($current)->format('Y-m-d');
-                $value = $value ? Carbon::parse($value)->format('Y-m-d') : null;
-            } elseif (is_bool($current) || is_bool($value)) {
-                $current = (bool) $current;
-                $value = (bool) $value;
-            }
-
-            if ((string) $current !== (string) $value) {
-                $changed[$key] = $value;
-            }
-        }
-
-        if (empty($changed)) {
-            return null;
-        }
 
         return ChangeRequest::create([
             'user_id' => auth()->id(),
             'changeable_type' => $type,
             'changeable_id' => $model->id,
-            'perubahan' => $changed,
             'alasan' => $request->alasan,
             'status' => 'pending',
         ]);

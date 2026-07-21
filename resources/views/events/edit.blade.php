@@ -13,13 +13,6 @@
                         @csrf
                         @method('PUT')
 
-                        @unless($canEditDirectly)
-                        <div class="flex gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl mb-6">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                            <p class="text-sm text-amber-800">Data ini sudah tervalidasi / bukan milik Anda. Perubahan yang Anda kirim akan diajukan sebagai <strong>usulan perubahan</strong> untuk ditinjau admin, tidak langsung diterapkan.</p>
-                        </div>
-                        @endunless
-
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <!-- Nama Event -->
                             <div class="md:col-span-2">
@@ -66,21 +59,13 @@
                             <x-wilayah-dropdown :selectedProvinsi="$event->provinsi" :selectedKabupaten="$event->kabupaten" :selectedKecamatan="$event->kecamatan" :selectedDesa="$event->desa" />
                         </div>
 
-                        @unless($canEditDirectly)
-                        <div class="mt-6">
-                            <x-input-label for="alasan" :value="__('Alasan Usulan Perubahan')" />
-                            <textarea id="alasan" name="alasan" rows="3" required minlength="10" placeholder="Jelaskan kenapa data ini perlu diubah..." class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">{{ old('alasan') }}</textarea>
-                            <x-input-error :messages="$errors->get('alasan')" class="mt-2" />
-                        </div>
-                        @endunless
-
                         <div class="flex items-center justify-end mt-6">
                             <a href="{{ route('events.index') }}" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 mr-4">
                                 {{ __('Batal') }}
                             </a>
 
                             <x-primary-button>
-                                {{ $canEditDirectly ? __('Perbarui') : __('Ajukan Perubahan') }}
+                                {{ __('Perbarui') }}
                             </x-primary-button>
                         </div>
                     </form>

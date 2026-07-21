@@ -237,7 +237,7 @@ Lihat `prd-addendum-v4.md` untuk detail lengkap konsep & rasional. Ringkasan imp
 - [x] Fix route `/prasarana/create`, `/clubs/create`, `/events/create` 404 — tertangkap route `show` karena constraint numerik dilepas untuk kode unik; dikecualikan lewat regex
 - [x] Fix data wilayah (provinsi/kabupaten/kecamatan/desa) ternyata tidak pernah ikut migration — cuma ada di DB lokal. Ditambahkan `database/data/wilayah_seed.sql` (91.599 baris, aman diimpor ulang) supaya server manapun bisa diisi datanya
 - [x] Fix peta Leaflet berantakan/tumpah keluar kotak di halaman detail yang dibuka dari dashboard — `layouts.app` belum punya `@stack('styles')` sehingga CSS Leaflet tidak pernah termuat di layout itu (JS-nya tetap jalan lewat `@stack('scripts')` yang sudah ada, makanya peta muncul tapi tanpa containment)
-- [x] **Usulan Perubahan (Change Request)**: Prasarana/Klub-Komunitas/Event yang sudah divalidasi tidak bisa diedit langsung oleh siapapun kecuali Super Admin/pemilik-sebelum-validasi (aturan lama). Sekarang non-pemilik yang login tetap bisa membuka form edit yang sama, tapi perubahannya masuk sebagai usulan (dengan kolom alasan wajib) yang ditinjau admin di menu "Usulan Perubahan" — disetujui → otomatis update data asli + notifikasi ke pengusul & pemilik data, ditolak → butuh catatan alasan, notifikasi ke pengusul. Foto/jadwal latihan/logo tidak bisa diusulkan (hanya field teks/angka/kondisi).
+- [x] **Usulan Perubahan (Change Request)**: aturan akses edit Prasarana/Klub-Komunitas/Event — (1) belum divalidasi admin → pemilik bisa edit langsung, (2) sudah divalidasi → pemilik sendiri pun harus ajukan permintaan edit dulu, (3) bukan pemilik → tidak bisa edit langsung sama sekali (baik sudah maupun belum divalidasi), harus mengajukan permintaan. Form pengajuan hanya berisi kolom alasan (tanpa usulan nilai field baru — tidak ada auto-apply perubahan data). Admin meninjau di menu "Usulan Perubahan": disetujui → `status_validasi` data dikembalikan ke `pending` sehingga aturan `canEdit()` yang sudah ada otomatis membuka akses edit untuk **pemilik asli data** (bukan pengaju), lalu admin perlu validasi ulang setelah pemilik selesai memperbaiki; notifikasi ke pemilik baru dikirim setelah disetujui (bukan saat pengajuan masuk). Ditolak → wajib catatan alasan, notifikasi ke pengaju.
 
 ---
 
@@ -443,7 +443,7 @@ npm run dev
 | 21 Juli 2026 | Kampung Olahraga boleh didaftarkan per RT/RW agar tidak terbatas satu per desa |
 | 21 Juli 2026 | Google OAuth berhasil live di produksi (dataraga.my.id) setelah fix composer.phar + redirect URI di hosting Rumah Web |
 | 21 Juli 2026 | Data wilayah (91k baris) ternyata tidak pernah ter-migrate, hanya ada di lokal — ditambahkan sebagai file seed SQL di repo |
-| 21 Juli 2026 | Tambah fitur Usulan Perubahan: non-pemilik data yang sudah divalidasi tidak bisa edit langsung, tapi bisa ajukan perubahan (+alasan) untuk ditinjau admin |
+| 21 Juli 2026 | Tambah fitur Usulan Perubahan: data belum divalidasi → pemilik bisa edit langsung; sudah divalidasi (termasuk oleh pemilik sendiri) atau bukan pemilik → wajib ajukan permintaan (+alasan); disetujui admin → status kembali pending & akses edit terbuka untuk pemilik asli (bukan pengaju) |
 
 ---
 

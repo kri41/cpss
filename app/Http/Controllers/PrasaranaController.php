@@ -159,9 +159,27 @@ class PrasaranaController extends Controller
      */
     public function edit(Prasarana $prasarana): View
     {
-        $canEditDirectly = auth()->user()->canEdit($prasarana);
+        if (!auth()->user()->canEdit($prasarana)) {
+            return view('prasarana.request-edit', compact('prasarana'));
+        }
 
-        return view('prasarana.edit', compact('prasarana', 'canEditDirectly'));
+        return view('prasarana.edit', compact('prasarana'));
+    }
+
+    /**
+     * Ajukan permintaan akses edit (bukan usulan nilai field) untuk data yang
+     * sudah tervalidasi/bukan milik user ini.
+     */
+    public function requestEdit(Request $request, Prasarana $prasarana): RedirectResponse
+    {
+        if (auth()->user()->canEdit($prasarana)) {
+            return redirect()->route('prasarana.edit', $prasarana);
+        }
+
+        $this->requestEditAccess($prasarana, 'prasarana', $request);
+
+        return redirect()->route('dashboard.prasarana')
+            ->with('success', 'Permintaan akses edit terkirim, menunggu persetujuan admin.');
     }
 
     /**
@@ -169,7 +187,9 @@ class PrasaranaController extends Controller
      */
     public function update(Request $request, Prasarana $prasarana): RedirectResponse
     {
-        $canEditDirectly = auth()->user()->canEdit($prasarana);
+        if (!auth()->user()->canEdit($prasarana)) {
+            abort(403, 'Anda tidak memiliki izin untuk mengedit data prasarana ini. Ajukan permintaan akses edit terlebih dahulu.');
+        }
 
         $validated = $request->validate([
             'nama_fasilitas' => 'required|string|max:255',
@@ -208,19 +228,6 @@ class PrasaranaController extends Controller
         $validated['akses_transportasi'] = $request->boolean('akses_transportasi', false);
         $validated['fasilitas_ruang_ganti'] = $request->boolean('fasilitas_ruang_ganti', false);
         $validated['fasilitas_tribun'] = $request->boolean('fasilitas_tribun', false);
-
-        if (!$canEditDirectly) {
-            // Foto tidak didukung lewat usulan perubahan — hanya field teks/angka/kondisi
-            unset($validated['foto'], $validated['foto_tambahan'], $validated['hapus_foto_tambahan']);
-
-            $changeRequest = $this->proposeChange($prasarana, 'prasarana', $validated, $request);
-            if (!$changeRequest) {
-                return back()->with('error', 'Tidak ada perubahan yang diajukan — data yang Anda masukkan sama dengan data saat ini.');
-            }
-
-            return redirect()->route('dashboard.prasarana')
-                ->with('success', 'Usulan perubahan berhasil dikirim, menunggu tinjauan admin.');
-        }
 
         // Simpan data lama untuk audit log
         $oldData = $prasarana->toArray();
