@@ -18,24 +18,25 @@
                         <!-- Informasi Dasar -->
                         <div>
                             <h3 class="text-lg font-semibold text-slate-800 mb-4">Informasi Dasar</h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <label for="nama_fasilitas" class="block text-sm font-medium text-slate-700">Nama Fasilitas <span class="text-red-500">*</span></label>
-                                    <input id="nama_fasilitas" type="text" name="nama_fasilitas" value="{{ old('nama_fasilitas') }}" required class="mt-1 block w-full rounded-lg border-slate-300 focus:border-sky-500 focus:ring-sky-500 shadow-sm" placeholder="Contoh: Lapangan Sepak Bola PPG">
-                                    @error('nama_fasilitas')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
-                                </div>
+                            <div>
+                                <label for="nama_fasilitas" class="block text-sm font-medium text-slate-700">Nama Fasilitas <span class="text-red-500">*</span></label>
+                                <input id="nama_fasilitas" type="text" name="nama_fasilitas" value="{{ old('nama_fasilitas') }}" required class="mt-1 block w-full rounded-lg border-slate-300 focus:border-sky-500 focus:ring-sky-500 shadow-sm" placeholder="Contoh: Lapangan Sepak Bola PPG">
+                                @error('nama_fasilitas')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                            </div>
 
-                                <div>
-                                    <label for="club_komunitas" class="block text-sm font-medium text-slate-700">Club / Komunitas</label>
-                                    <input id="club_komunitas" type="text" name="club_komunitas" value="{{ old('club_komunitas') }}" class="mt-1 block w-full rounded-lg border-slate-300 focus:border-sky-500 focus:ring-sky-500 shadow-sm" placeholder="Opsional">
-                                    @error('club_komunitas')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                            <div class="mt-6">
+                                <label class="block text-sm font-medium text-slate-700">Jenis Olahraga <span class="text-red-500">*</span> <span class="text-slate-400 font-normal">(bisa pilih lebih dari satu, fasilitas sering multifungsi)</span></label>
+                                <div class="mt-2 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                                    @php $oldJenis = old('jenis_olahraga_id', []); @endphp
+                                    @foreach($jenisOlahragaList as $j)
+                                        <label class="flex items-center p-2.5 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 has-[:checked]:bg-sky-50 has-[:checked]:border-sky-300">
+                                            <input type="checkbox" name="jenis_olahraga_id[]" value="{{ $j->id }}" {{ in_array($j->id, $oldJenis) ? 'checked' : '' }} class="w-4 h-4 text-sky-600 border-slate-300 rounded focus:ring-sky-500">
+                                            <span class="ml-2 text-sm text-slate-700">{{ $j->nama }}</span>
+                                        </label>
+                                    @endforeach
                                 </div>
-
-                                <div>
-                                    <label for="kategori_olahraga" class="block text-sm font-medium text-slate-700">Kategori Olahraga <span class="text-red-500">*</span></label>
-                                    <input id="kategori_olahraga" type="text" name="kategori_olahraga" value="{{ old('kategori_olahraga') }}" required class="mt-1 block w-full rounded-lg border-slate-300 focus:border-sky-500 focus:ring-sky-500 shadow-sm" placeholder="Contoh: Sepakbola, Voli, Basket">
-                                    @error('kategori_olahraga')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
-                                </div>
+                                @error('jenis_olahraga_id')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                                @error('jenis_olahraga_id.*')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                             </div>
                         </div>
 

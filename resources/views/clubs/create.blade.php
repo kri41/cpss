@@ -119,7 +119,7 @@
                                     <option value="">Pilih Prasarana (Opsional)</option>
                                     @foreach($prasarana as $p)
                                         <option value="{{ $p->id }}" {{ old('prasarana_id') == $p->id ? 'selected' : '' }}>
-                                            {{ $p->nama_fasilitas }} ({{ $p->kategori_olahraga }})
+                                            {{ $p->nama_fasilitas }} ({{ $p->kategori_olahraga_label }})
                                         </option>
                                     @endforeach
                                 </select>

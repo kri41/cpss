@@ -77,7 +77,7 @@
                             {{ $fasil->nama_fasilitas }}
                             <i class="fas fa-circle-check text-emerald-500 text-sm align-middle ml-1" title="Kampung Olahraga Terverifikasi"></i>
                         </h1>
-                        <p class="text-sm text-blue-600 font-semibold mt-0.5">{{ $fasil->kategori_olahraga }}</p>
+                        <p class="text-sm text-blue-600 font-semibold mt-0.5">{{ $fasil->kategori_olahraga_label }}</p>
 
                         <div class="mt-3 pt-3 border-t border-gray-50 space-y-2 text-sm text-gray-600">
                             <div class="flex gap-2">

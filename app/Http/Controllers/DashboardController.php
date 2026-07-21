@@ -83,7 +83,7 @@ class DashboardController extends Controller
 
         $baseScope = fn($query) => $isRelawan ? $query->where('user_id', $user->id) : $query;
 
-        $prasarana   = $baseScope(Prasarana::with('user')->latest())->get();
+        $prasarana   = $baseScope(Prasarana::with(['user', 'jenisOlahraga'])->latest())->get();
         $events      = $baseScope(Event::with('user')->latest())->get();
         $clubs       = $baseScope(Club::with('user')->latest())->get();
         $partisipasi = $baseScope(Partisipasi::with('user')->latest())->get();

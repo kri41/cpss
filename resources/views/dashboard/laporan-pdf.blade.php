@@ -142,7 +142,7 @@ tbody tr:nth-child(even) td { background: #f8fafc; }
         <tr>
             <td class="no-col">{{ $i+1 }}</td>
             <td>{{ $p->nama_fasilitas ?? $p->nama ?? '-' }}</td>
-            <td>{{ $p->kategori_olahraga ?? '-' }}</td>
+            <td>{{ $p->kategori_olahraga_label ?? '-' }}</td>
             <td>{{ collect([$p->desa, $p->kecamatan, $p->kabupaten])->filter()->implode(', ') ?: '-' }}</td>
             @if(!$isRelawan)<td>{{ $p->user?->name ?? '-' }}</td>@endif
             <td><span class="badge {{ $p->status_validasi==='validated'?'b-valid':($p->status_validasi==='rejected'?'b-rejected':'b-pending') }}">{{ $p->status_validasi==='validated'?'Valid':($p->status_validasi==='rejected'?'Tolak':'Pending') }}</span></td>

@@ -76,7 +76,7 @@
                     <select name="kategori" class="w-full rounded-lg border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500 shadow-sm" onchange="this.form.submit()">
                         <option value="">Semua</option>
                         @foreach($kategoriList as $k)
-                            <option value="{{ $k }}" {{ request('kategori') == $k ? 'selected' : '' }}>{{ $k }}</option>
+                            <option value="{{ $k->id }}" {{ request('kategori') == $k->id ? 'selected' : '' }}>{{ $k->nama }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -118,7 +118,9 @@
                                     @endif
                                 </div>
                                 <div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-sm text-gray-500">
-                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium bg-blue-50 text-blue-700">{{ $item->kategori_olahraga }}</span>
+                                    @foreach($item->jenisOlahraga as $j)
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium bg-blue-50 text-blue-700">{{ $j->nama }}</span>
+                                    @endforeach
                                     <span class="inline-flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>{{ $item->desa ?? '-' }}, {{ $item->kecamatan ?? '-' }}</span>
                                     <span class="inline-flex items-center gap-1 text-xs">Kondisi: <strong class="text-gray-700">{{ $item->average_kondisi }}/5</strong><span class="inline-block w-12 h-1.5 bg-gray-200 rounded-full overflow-hidden align-middle ml-1"><span class="block h-full {{ $item->average_kondisi >= 4 ? 'bg-green-500' : ($item->average_kondisi >= 3 ? 'bg-blue-500' : ($item->average_kondisi >= 2 ? 'bg-amber-400' : 'bg-red-500')) }}" style="width: {{ min(100, max(0, ($item->average_kondisi / 5) * 100)) }}%"></span></span></span>
                                 </div>
@@ -132,9 +134,9 @@
                                 @endif
                                 @if(auth()->user()->isAdmin())
                                     @if($item->status_validasi === 'pending')
-                                        <button @click="selected = { id: {{ $item->id }}, nama: '{{ $item->nama_fasilitas }}', kategori: '{{ $item->kategori_olahraga }}', wilayah: '{{ $item->desa ?? '-' }} / {{ $item->kecamatan ?? '-' }} / {{ $item->kabupaten ?? '-' }}', kondisi: '{{ $item->average_kondisi }}', status: '{{ $item->status_validasi }}', action: '{{ route('prasarana.validate', $item) }}' }; verifyOpen = true" class="p-2 rounded-lg text-emerald-600 hover:bg-emerald-50 transition-colors" title="Verifikasi"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></button>
+                                        <button @click="selected = { id: {{ $item->id }}, nama: '{{ $item->nama_fasilitas }}', kategori: '{{ $item->kategori_olahraga_label }}', wilayah: '{{ $item->desa ?? '-' }} / {{ $item->kecamatan ?? '-' }} / {{ $item->kabupaten ?? '-' }}', kondisi: '{{ $item->average_kondisi }}', status: '{{ $item->status_validasi }}', action: '{{ route('prasarana.validate', $item) }}' }; verifyOpen = true" class="p-2 rounded-lg text-emerald-600 hover:bg-emerald-50 transition-colors" title="Verifikasi"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></button>
                                     @else
-                                        <button @click="selected = { id: {{ $item->id }}, nama: '{{ $item->nama_fasilitas }}', kategori: '{{ $item->kategori_olahraga }}', wilayah: '{{ $item->desa ?? '-' }} / {{ $item->kecamatan ?? '-' }} / {{ $item->kabupaten ?? '-' }}', kondisi: '{{ $item->average_kondisi }}', status: '{{ $item->status_validasi }}', action: '{{ route('prasarana.cancel-validate', $item) }}' }; unverifyOpen = true" class="p-2 rounded-lg text-red-600 hover:bg-red-50 transition-colors" title="Batalkan Verifikasi"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></button>
+                                        <button @click="selected = { id: {{ $item->id }}, nama: '{{ $item->nama_fasilitas }}', kategori: '{{ $item->kategori_olahraga_label }}', wilayah: '{{ $item->desa ?? '-' }} / {{ $item->kecamatan ?? '-' }} / {{ $item->kabupaten ?? '-' }}', kondisi: '{{ $item->average_kondisi }}', status: '{{ $item->status_validasi }}', action: '{{ route('prasarana.cancel-validate', $item) }}' }; unverifyOpen = true" class="p-2 rounded-lg text-red-600 hover:bg-red-50 transition-colors" title="Batalkan Verifikasi"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></button>
                                     @endif
                                 @endif
                             @endauth

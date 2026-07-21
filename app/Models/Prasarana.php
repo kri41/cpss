@@ -6,6 +6,7 @@ use App\Models\Concerns\HasSlug;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Str;
@@ -21,8 +22,6 @@ class Prasarana extends Model
         'kampung_olahraga_id',
         'qr_token',
         'nama_fasilitas',
-        'club_komunitas',
-        'kategori_olahraga',
         'latitude',
         'longitude',
         'alamat',
@@ -104,6 +103,19 @@ class Prasarana extends Model
     public function clubs(): HasMany
     {
         return $this->hasMany(Club::class);
+    }
+
+    /**
+     * Relasi ke Jenis Olahraga (multi-pilihan — fasilitas sering multifungsi)
+     */
+    public function jenisOlahraga(): BelongsToMany
+    {
+        return $this->belongsToMany(JenisOlahraga::class, 'prasarana_jenis_olahraga');
+    }
+
+    public function getKategoriOlahragaLabelAttribute(): string
+    {
+        return $this->jenisOlahraga->pluck('nama')->implode(', ') ?: '-';
     }
 
     /**
@@ -246,11 +258,14 @@ class Prasarana extends Model
     }
 
     /**
-     * Scope untuk filter berdasarkan club/komunitas
+     * Scope untuk filter berdasarkan jenis olahraga (id). Nama scope sengaja
+     * dibedakan dari relasi jenisOlahraga() agar tidak bentrok saat dipanggil
+     * secara statis (mis. Prasarana::jenisOlahraga() akan resolve ke relasi,
+     * bukan scope).
      */
-    public function scopeClubKomunitas($query, $club)
+    public function scopeKategoriOlahraga($query, $jenisOlahragaId)
     {
-        return $query->where('club_komunitas', 'like', '%' . $club . '%');
+        return $query->whereHas('jenisOlahraga', fn($q) => $q->where('jenis_olahraga.id', $jenisOlahragaId));
     }
 
     /**

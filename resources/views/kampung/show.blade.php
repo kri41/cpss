@@ -125,7 +125,7 @@
                     <div class="px-5 py-3 flex items-center justify-between gap-3">
                         <div class="min-w-0">
                             <p class="text-sm font-semibold text-gray-900 truncate">{{ $fasil->nama_fasilitas }}</p>
-                            <p class="text-xs text-gray-500">{{ $fasil->kategori_olahraga }}</p>
+                            <p class="text-xs text-gray-500">{{ $fasil->kategori_olahraga_label }}</p>
                         </div>
                         <div class="flex items-center gap-2 shrink-0">
                             @if(isset($fasilQr[$fasil->id]))
@@ -386,7 +386,7 @@
             <select name="prasarana_id" required class="w-full rounded-xl border-gray-300 focus:border-blue-500 focus:ring-blue-500 text-sm mb-4">
                 <option value="">Pilih fasil...</option>
                 @foreach($candidateFasil as $f)
-                <option value="{{ $f->id }}">{{ $f->nama_fasilitas }} ({{ $f->kategori_olahraga }})</option>
+                <option value="{{ $f->id }}">{{ $f->nama_fasilitas }} ({{ $f->kategori_olahraga_label }})</option>
                 @endforeach
             </select>
             @if($candidateFasil->isEmpty())

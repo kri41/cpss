@@ -60,7 +60,7 @@ class ExportController extends Controller
 
     public function prasarana(Request $request): StreamedResponse
     {
-        $query = $this->scopeToUser(Prasarana::with('user')->latest());
+        $query = $this->scopeToUser(Prasarana::with(['user', 'jenisOlahraga'])->latest());
 
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
@@ -70,7 +70,7 @@ class ExportController extends Controller
         }
         if ($request->filled('kabupaten'))     $query->where('kabupaten', $request->kabupaten);
         if ($request->filled('kecamatan'))     $query->where('kecamatan', $request->kecamatan);
-        if ($request->filled('kategori'))      $query->where('kategori_olahraga', $request->kategori);
+        if ($request->filled('kategori'))      $query->kategoriOlahraga($request->kategori);
         if ($request->filled('status_validasi')) $query->where('status_validasi', $request->status_validasi);
 
         $rows = $query->get();
@@ -84,7 +84,7 @@ class ExportController extends Controller
                 fputcsv($out, [
                     $i + 1,
                     $p->nama_fasilitas,
-                    $p->kategori_olahraga,
+                    $p->kategori_olahraga_label,
                     $p->alamat,
                     $p->desa,
                     $p->kecamatan,

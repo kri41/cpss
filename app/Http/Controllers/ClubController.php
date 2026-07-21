@@ -82,7 +82,7 @@ class ClubController extends Controller
      */
     public function create(): View
     {
-        $prasarana = Prasarana::all();
+        $prasarana = Prasarana::with('jenisOlahraga')->get();
         $jenisOlahragaList = JenisOlahraga::where('aktif', true)->orderBy('nama')->get();
         return view('clubs.create', compact('prasarana', 'jenisOlahragaList'));
     }
@@ -134,7 +134,7 @@ class ClubController extends Controller
      */
     public function show(Club $club): View
     {
-        $club->load(['user', 'prasarana', 'jadwalLatihan']);
+        $club->load(['user', 'prasarana.jenisOlahraga', 'jadwalLatihan']);
         
         // Group schedules by day
         $jadwalByHari = $club->jadwalLatihan
@@ -157,7 +157,7 @@ class ClubController extends Controller
             return view('clubs.request-edit', compact('club'));
         }
 
-        $prasarana = Prasarana::all();
+        $prasarana = Prasarana::with('jenisOlahraga')->get();
         $jenisOlahragaList = JenisOlahraga::where('aktif', true)->orderBy('nama')->get();
         $club->load('jadwalLatihan');
 

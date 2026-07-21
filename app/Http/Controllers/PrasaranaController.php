@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Concerns\HandlesChangeRequests;
 use App\Http\Middleware\AuditLogger;
+use App\Models\JenisOlahraga;
 use App\Models\PointTransaction;
 use App\Models\Prasarana;
 use App\Models\UserNotification;
@@ -25,7 +26,7 @@ class PrasaranaController extends Controller
         $isDashboard = request()->is('dashboard/*');
         $user = auth()->user();
 
-        $query = Prasarana::with('user')->latest();
+        $query = Prasarana::with(['user', 'jenisOlahraga'])->latest();
 
         // Guest (publik) hanya lihat yang sudah divalidasi
         if (!auth()->check()) {
@@ -54,7 +55,7 @@ class PrasaranaController extends Controller
 
         // Filter: kategori olahraga
         if ($request->filled('kategori')) {
-            $query->where('kategori_olahraga', 'like', '%' . $request->kategori . '%');
+            $query->kategoriOlahraga($request->kategori);
         }
 
         $prasarana = $query->paginate(10)->withQueryString();
@@ -66,7 +67,7 @@ class PrasaranaController extends Controller
         }
         $kabupatenList = (clone $filterQuery)->distinct()->orderBy('kabupaten')->pluck('kabupaten')->filter();
         $kecamatanList = (clone $filterQuery)->when($request->filled('kabupaten'), fn($q) => $q->where('kabupaten', $request->kabupaten))->distinct()->orderBy('kecamatan')->pluck('kecamatan')->filter();
-        $kategoriList = (clone $filterQuery)->distinct()->orderBy('kategori_olahraga')->pluck('kategori_olahraga')->filter();
+        $kategoriList = JenisOlahraga::where('aktif', true)->orderBy('nama')->get();
 
         $view = $isDashboard ? 'prasarana.index-dashboard' : 'prasarana.index';
         return view($view, compact('prasarana', 'kabupatenList', 'kecamatanList', 'kategoriList'));
@@ -77,7 +78,9 @@ class PrasaranaController extends Controller
      */
     public function create(): View
     {
-        return view('prasarana.create');
+        $jenisOlahragaList = JenisOlahraga::where('aktif', true)->orderBy('nama')->get();
+
+        return view('prasarana.create', compact('jenisOlahragaList'));
     }
 
     /**
@@ -87,8 +90,8 @@ class PrasaranaController extends Controller
     {
         $validated = $request->validate([
             'nama_fasilitas' => 'required|string|max:255',
-            'club_komunitas' => 'nullable|string|max:255',
-            'kategori_olahraga' => 'required|string|max:100',
+            'jenis_olahraga_id' => 'required|array|min:1',
+            'jenis_olahraga_id.*' => 'exists:jenis_olahraga,id',
             'latitude' => 'nullable|numeric|between:-90,90',
             'longitude' => 'nullable|numeric|between:-180,180',
             'alamat' => 'nullable|string',
@@ -115,6 +118,9 @@ class PrasaranaController extends Controller
             'foto_tambahan.*' => 'image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
+        $jenisOlahragaIds = $validated['jenis_olahraga_id'];
+        unset($validated['jenis_olahraga_id']);
+
         $validated['user_id'] = auth()->id();
         $validated['akses_disabilitas'] = $request->boolean('akses_disabilitas', false);
         $validated['akses_parkir'] = $request->boolean('akses_parkir', false);
@@ -138,6 +144,7 @@ class PrasaranaController extends Controller
         $validated['foto_tambahan'] = !empty($fotoPaths) ? $fotoPaths : null;
 
         $prasarana = Prasarana::create($validated);
+        $prasarana->jenisOlahraga()->sync($jenisOlahragaIds);
 
         // Audit Log
         AuditLogger::logCreate('prasarana', $prasarana->id, $validated);
@@ -151,6 +158,8 @@ class PrasaranaController extends Controller
      */
     public function show(Prasarana $prasarana): View
     {
+        $prasarana->load(['jenisOlahraga', 'clubs']);
+
         return view('prasarana.show', compact('prasarana'));
     }
 
@@ -163,7 +172,9 @@ class PrasaranaController extends Controller
             return view('prasarana.request-edit', compact('prasarana'));
         }
 
-        return view('prasarana.edit', compact('prasarana'));
+        $jenisOlahragaList = JenisOlahraga::where('aktif', true)->orderBy('nama')->get();
+
+        return view('prasarana.edit', compact('prasarana', 'jenisOlahragaList'));
     }
 
     /**
@@ -193,8 +204,8 @@ class PrasaranaController extends Controller
 
         $validated = $request->validate([
             'nama_fasilitas' => 'required|string|max:255',
-            'club_komunitas' => 'nullable|string|max:255',
-            'kategori_olahraga' => 'required|string|max:100',
+            'jenis_olahraga_id' => 'required|array|min:1',
+            'jenis_olahraga_id.*' => 'exists:jenis_olahraga,id',
             'latitude' => 'nullable|numeric|between:-90,90',
             'longitude' => 'nullable|numeric|between:-180,180',
             'alamat' => 'nullable|string',
@@ -222,6 +233,9 @@ class PrasaranaController extends Controller
             'hapus_foto_tambahan' => 'nullable|array',
             'hapus_foto_tambahan.*' => 'nullable|string',
         ]);
+
+        $jenisOlahragaIds = $validated['jenis_olahraga_id'];
+        unset($validated['jenis_olahraga_id']);
 
         $validated['akses_disabilitas'] = $request->boolean('akses_disabilitas', false);
         $validated['akses_parkir'] = $request->boolean('akses_parkir', false);
@@ -259,6 +273,7 @@ class PrasaranaController extends Controller
         $validated['foto_tambahan'] = !empty($existingFoto) ? array_values($existingFoto) : null;
 
         $prasarana->update($validated);
+        $prasarana->jenisOlahraga()->sync($jenisOlahragaIds);
 
         // Audit Log
         AuditLogger::logUpdate('prasarana', $prasarana->id, $oldData, $prasarana->fresh()->toArray());

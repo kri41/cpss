@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Club;
 use App\Models\Event;
+use App\Models\JenisOlahraga;
 use App\Models\Kehadiran;
 use App\Models\Partisipasi;
 use App\Models\PointTransaction;
@@ -35,7 +36,7 @@ class DummyDataSeeder extends Seeder
         $data = [
             [
                 'nama_fasilitas' => 'Lapangan Sepak Bola Desa Sumber Agung',
-                'kategori_olahraga' => 'Sepak Bola',
+                '_jenis_olahraga' => ['Sepak Bola'],
                 'alamat' => 'Jl. Raya Sumber Agung No. 45',
                 'desa' => 'Desa Sumber Agung',
                 'kecamatan' => 'Kec. Glagah',
@@ -60,7 +61,7 @@ class DummyDataSeeder extends Seeder
             ],
             [
                 'nama_fasilitas' => 'Gor Tamansari',
-                'kategori_olahraga' => 'Badminton',
+                '_jenis_olahraga' => ['Badminton'],
                 'alamat' => 'Jl. Sudirman No. 12, Tamansari',
                 'desa' => 'Desa Tamansari',
                 'kecamatan' => 'Kec. Banyuwangi',
@@ -85,7 +86,7 @@ class DummyDataSeeder extends Seeder
             ],
             [
                 'nama_fasilitas' => 'Lapangan Voli Jajag',
-                'kategori_olahraga' => 'Voli',
+                '_jenis_olahraga' => ['Bola Voli'],
                 'alamat' => 'Dusun Krajan, Jajag',
                 'desa' => 'Desa Jajag',
                 'kecamatan' => 'Kec. Gambiran',
@@ -110,7 +111,7 @@ class DummyDataSeeder extends Seeder
             ],
             [
                 'nama_fasilitas' => 'Stadion Mini Gumukmas',
-                'kategori_olahraga' => 'Atletik',
+                '_jenis_olahraga' => ['Atletik/Lari'],
                 'alamat' => 'Jl. Ahmad Yani, Gumukmas',
                 'desa' => 'Desa Gumukmas',
                 'kecamatan' => 'Kec. Gumukmas',
@@ -135,7 +136,7 @@ class DummyDataSeeder extends Seeder
             ],
             [
                 'nama_fasilitas' => 'Lapangan Basket Tempurejo',
-                'kategori_olahraga' => 'Basket',
+                '_jenis_olahraga' => ['Bola Basket'],
                 'alamat' => 'Komplek SMPN 3 Tempurejo',
                 'desa' => 'Desa Tempurejo',
                 'kecamatan' => 'Kec. Tempurejo',
@@ -161,8 +162,14 @@ class DummyDataSeeder extends Seeder
         ];
 
         foreach ($data as $item) {
+            $jenisOlahragaNama = $item['_jenis_olahraga'];
+            unset($item['_jenis_olahraga']);
             $item['user_id'] = $relawanIds[array_rand($relawanIds)];
-            Prasarana::create($item);
+
+            $prasarana = Prasarana::create($item);
+            $jenisOlahragaIds = collect($jenisOlahragaNama)
+                ->map(fn($nama) => JenisOlahraga::firstOrCreate(['nama' => $nama], ['aktif' => true])->id);
+            $prasarana->jenisOlahraga()->sync($jenisOlahragaIds);
         }
 
         $this->command->info('Seeded 5 prasarana.');
