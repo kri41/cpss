@@ -51,14 +51,14 @@ Route::get('/api/kehadiran/autocomplete-nama', [\App\Http\Controllers\KehadiranC
    AKSES PUBLIK (Tanpa Login)
    ============================================================ */
 Route::get('/prasarana', [PrasaranaController::class, 'index'])->name('prasarana.index');
-Route::get('/prasarana/{prasarana}', [PrasaranaController::class, 'show'])->name('prasarana.show');
+Route::get('/prasarana/{prasarana}', [PrasaranaController::class, 'show'])->name('prasarana.show')->where('prasarana', '(?!create$)[^/]+');
 
 Route::get('/clubs', [ClubController::class, 'index'])->name('clubs.index');
-Route::get('/clubs/{club}', [ClubController::class, 'show'])->name('clubs.show');
+Route::get('/clubs/{club}', [ClubController::class, 'show'])->name('clubs.show')->where('club', '(?!create$)[^/]+');
 
 Route::get('/events', [EventController::class, 'index'])->name('events.index');
 Route::get('/events/peta', [EventController::class, 'peta'])->name('events.peta');
-Route::get('/events/{event}', [EventController::class, 'show'])->name('events.show');
+Route::get('/events/{event}', [EventController::class, 'show'])->name('events.show')->where('event', '(?!create$)[^/]+');
 
 Route::get('/kalender', [KalenderController::class, 'index'])->name('kalender.index');
 
