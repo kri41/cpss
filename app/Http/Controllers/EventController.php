@@ -196,7 +196,7 @@ class EventController extends Controller
      */
     public function destroy(Event $event): RedirectResponse
     {
-        if (!auth()->user()->canEdit($event)) {
+        if (!auth()->user()->isAdmin() && !auth()->user()->canEdit($event)) {
             abort(403, 'Anda tidak memiliki izin untuk menghapus event ini.');
         }
 

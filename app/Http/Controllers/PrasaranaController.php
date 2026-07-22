@@ -289,7 +289,7 @@ class PrasaranaController extends Controller
      */
     public function destroy(Prasarana $prasarana): RedirectResponse
     {
-        if (!auth()->user()->canEdit($prasarana)) {
+        if (!auth()->user()->isAdmin() && !auth()->user()->canEdit($prasarana)) {
             abort(403, 'Anda tidak memiliki izin untuk menghapus data prasarana ini.');
         }
 

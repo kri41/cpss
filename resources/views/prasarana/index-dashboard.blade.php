@@ -149,6 +149,10 @@
                                     @elseif($item->status_validasi === 'rejected')
                                         <button @click="selected = {{ $itemData }}, action: '{{ route('prasarana.validate', $item) }}' }; verifyOpen = true" class="p-2 rounded-lg text-emerald-600 hover:bg-emerald-50 transition-colors" title="Verifikasi Ulang"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></button>
                                     @endif
+                                    <form method="POST" action="{{ route('prasarana.destroy', $item) }}" onsubmit="return confirm('Hapus data prasarana ini? Tindakan ini tidak bisa dibatalkan.')">
+                                        @csrf @method('DELETE')
+                                        <button type="submit" class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-red-600 transition-colors" title="Hapus"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
+                                    </form>
                                 @endif
                             @endauth
                         </div>
