@@ -70,6 +70,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/laporan-pdf', [DashboardController::class, 'laporanPdf'])->name('dashboard.laporan-pdf');
+    Route::get('/dashboard/laporan-csv', [DashboardController::class, 'laporanCsv'])->name('dashboard.laporan-csv');
 
     // Dashboard views (index with sidebar)
     Route::get('/dashboard/events', [EventController::class, 'index'])->name('dashboard.events');
@@ -96,6 +97,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware(['App\Http\Middleware\CheckRole:admin,relawan'])->group(function () {
         Route::resource('prasarana', PrasaranaController::class)->except(['index', 'show']);
         Route::patch('/prasarana/{prasarana}/validate', [PrasaranaController::class, 'validatePrasarana'])->name('prasarana.validate');
+        Route::patch('/prasarana/{prasarana}/reject', [PrasaranaController::class, 'rejectPrasarana'])->name('prasarana.reject');
         Route::patch('/prasarana/{prasarana}/cancel-validate', [PrasaranaController::class, 'cancelValidatePrasarana'])->name('prasarana.cancel-validate');
         Route::post('/prasarana/{prasarana}/request-edit', [PrasaranaController::class, 'requestEdit'])->name('prasarana.request-edit');
     });
@@ -120,6 +122,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware(['App\Http\Middleware\CheckRole:admin,relawan'])->group(function () {
         Route::resource('events', EventController::class)->except(['index', 'show']);
         Route::patch('/events/{event}/validate', [EventController::class, 'validateEvent'])->name('events.validate');
+        Route::patch('/events/{event}/reject', [EventController::class, 'rejectEvent'])->name('events.reject');
         Route::patch('/events/{event}/cancel-validate', [EventController::class, 'cancelValidateEvent'])->name('events.cancel-validate');
         Route::post('/events/{event}/request-edit', [EventController::class, 'requestEdit'])->name('events.request-edit');
     });
@@ -128,6 +131,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware(['App\Http\Middleware\CheckRole:admin,relawan'])->group(function () {
         Route::resource('clubs', ClubController::class)->except(['index', 'show']);
         Route::patch('/clubs/{club}/validate', [ClubController::class, 'validateClub'])->name('clubs.validate');
+        Route::patch('/clubs/{club}/reject', [ClubController::class, 'rejectClub'])->name('clubs.reject');
         Route::patch('/clubs/{club}/cancel-validate', [ClubController::class, 'cancelValidateClub'])->name('clubs.cancel-validate');
         Route::post('/clubs/{club}/request-edit', [ClubController::class, 'requestEdit'])->name('clubs.request-edit');
     });

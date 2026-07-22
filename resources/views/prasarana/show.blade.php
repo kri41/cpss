@@ -27,6 +27,8 @@
                                 <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
                                 Tervalidasi
                             </span>
+                        @elseif($prasarana->status_validasi === 'rejected')
+                            <span class="px-3 py-1 text-xs font-semibold rounded-full bg-orange-100 text-orange-700">Butuh Perbaikan</span>
                         @else
                             <span class="px-3 py-1 text-xs font-semibold rounded-full bg-amber-100 text-amber-700">Menunggu Validasi</span>
                         @endif
@@ -36,6 +38,12 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                         {{ $prasarana->desa ?? '-' }} / {{ $prasarana->kecamatan ?? '-' }} / {{ $prasarana->kabupaten ?? '-' }}
                     </p>
+                    @if($prasarana->status_validasi === 'rejected' && $prasarana->komentar_validasi)
+                    <div class="mt-3 flex gap-2 p-3 bg-orange-50 border border-orange-100 rounded-lg text-sm text-orange-800 max-w-xl">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                        <span><strong>Catatan Admin:</strong> {{ $prasarana->komentar_validasi }}</span>
+                    </div>
+                    @endif
                 </div>
                 <div class="flex items-center gap-2 shrink-0">
                     <a href="{{ route('prasarana.index') }}" class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition shadow-sm">

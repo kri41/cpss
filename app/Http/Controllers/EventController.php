@@ -25,7 +25,9 @@ class EventController extends Controller
         $isDashboard = request()->is('dashboard/*');
         $user = auth()->user();
 
-        $query = Event::with('user')->latest();
+        $query = Event::with('user')
+            ->orderByRaw("status_validasi = 'validated'")
+            ->latest();
 
         // Guest (publik) hanya lihat yang sudah divalidasi
         if (!auth()->check()) {
@@ -250,6 +252,34 @@ class EventController extends Controller
             $redirect->with('poin_diperoleh', ['poin' => $tx->poin, 'label' => 'Event "' . $event->nama_event . '" divalidasi']);
         }
         return $redirect;
+    }
+
+    /**
+     * Tandai data butuh perbaikan (ditolak sementara, bukan penghapusan).
+     */
+    public function rejectEvent(Request $request, Event $event): RedirectResponse
+    {
+        if (!auth()->user()->canValidate($event)) {
+            abort(403, 'Anda tidak memiliki izin untuk menolak event ini.');
+        }
+
+        $request->validate(['komentar_validasi' => 'required|string|min:5']);
+
+        $event->update([
+            'status_validasi' => 'rejected',
+            'komentar_validasi' => $request->komentar_validasi,
+        ]);
+
+        UserNotification::create([
+            'user_id' => $event->user_id,
+            'type' => 'validasi',
+            'title' => 'Event Butuh Perbaikan',
+            'message' => 'Event "' . $event->nama_event . '" perlu diperbaiki. Catatan admin: ' . $request->komentar_validasi,
+            'data' => ['related_type' => 'event', 'related_id' => $event->id],
+        ]);
+
+        return redirect()->route('dashboard.events')
+            ->with('success', 'Event ditandai butuh perbaikan. Relawan pelapor telah diberi tahu.');
     }
 
     /**

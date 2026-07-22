@@ -11,7 +11,7 @@
     $validatedClubs = $items->where('status_validasi', 'validated')->count();
 @endphp
 
-<div x-data="{ verifyOpen: false, unverifyOpen: false, selected: null }">
+<div x-data="{ verifyOpen: false, unverifyOpen: false, rejectOpen: false, selected: null }">
     <!-- Sticky Stats & Filter Bar -->
     <div class="sticky top-14 lg:top-0 z-30 bg-white/90 backdrop-blur border-b border-gray-200/80">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-4">
@@ -133,10 +133,16 @@
                                     <a href="{{ route('clubs.edit', $club) }}" class="p-2 rounded-lg text-amber-600 hover:bg-amber-50 transition-colors" title="Edit"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg></a>
                                 @endif
                                 @if(auth()->user()->isAdmin())
+                                    @php
+                                        $clubData = "{ id: {{ $club->id }}, nama: '{{ $club->nama_club }}', ketua: '{{ $club->ketua_club }}', wilayah: '{{ $club->desa ?? '-' }} / {{ $club->kecamatan ?? '-' }} / {{ $club->kabupaten ?? '-' }}', aktif: '{{ $club->aktif ? 'Aktif' : 'Nonaktif' }}', status: '{{ $club->status_validasi }}'";
+                                    @endphp
                                     @if($club->status_validasi === 'pending')
-                                        <button @click="selected = { id: {{ $club->id }}, nama: '{{ $club->nama_club }}', ketua: '{{ $club->ketua_club }}', wilayah: '{{ $club->desa ?? '-' }} / {{ $club->kecamatan ?? '-' }} / {{ $club->kabupaten ?? '-' }}', aktif: '{{ $club->aktif ? 'Aktif' : 'Nonaktif' }}', status: '{{ $club->status_validasi }}', action: '{{ route('clubs.validate', $club) }}' }; verifyOpen = true" class="p-2 rounded-lg text-emerald-600 hover:bg-emerald-50 transition-colors" title="Verifikasi"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></button>
-                                    @else
-                                        <button @click="selected = { id: {{ $club->id }}, nama: '{{ $club->nama_club }}', ketua: '{{ $club->ketua_club }}', wilayah: '{{ $club->desa ?? '-' }} / {{ $club->kecamatan ?? '-' }} / {{ $club->kabupaten ?? '-' }}', aktif: '{{ $club->aktif ? 'Aktif' : 'Nonaktif' }}', status: '{{ $club->status_validasi }}', action: '{{ route('clubs.cancel-validate', $club) }}' }; unverifyOpen = true" class="p-2 rounded-lg text-red-600 hover:bg-red-50 transition-colors" title="Batalkan Verifikasi"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></button>
+                                        <button @click="selected = {{ $clubData }}, action: '{{ route('clubs.validate', $club) }}' }; verifyOpen = true" class="p-2 rounded-lg text-emerald-600 hover:bg-emerald-50 transition-colors" title="Verifikasi"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></button>
+                                        <button @click="selected = {{ $clubData }}, action: '{{ route('clubs.reject', $club) }}' }; rejectOpen = true" class="p-2 rounded-lg text-orange-600 hover:bg-orange-50 transition-colors" title="Butuh Perbaikan"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg></button>
+                                    @elseif($club->status_validasi === 'validated')
+                                        <button @click="selected = {{ $clubData }}, action: '{{ route('clubs.cancel-validate', $club) }}' }; unverifyOpen = true" class="p-2 rounded-lg text-red-600 hover:bg-red-50 transition-colors" title="Batalkan Verifikasi"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></button>
+                                    @elseif($club->status_validasi === 'rejected')
+                                        <button @click="selected = {{ $clubData }}, action: '{{ route('clubs.validate', $club) }}' }; verifyOpen = true" class="p-2 rounded-lg text-emerald-600 hover:bg-emerald-50 transition-colors" title="Verifikasi Ulang"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></button>
                                     @endif
                                 @endif
                             @endauth
@@ -170,7 +176,7 @@
                 <div class="flex justify-between"><span class="text-gray-500">Ketua Club</span><span class="font-medium text-gray-900" x-text="selected?.ketua"></span></div>
                 <div class="flex justify-between"><span class="text-gray-500">Wilayah</span><span class="font-medium text-gray-900 text-right max-w-[60%]" x-text="selected?.wilayah"></span></div>
                 <div class="flex justify-between"><span class="text-gray-500">Status Aktif</span><span class="font-medium text-gray-900" x-text="selected?.aktif"></span></div>
-                <div class="flex justify-between"><span class="text-gray-500">Status Saat Ini</span><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-700 border border-amber-100">Pending</span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Status Saat Ini</span><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-700 border border-amber-100" x-text="selected?.status === 'rejected' ? 'Ditolak' : 'Pending'"></span></div>
             </div>
 
             <form :action="selected?.action" method="POST">
@@ -216,6 +222,34 @@
                 <div class="flex justify-end gap-2">
                     <button type="button" @click="unverifyOpen = false" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition">Batal</button>
                     <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition shadow-sm">Batalkan Verifikasi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Butuh Perbaikan -->
+    <div x-show="rejectOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 backdrop-blur-sm" @click="rejectOpen = false">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 p-6" @click.stop>
+            <h3 class="text-lg font-bold text-gray-900 mb-1">Tandai Butuh Perbaikan</h3>
+            <p class="text-sm text-gray-500 mb-4">Data akan dikembalikan ke pelapor untuk diperbaiki. Jelaskan apa yang perlu diperbaiki.</p>
+
+            <!-- Preview Data -->
+            <div class="bg-gray-50 rounded-lg border border-gray-200 p-4 mb-5 space-y-2 text-sm">
+                <div class="flex justify-between"><span class="text-gray-500">Nama Klub</span><span class="font-semibold text-gray-900 text-right max-w-[60%]" x-text="selected?.nama"></span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Ketua Club</span><span class="font-medium text-gray-900" x-text="selected?.ketua"></span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Wilayah</span><span class="font-medium text-gray-900 text-right max-w-[60%]" x-text="selected?.wilayah"></span></div>
+            </div>
+
+            <form :action="selected?.action" method="POST">
+                @csrf
+                <input type="hidden" name="_method" value="PATCH">
+                <div class="mb-5">
+                    <label class="block text-xs font-medium text-gray-500 mb-1">Catatan Perbaikan <span class="text-red-500">*</span></label>
+                    <textarea name="komentar_validasi" rows="3" required minlength="5" class="w-full rounded-lg border-gray-300 text-sm focus:border-orange-500 focus:ring-orange-500 shadow-sm" placeholder="Contoh: kontak narahubung tidak bisa dihubungi, dst."></textarea>
+                </div>
+                <div class="flex justify-end gap-2">
+                    <button type="button" @click="rejectOpen = false" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-orange-600 text-white rounded-lg text-sm font-medium hover:bg-orange-700 transition shadow-sm">Kirim</button>
                 </div>
             </form>
         </div>

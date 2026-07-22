@@ -94,6 +94,9 @@
                         <button type="submit" class="px-4 py-2 text-sm font-semibold bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl transition">Verifikasi Ulang</button>
                     </form>
                     @endif
+                    @if(auth()->user()->isSuperAdmin())
+                    <a href="{{ route('kampung.edit', $kampung) }}" class="px-4 py-2 text-sm font-semibold bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl transition">Edit Data</a>
+                    @endif
                 </div>
                 @elseif($isOwner && $kampung->status_validasi !== 'validated')
                 <div class="px-5 pb-5 flex gap-2">

@@ -27,7 +27,9 @@ class ClubController extends Controller
         $isDashboard = request()->is('dashboard/*');
         $user = auth()->user();
 
-        $query = Club::with(['user', 'prasarana'])->latest();
+        $query = Club::with(['user', 'prasarana'])
+            ->orderByRaw("status_validasi = 'validated'")
+            ->latest();
 
         // Guest (publik) hanya lihat yang sudah divalidasi
         if (!auth()->check()) {
@@ -292,6 +294,34 @@ class ClubController extends Controller
             $redirect->with('poin_diperoleh', ['poin' => $tx->poin, 'label' => $label]);
         }
         return $redirect;
+    }
+
+    /**
+     * Tandai data butuh perbaikan (ditolak sementara, bukan penghapusan).
+     */
+    public function rejectClub(Request $request, Club $club): RedirectResponse
+    {
+        if (!auth()->user()->canValidate($club)) {
+            abort(403, 'Anda tidak memiliki izin untuk menolak club ini.');
+        }
+
+        $request->validate(['komentar_validasi' => 'required|string|min:5']);
+
+        $club->update([
+            'status_validasi' => 'rejected',
+            'komentar_validasi' => $request->komentar_validasi,
+        ]);
+
+        UserNotification::create([
+            'user_id' => $club->user_id,
+            'type' => 'validasi',
+            'title' => 'Klub/Komunitas Butuh Perbaikan',
+            'message' => 'Data klub "' . $club->nama_club . '" perlu diperbaiki. Catatan admin: ' . $request->komentar_validasi,
+            'data' => ['related_type' => 'club', 'related_id' => $club->id],
+        ]);
+
+        return redirect()->route('dashboard.clubs')
+            ->with('success', 'Klub ditandai butuh perbaikan. Relawan pelapor telah diberi tahu.');
     }
 
     /**

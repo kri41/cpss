@@ -9,6 +9,7 @@ use App\Models\KampungOlahraga;
 use App\Models\KomponenSyarat;
 use App\Models\PointTransaction;
 use App\Models\Prasarana;
+use App\Models\UserNotification;
 use App\Services\GamificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -224,12 +225,24 @@ class KampungController extends Controller
     {
         abort_unless(auth()->user()->isAdmin(), 403);
 
+        $request->validate(['catatan_admin' => 'required|string|min:5']);
+
         $kampung->update([
             'status_validasi' => 'rejected',
             'catatan_admin'   => $request->catatan_admin,
         ]);
 
-        return back()->with('success', 'Kampung Olahraga telah ditolak.');
+        if ($kampung->user_id) {
+            UserNotification::create([
+                'user_id' => $kampung->user_id,
+                'type' => 'validasi',
+                'title' => 'Kampung Olahraga Butuh Perbaikan',
+                'message' => 'Kampung Olahraga "' . $kampung->nama_kampung . '" perlu diperbaiki. Catatan admin: ' . $request->catatan_admin,
+                'data' => ['related_type' => 'kampung_olahraga', 'related_id' => $kampung->id],
+            ]);
+        }
+
+        return back()->with('success', 'Kampung Olahraga ditandai butuh perbaikan. Relawan pelapor telah diberi tahu.');
     }
 
     public function cancelValidate(KampungOlahraga $kampung): RedirectResponse

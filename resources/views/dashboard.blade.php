@@ -21,11 +21,18 @@
                         <h3 class="text-2xl sm:text-3xl font-bold mb-2">Pemetaan Olahraga Masyarakat</h3>
                         <p class="text-blue-100 max-w-2xl">Platform kolaborasi untuk memetakan fasilitas, aktivitas, komunitas, dan event olahraga daerah.</p>
                     </div>
-                    <a href="{{ route('dashboard.laporan-pdf') }}"
-                       class="shrink-0 flex items-center gap-2 px-5 py-3 bg-white/20 hover:bg-white/30 border border-white/30 text-white font-semibold rounded-xl transition text-sm backdrop-blur-sm">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                        Download Laporan PDF
-                    </a>
+                    <div class="shrink-0 flex items-center gap-2">
+                        <a href="{{ route('dashboard.laporan-pdf') }}"
+                           class="flex items-center gap-2 px-5 py-3 bg-white/20 hover:bg-white/30 border border-white/30 text-white font-semibold rounded-xl transition text-sm backdrop-blur-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            Download Laporan PDF
+                        </a>
+                        <a href="{{ route('dashboard.laporan-csv') }}"
+                           class="flex items-center gap-2 px-5 py-3 bg-white/20 hover:bg-white/30 border border-white/30 text-white font-semibold rounded-xl transition text-sm backdrop-blur-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"/></svg>
+                            Download CSV
+                        </a>
+                    </div>
                 </div>
             </div>
 

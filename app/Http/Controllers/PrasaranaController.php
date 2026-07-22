@@ -26,7 +26,9 @@ class PrasaranaController extends Controller
         $isDashboard = request()->is('dashboard/*');
         $user = auth()->user();
 
-        $query = Prasarana::with(['user', 'jenisOlahraga'])->latest();
+        $query = Prasarana::with(['user', 'jenisOlahraga'])
+            ->orderByRaw("status_validasi = 'validated'")
+            ->latest();
 
         // Guest (publik) hanya lihat yang sudah divalidasi
         if (!auth()->check()) {
@@ -351,6 +353,36 @@ class PrasaranaController extends Controller
             $redirect->with('poin_diperoleh', ['poin' => $tx->poin, 'label' => $label]);
         }
         return $redirect;
+    }
+
+    /**
+     * Tandai data butuh perbaikan (ditolak sementara, bukan penghapusan).
+     * Status kembali bisa diedit pemilik lewat aturan canEdit() yang sudah ada
+     * (hanya validated yang terkunci), lalu admin memvalidasi ulang.
+     */
+    public function rejectPrasarana(Request $request, Prasarana $prasarana): RedirectResponse
+    {
+        if (!auth()->user()->canValidate($prasarana)) {
+            abort(403, 'Anda tidak memiliki izin untuk menolak data prasarana ini.');
+        }
+
+        $request->validate(['komentar_validasi' => 'required|string|min:5']);
+
+        $prasarana->update([
+            'status_validasi' => 'rejected',
+            'komentar_validasi' => $request->komentar_validasi,
+        ]);
+
+        UserNotification::create([
+            'user_id' => $prasarana->user_id,
+            'type' => 'validasi',
+            'title' => 'Prasarana Butuh Perbaikan',
+            'message' => 'Laporan prasarana "' . $prasarana->nama_fasilitas . '" perlu diperbaiki. Catatan admin: ' . $request->komentar_validasi,
+            'data' => ['related_type' => 'prasarana', 'related_id' => $prasarana->id],
+        ]);
+
+        return redirect()->route('dashboard.prasarana')
+            ->with('success', 'Prasarana ditandai butuh perbaikan. Relawan pelapor telah diberi tahu.');
     }
 
     /**

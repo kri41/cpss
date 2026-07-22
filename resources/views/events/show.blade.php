@@ -27,8 +27,21 @@
                             {{ $event->status === 'Selesai' ? 'bg-gray-100 text-gray-700' : '' }}">
                             {{ $event->status }}
                         </span>
+                        @if($event->status_validasi === 'validated')
+                            <span class="px-3 py-1 text-xs font-semibold rounded-full bg-emerald-100 text-emerald-700">Tervalidasi</span>
+                        @elseif($event->status_validasi === 'rejected')
+                            <span class="px-3 py-1 text-xs font-semibold rounded-full bg-orange-100 text-orange-700">Butuh Perbaikan</span>
+                        @else
+                            <span class="px-3 py-1 text-xs font-semibold rounded-full bg-amber-100 text-amber-700">Menunggu Validasi</span>
+                        @endif
                     </div>
                     <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">{{ $event->nama_event }}</h1>
+                    @if($event->status_validasi === 'rejected' && $event->komentar_validasi)
+                    <div class="mt-3 flex gap-2 p-3 bg-orange-50 border border-orange-100 rounded-lg text-sm text-orange-800 max-w-xl">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                        <span><strong>Catatan Admin:</strong> {{ $event->komentar_validasi }}</span>
+                    </div>
+                    @endif
                 </div>
                 <div class="flex items-center gap-2 shrink-0">
                     <a href="{{ route('events.index') }}" class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition shadow-sm">
