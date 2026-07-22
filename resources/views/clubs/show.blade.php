@@ -40,7 +40,7 @@
                     @endif
                 </div>
                 <div class="flex items-center gap-2 shrink-0">
-                    <a href="{{ route('clubs.index') }}" class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition shadow-sm">
+                    <a href="{{ auth()->check() ? route('dashboard.clubs') : route('clubs.index') }}" class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition shadow-sm">
                         Kembali
                     </a>
                     @auth

@@ -128,7 +128,13 @@
                                 @endif
                                 @if(auth()->user()->isAdmin())
                                     @php
-                                        $eventData = "{ id: {{ $event->id }}, nama: '{{ $event->nama_event }}', tanggal: '{{ $event->tanggal_mulai->translatedFormat('d F Y') }}', selesai: '{{ $event->tanggal_selesai?->translatedFormat('d F Y') ?? '-' }}', tingkat: '{{ $event->tingkat }}', wilayah: '{{ $event->desa ?? '-' }} / {{ $event->kecamatan ?? '-' }} / {{ $event->kabupaten ?? '-' }}', status: '{{ $event->status_validasi }}'";
+                                        $eventData = '{ id: ' . $event->id
+                                            . ", nama: '" . addslashes($event->nama_event) . "'"
+                                            . ", tanggal: '" . $event->tanggal_mulai->translatedFormat('d F Y') . "'"
+                                            . ", selesai: '" . ($event->tanggal_selesai?->translatedFormat('d F Y') ?? '-') . "'"
+                                            . ", tingkat: '" . addslashes($event->tingkat) . "'"
+                                            . ", wilayah: '" . addslashes(($event->desa ?? '-') . ' / ' . ($event->kecamatan ?? '-') . ' / ' . ($event->kabupaten ?? '-')) . "'"
+                                            . ", status: '" . $event->status_validasi . "'";
                                     @endphp
                                     @if($event->status_validasi === 'pending')
                                         <button @click="selected = {{ $eventData }}, action: '{{ route('events.validate', $event) }}' }; verifyOpen = true" class="p-2 rounded-lg text-emerald-600 hover:bg-emerald-50 transition-colors" title="Verifikasi"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></button>

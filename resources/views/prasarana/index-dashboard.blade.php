@@ -134,7 +134,12 @@
                                 @endif
                                 @if(auth()->user()->isAdmin())
                                     @php
-                                        $itemData = "{ id: {{ $item->id }}, nama: '{{ $item->nama_fasilitas }}', kategori: '{{ $item->kategori_olahraga_label }}', wilayah: '{{ $item->desa ?? '-' }} / {{ $item->kecamatan ?? '-' }} / {{ $item->kabupaten ?? '-' }}', kondisi: '{{ $item->average_kondisi }}', status: '{{ $item->status_validasi }}'";
+                                        $itemData = '{ id: ' . $item->id
+                                            . ", nama: '" . addslashes($item->nama_fasilitas) . "'"
+                                            . ", kategori: '" . addslashes($item->kategori_olahraga_label) . "'"
+                                            . ", wilayah: '" . addslashes(($item->desa ?? '-') . ' / ' . ($item->kecamatan ?? '-') . ' / ' . ($item->kabupaten ?? '-')) . "'"
+                                            . ", kondisi: '" . $item->average_kondisi . "'"
+                                            . ", status: '" . $item->status_validasi . "'";
                                     @endphp
                                     @if($item->status_validasi === 'pending')
                                         <button @click="selected = {{ $itemData }}, action: '{{ route('prasarana.validate', $item) }}' }; verifyOpen = true" class="p-2 rounded-lg text-emerald-600 hover:bg-emerald-50 transition-colors" title="Verifikasi"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></button>
