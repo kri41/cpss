@@ -9,7 +9,7 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-                    <form method="POST" action="{{ route('events.update', $event) }}">
+                    <form method="POST" action="{{ route('events.update', $event) }}" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
 
@@ -52,6 +52,24 @@
                                 <x-input-label for="deskripsi_kegiatan" :value="__('Deskripsi Kegiatan')" />
                                 <textarea id="deskripsi_kegiatan" name="deskripsi_kegiatan" rows="4" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">{{ old('deskripsi_kegiatan', $event->deskripsi_kegiatan) }}</textarea>
                                 <x-input-error :messages="$errors->get('deskripsi_kegiatan')" class="mt-2" />
+                            </div>
+
+                            <!-- Flyer -->
+                            <div class="md:col-span-2">
+                                <x-input-label for="flyer" :value="__('Flyer Event')" />
+                                @if($event->flyer_path)
+                                    <div class="mt-1 mb-2 flex items-center gap-3">
+                                        <img src="{{ Storage::url($event->flyer_path) }}" alt="" class="h-20 w-20 object-cover rounded-lg border border-gray-200">
+                                        <label class="flex items-center gap-2 text-sm text-gray-600">
+                                            <input type="checkbox" name="hapus_flyer" value="1" class="rounded border-gray-300 text-red-600">
+                                            Hapus flyer saat ini
+                                        </label>
+                                    </div>
+                                @endif
+                                <input id="flyer" type="file" name="flyer" accept="image/*"
+                                       class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" />
+                                <p class="mt-1 text-xs text-gray-400">Format JPG/PNG/WEBP, maks 4MB. Kosongkan jika tidak ingin mengganti.</p>
+                                <x-input-error :messages="$errors->get('flyer')" class="mt-2" />
                             </div>
                         </div>
 

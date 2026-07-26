@@ -9,7 +9,7 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-                    <form method="POST" action="{{ route('events.store') }}">
+                    <form method="POST" action="{{ route('events.store') }}" enctype="multipart/form-data">
                         @csrf
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -51,6 +51,15 @@
                                 <x-input-label for="deskripsi_kegiatan" :value="__('Deskripsi Kegiatan')" />
                                 <textarea id="deskripsi_kegiatan" name="deskripsi_kegiatan" rows="4" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">{{ old('deskripsi_kegiatan') }}</textarea>
                                 <x-input-error :messages="$errors->get('deskripsi_kegiatan')" class="mt-2" />
+                            </div>
+
+                            <!-- Flyer -->
+                            <div class="md:col-span-2">
+                                <x-input-label for="flyer" :value="__('Flyer Event (Opsional)')" />
+                                <input id="flyer" type="file" name="flyer" accept="image/*"
+                                       class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" />
+                                <p class="mt-1 text-xs text-gray-400">Format JPG/PNG/WEBP, maks 4MB.</p>
+                                <x-input-error :messages="$errors->get('flyer')" class="mt-2" />
                             </div>
                         </div>
 

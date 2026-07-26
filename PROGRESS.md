@@ -246,6 +246,8 @@ Lihat `prd-addendum-v4.md` untuk detail lengkap konsep & rasional. Ringkasan imp
 - [x] **Tombol Hapus Prasarana/Event untuk Admin & Super Admin** — sebelumnya `destroy()` di kedua controller hanya mengizinkan pemilik (sebelum divalidasi) atau Super Admin lewat `canEdit()`; admin biasa tidak bisa hapus sama sekali dan tidak ada tombol Hapus di listing dashboard. Guard diubah jadi `isAdmin() || canEdit()`, ditambahkan tombol ikon Hapus (dengan konfirmasi) di baris aksi dashboard Prasarana & Event.
 - [x] **Fix tombol Tolak di halaman Usulan Perubahan tidak bisa dipakai** — modal konfirmasi tolak (`change-requests/index.blade.php`) ditempatkan di luar `<div x-data="...">` sehingga Alpine tidak mengenali `rejectOpen`; klik tombol "Tolak" tidak menampilkan apa-apa. Modal dipindah ke dalam scope `x-data` yang sama.
 - [x] **Fitur Pengumuman Dashboard** — admin/super admin bisa menambah, mengedit (judul/isi/status aktif), dan menghapus pengumuman lewat menu "Pengumuman" di sidebar (`pengumuman.index`, mengikuti pola CRUD Komponen Syarat). Pengumuman yang berstatus Aktif tampil sebagai banner kuning di halaman dashboard untuk semua pengguna yang login, dengan tautan "Edit" khusus untuk admin.
+- [x] **Fix besar: bel notifikasi tidak muncul di hampir semua halaman** — root cause: seluruh bar notifikasi (ikon bel, dropdown, badge unread) dibungkus `@isset($header)...@endisset` di `layouts/app.blade.php`. `$header` cuma ter-set kalau halaman pakai `<x-app-layout><x-slot name="header">`; halaman yang pakai `@extends('layouts.app')` biasa (index/show/dashboard Prasarana/Klub/Event/Kampung, leaderboard, change-requests, komponen-syarat, pengumuman, dll — mayoritas halaman yang paling sering dibuka) tidak pernah membuat `$header` ter-set, jadi bel notifikasi tidak pernah dirender di situ sama sekali. Bar header sekarang selalu dirender untuk pengguna yang login; hanya konten judul (`{{ $header }}`) yang tetap opsional.
+- [x] **Upload Flyer untuk Event** — kolom baru `flyer_path` di tabel `events`. Form tambah/edit Event bisa upload flyer (JPG/PNG/WEBP, maks 4MB), bisa diganti atau dihapus saat edit, tampil penuh di halaman detail Event. File lama otomatis dihapus dari storage saat flyer diganti atau Event dihapus.
 
 ---
 
@@ -456,6 +458,7 @@ npm run dev
 | 22 Juli 2026 | Tambah Unduh CSV gabungan di dashboard; urutkan listing Prasarana/Klub/Event supaya yang belum di-acc tampil duluan; tambah aksi "Butuh Perbaikan" (reject + alasan wajib) untuk Prasarana/Klub/Event mengikuti pola Kampung Olahraga; tambah tombol Edit Kampung Olahraga untuk Super Admin |
 | 22 Juli 2026 | Fix bug production: enum status_validasi belum punya 'rejected', bug Blade di tombol Verifikasi/Butuh Perbaikan, asset Tailwind belum ter-build; tambah tombol Hapus Prasarana/Event untuk Admin & Super Admin |
 | 26 Juli 2026 | Fix tombol Tolak di Usulan Perubahan (modal di luar scope Alpine x-data); tambah fitur Pengumuman Dashboard (CRUD admin, tampil sebagai banner di dashboard) |
+| 27 Juli 2026 | Fix besar: bel notifikasi ternyata tidak pernah muncul di halaman yang pakai @extends biasa (mayoritas halaman) karena dibungkus @isset($header); tambah upload flyer untuk Event |
 
 ---
 

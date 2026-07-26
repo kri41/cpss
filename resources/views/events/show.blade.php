@@ -65,6 +65,11 @@
 
     <!-- Content -->
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        @if($event->flyer_path)
+        <div class="mb-6 bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+            <img src="{{ Storage::url($event->flyer_path) }}" alt="Flyer {{ $event->nama_event }}" class="w-full max-h-[32rem] object-contain bg-gray-50">
+        </div>
+        @endif
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Main Info -->
             <div class="lg:col-span-2 space-y-6">

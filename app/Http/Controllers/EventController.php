@@ -10,6 +10,7 @@ use App\Models\UserNotification;
 use App\Services\GamificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 
@@ -97,9 +98,15 @@ class EventController extends Controller
             'kecamatan' => 'nullable|string|max:255',
             'kabupaten' => 'nullable|string|max:255',
             'provinsi' => 'nullable|string|max:20',
+            'flyer' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:4096',
         ]);
 
         $validated['user_id'] = auth()->id();
+
+        if ($request->hasFile('flyer')) {
+            $validated['flyer_path'] = $request->file('flyer')->store('events', 'public');
+        }
+        unset($validated['flyer']);
 
         $event = Event::create($validated);
 
@@ -177,10 +184,23 @@ class EventController extends Controller
             'kecamatan' => 'nullable|string|max:255',
             'kabupaten' => 'nullable|string|max:255',
             'provinsi' => 'nullable|string|max:20',
+            'flyer' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:4096',
+            'hapus_flyer' => 'nullable|boolean',
         ]);
 
         // Simpan data lama untuk audit log
         $oldData = $event->toArray();
+
+        if ($request->hasFile('flyer')) {
+            if ($event->flyer_path) {
+                Storage::disk('public')->delete($event->flyer_path);
+            }
+            $validated['flyer_path'] = $request->file('flyer')->store('events', 'public');
+        } elseif ($request->boolean('hapus_flyer') && $event->flyer_path) {
+            Storage::disk('public')->delete($event->flyer_path);
+            $validated['flyer_path'] = null;
+        }
+        unset($validated['flyer'], $validated['hapus_flyer']);
 
         $event->update($validated);
 
@@ -202,6 +222,10 @@ class EventController extends Controller
 
         // Simpan data untuk audit log
         $oldData = $event->toArray();
+
+        if ($event->flyer_path) {
+            Storage::disk('public')->delete($event->flyer_path);
+        }
 
         $event->delete();
 
