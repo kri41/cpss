@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Prasarana;
 use App\Models\Partisipasi;
+use App\Models\Pengumuman;
 use App\Models\Event;
 use App\Models\Talenta;
 use App\Models\TenagaAhli;
@@ -67,13 +68,16 @@ class DashboardController extends Controller
                 ->get();
         }
 
+        $pengumumanAktif = Pengumuman::aktif()->latest()->get();
+
         return view('dashboard', compact(
             'stats',
             'partisipasiPerBulan',
             'upcomingEvents',
             'prasaranaByKondisi',
             'partisipasiByUsia',
-            'recentAuditLogs'
+            'recentAuditLogs',
+            'pengumumanAktif'
         ));
     }
 

@@ -13,6 +13,7 @@ use App\Http\Controllers\KomponenSyaratController;
 use App\Http\Controllers\LeaderboardController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PartisipasiController;
+use App\Http\Controllers\PengumumanController;
 use App\Http\Controllers\ProfilController;
 use App\Http\Controllers\PrasaranaController;
 use App\Http\Controllers\ProfileController;
@@ -199,6 +200,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/perubahan', [ChangeRequestController::class, 'index'])->name('change-requests.index');
         Route::patch('/perubahan/{changeRequest}/approve', [ChangeRequestController::class, 'approve'])->name('change-requests.approve');
         Route::patch('/perubahan/{changeRequest}/reject', [ChangeRequestController::class, 'reject'])->name('change-requests.reject');
+    });
+
+    // Pengumuman Dashboard (Admin only mengelola)
+    Route::middleware(['App\Http\Middleware\CheckRole:admin'])->group(function () {
+        Route::get('/pengumuman', [PengumumanController::class, 'index'])->name('pengumuman.index');
+        Route::post('/pengumuman', [PengumumanController::class, 'store'])->name('pengumuman.store');
+        Route::put('/pengumuman/{pengumuman}', [PengumumanController::class, 'update'])->name('pengumuman.update');
+        Route::delete('/pengumuman/{pengumuman}', [PengumumanController::class, 'destroy'])->name('pengumuman.destroy');
     });
 });
 
