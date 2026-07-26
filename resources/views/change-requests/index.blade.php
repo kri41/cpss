@@ -79,21 +79,21 @@
 
     <div class="mt-6">{{ $changeRequests->links() }}</div>
     @endif
-</div>
 
-{{-- Reject Modal --}}
-<div x-show="rejectOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-    <div @click.away="rejectOpen = false" class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6">
-        <h3 class="text-base font-bold text-gray-900 mb-1">Tolak Permintaan</h3>
-        <p class="text-sm text-gray-500 mb-4">Berikan alasan penolakan agar pengaju mengerti.</p>
-        <form method="POST" :action="rejectAction">
-            @csrf @method('PATCH')
-            <textarea name="catatan_admin" rows="3" placeholder="Tuliskan alasan penolakan..." required class="w-full rounded-xl border-gray-300 focus:border-red-500 focus:ring-red-500 text-sm mb-4 resize-none"></textarea>
-            <div class="flex gap-2">
-                <button type="submit" class="flex-1 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-xl transition">Tolak</button>
-                <button type="button" @click="rejectOpen = false" class="flex-1 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-semibold rounded-xl transition">Batal</button>
-            </div>
-        </form>
+    {{-- Reject Modal --}}
+    <div x-show="rejectOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+        <div @click.away="rejectOpen = false" class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6">
+            <h3 class="text-base font-bold text-gray-900 mb-1">Tolak Permintaan</h3>
+            <p class="text-sm text-gray-500 mb-4">Berikan alasan penolakan agar pengaju mengerti.</p>
+            <form method="POST" :action="rejectAction">
+                @csrf @method('PATCH')
+                <textarea name="catatan_admin" rows="3" placeholder="Tuliskan alasan penolakan..." required class="w-full rounded-xl border-gray-300 focus:border-red-500 focus:ring-red-500 text-sm mb-4 resize-none"></textarea>
+                <div class="flex gap-2">
+                    <button type="submit" class="flex-1 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-xl transition">Tolak</button>
+                    <button type="button" @click="rejectOpen = false" class="flex-1 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-semibold rounded-xl transition">Batal</button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 @endsection
