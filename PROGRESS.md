@@ -248,6 +248,7 @@ Lihat `prd-addendum-v4.md` untuk detail lengkap konsep & rasional. Ringkasan imp
 - [x] **Fitur Pengumuman Dashboard** — admin/super admin bisa menambah, mengedit (judul/isi/status aktif), dan menghapus pengumuman lewat menu "Pengumuman" di sidebar (`pengumuman.index`, mengikuti pola CRUD Komponen Syarat). Pengumuman yang berstatus Aktif tampil sebagai banner kuning di halaman dashboard untuk semua pengguna yang login, dengan tautan "Edit" khusus untuk admin.
 - [x] **Fix besar: bel notifikasi tidak muncul di hampir semua halaman** — root cause: seluruh bar notifikasi (ikon bel, dropdown, badge unread) dibungkus `@isset($header)...@endisset` di `layouts/app.blade.php`. `$header` cuma ter-set kalau halaman pakai `<x-app-layout><x-slot name="header">`; halaman yang pakai `@extends('layouts.app')` biasa (index/show/dashboard Prasarana/Klub/Event/Kampung, leaderboard, change-requests, komponen-syarat, pengumuman, dll — mayoritas halaman yang paling sering dibuka) tidak pernah membuat `$header` ter-set, jadi bel notifikasi tidak pernah dirender di situ sama sekali. Bar header sekarang selalu dirender untuk pengguna yang login; hanya konten judul (`{{ $header }}`) yang tetap opsional.
 - [x] **Upload Flyer untuk Event** — kolom baru `flyer_path` di tabel `events`. Form tambah/edit Event bisa upload flyer (JPG/PNG/WEBP, maks 4MB), bisa diganti atau dihapus saat edit, tampil penuh di halaman detail Event. File lama otomatis dihapus dari storage saat flyer diganti atau Event dihapus.
+- [x] **Fix besar: seluruh fitur Export CSV (5 endpoint) error 500** — `ExportController::__construct()` memanggil `$this->middleware(...)`, method yang sudah tidak ada di base Controller Laravel 13 (proyek ini sudah pakai middleware di level rute, bukan di constructor, seperti semua controller lain). Akibatnya SEMUA export (`/export/prasarana`, `/clubs`, `/events`, `/partisipasi`, `/leaderboard`) selalu error 500 untuk siapapun, tidak pernah bisa dipakai sejak awal. Constructor yang rusak dihapus (proteksi role sudah ada di `routes/web.php`). Sekalian diperbaiki: export Klub mereferensikan kolom `cabang_olahraga`/`jumlah_anggota` yang sudah tidak ada di tabel `clubs` (sisa skema lama) — diganti pakai relasi `jenisOlahraga`.
 
 ---
 
@@ -459,6 +460,7 @@ npm run dev
 | 22 Juli 2026 | Fix bug production: enum status_validasi belum punya 'rejected', bug Blade di tombol Verifikasi/Butuh Perbaikan, asset Tailwind belum ter-build; tambah tombol Hapus Prasarana/Event untuk Admin & Super Admin |
 | 26 Juli 2026 | Fix tombol Tolak di Usulan Perubahan (modal di luar scope Alpine x-data); tambah fitur Pengumuman Dashboard (CRUD admin, tampil sebagai banner di dashboard) |
 | 27 Juli 2026 | Fix besar: bel notifikasi ternyata tidak pernah muncul di halaman yang pakai @extends biasa (mayoritas halaman) karena dibungkus @isset($header); tambah upload flyer untuk Event |
+| 27 Juli 2026 | Fix besar: seluruh fitur Export CSV (5 endpoint) selalu error 500 sejak awal karena constructor ExportController manggil method middleware() yang tidak ada lagi di Laravel 13; sekalian fix export Klub yang mereferensikan kolom lama cabang_olahraga/jumlah_anggota |
 
 ---
 

@@ -12,11 +12,6 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ExportController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware(['auth', 'App\Http\Middleware\CheckRole:admin,relawan']);
-    }
-
     private function scopeToUser($query, string $userIdColumn = 'user_id')
     {
         $user = auth()->user();
@@ -106,29 +101,28 @@ class ExportController extends Controller
 
     public function clubs(Request $request): StreamedResponse
     {
-        $query = $this->scopeToUser(Club::with('user')->latest());
+        $query = $this->scopeToUser(Club::with(['user', 'jenisOlahraga'])->latest());
 
         if ($request->filled('search'))    $query->where('nama_club', 'like', '%' . $request->search . '%');
         if ($request->filled('kabupaten')) $query->where('kabupaten', $request->kabupaten);
         if ($request->filled('kecamatan')) $query->where('kecamatan', $request->kecamatan);
-        if ($request->filled('cabang'))    $query->where('cabang_olahraga', $request->cabang);
+        if ($request->filled('cabang'))    $query->whereHas('jenisOlahraga', fn($q) => $q->where('jenis_olahraga.id', $request->cabang));
         if ($request->filled('status_validasi')) $query->where('status_validasi', $request->status_validasi);
 
         $rows = $query->get();
 
         return $this->csvResponse($this->filename('clubs', $request), function ($out) use ($rows) {
             fputcsv($out, ['No', 'Nama Klub', 'Cabang Olahraga', 'Desa', 'Kecamatan', 'Kabupaten',
-                           'Jumlah Anggota', 'Status Aktif', 'Status Validasi', 'Relawan', 'Tanggal Input']);
+                           'Status Aktif', 'Status Validasi', 'Relawan', 'Tanggal Input']);
 
             foreach ($rows as $i => $c) {
                 fputcsv($out, [
                     $i + 1,
                     $c->nama_club,
-                    $c->cabang_olahraga,
+                    $c->jenisOlahraga?->nama ?? '-',
                     $c->desa,
                     $c->kecamatan,
                     $c->kabupaten,
-                    $c->jumlah_anggota ?? '-',
                     isset($c->aktif) ? ($c->aktif ? 'Aktif' : 'Non-aktif') : '-',
                     ucfirst($c->status_validasi),
                     $c->user?->name ?? '-',
