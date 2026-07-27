@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\DiskusiPost;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -32,7 +33,16 @@ class DiskusiController extends Controller
 
         $provinsiNama = $provinsiList->firstWhere('kode', $provinsi)?->nama ?? '-';
 
-        return view('diskusi.index', compact('posts', 'provinsi', 'provinsiNama', 'provinsiList'));
+        $peserta = User::where('role', 'relawan')
+            ->where('provinsi', $provinsi)
+            ->latest()
+            ->get();
+
+        $wilayahNama = DB::table('wilayah')
+            ->whereIn('kode', $peserta->pluck('kabupaten')->filter()->unique())
+            ->pluck('nama', 'kode');
+
+        return view('diskusi.index', compact('posts', 'provinsi', 'provinsiNama', 'provinsiList', 'peserta', 'wilayahNama'));
     }
 
     public function store(Request $request): RedirectResponse
