@@ -6,6 +6,7 @@ use App\Http\Controllers\GeoJsonController;
 use App\Http\Controllers\ClubController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DiskusiController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\KalenderController;
 use App\Http\Controllers\KampungController;
@@ -169,6 +170,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Daftar Relawan (All authenticated users)
     Route::get('/relawan', [RelawanController::class, 'index'])->name('relawan.index');
+
+    // Papan Diskusi per Provinsi (All authenticated users)
+    Route::get('/diskusi', [DiskusiController::class, 'index'])->name('diskusi.index');
+    Route::post('/diskusi', [DiskusiController::class, 'store'])->name('diskusi.store');
+    Route::delete('/diskusi/{diskusiPost}', [DiskusiController::class, 'destroy'])->name('diskusi.destroy');
 
     // Notifications
     Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
