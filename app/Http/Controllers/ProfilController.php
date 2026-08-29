@@ -20,17 +20,17 @@ class ProfilController extends Controller
         $user = auth()->user();
 
         $stats = [
-            'prasarana'  => Prasarana::where('user_id', $user->id)->count(),
-            'clubs'      => Club::where('user_id', $user->id)->count(),
-            'events'     => Event::where('user_id', $user->id)->count(),
-            'partisipasi'=> Partisipasi::where('user_id', $user->id)->count(),
+            'prasarana' => Prasarana::where('user_id', $user->id)->count(),
+            'clubs' => Club::where('user_id', $user->id)->count(),
+            'events' => Event::where('user_id', $user->id)->count(),
+            'partisipasi' => Partisipasi::where('user_id', $user->id)->count(),
         ];
 
         $stats['total'] = array_sum($stats);
 
-        $stats['prasarana_validated']   = Prasarana::where('user_id', $user->id)->where('status_validasi', 'validated')->count();
-        $stats['clubs_validated']       = Club::where('user_id', $user->id)->where('status_validasi', 'validated')->count();
-        $stats['events_validated']      = Event::where('user_id', $user->id)->where('status_validasi', 'validated')->count();
+        $stats['prasarana_validated'] = Prasarana::where('user_id', $user->id)->where('status_validasi', 'validated')->count();
+        $stats['clubs_validated'] = Club::where('user_id', $user->id)->where('status_validasi', 'validated')->count();
+        $stats['events_validated'] = Event::where('user_id', $user->id)->where('status_validasi', 'validated')->count();
         $stats['partisipasi_validated'] = Partisipasi::where('user_id', $user->id)->where('status_validasi', 'validated')->count();
 
         $allBadges = Badge::all();
@@ -41,6 +41,7 @@ class ProfilController extends Controller
             $badge->earned_at = $badge->earned
                 ? $user->badges->where('id', $badge->id)->first()?->pivot?->earned_at
                 : null;
+
             return $badge;
         });
 
@@ -66,24 +67,25 @@ class ProfilController extends Controller
     {
         $user = auth()->user();
 
-        $judul = match($jenis) {
-            'prasarana'  => 'Laporan Prasarana Olahraga',
-            'events'     => 'Laporan Event Olahraga',
-            'clubs'      => 'Laporan Klub Olahraga',
-            'partisipasi'=> 'Laporan Partisipasi',
+        $judul = match ($jenis) {
+            'prasarana' => 'Laporan Prasarana Olahraga',
+            'events' => 'Laporan Event Olahraga',
+            'clubs' => 'Laporan Klub Olahraga',
+            'partisipasi' => 'Laporan Partisipasi',
         };
 
-        $items = match($jenis) {
-            'prasarana'  => Prasarana::where('user_id', $user->id)->latest()->get(),
-            'events'     => Event::where('user_id', $user->id)->latest()->get(),
-            'clubs'      => Club::where('user_id', $user->id)->latest()->get(),
-            'partisipasi'=> Partisipasi::where('user_id', $user->id)->latest()->get(),
+        $items = match ($jenis) {
+            'prasarana' => Prasarana::with('jenisOlahraga')->where('user_id', $user->id)->latest()->get(),
+            'events' => Event::where('user_id', $user->id)->latest()->get(),
+            'clubs' => Club::with('jenisOlahraga')->where('user_id', $user->id)->latest()->get(),
+            'partisipasi' => Partisipasi::where('user_id', $user->id)->latest()->get(),
         };
 
         $pdf = Pdf::loadView('profil.laporan-pdf', compact('user', 'judul', 'jenis', 'items'))
-            ->setPaper('a4', 'portrait');
+            ->setPaper('a4', 'portrait')
+            ->setOption('isPhpEnabled', true);
 
-        $filename = $jenis . '_' . str_replace(' ', '_', $user->name) . '_' . now()->format('Ymd') . '.pdf';
+        $filename = $jenis.'_'.str_replace(' ', '_', $user->name).'_'.now()->format('Ymd').'.pdf';
 
         return $pdf->download($filename);
     }

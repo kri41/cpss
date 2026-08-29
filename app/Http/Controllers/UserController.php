@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\View\View;
-use Illuminate\Http\RedirectResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class UserController extends Controller
@@ -14,10 +14,23 @@ class UserController extends Controller
     /**
      * Display a listing of users.
      */
-    public function index(): View
+    public function index(Request $request): View
     {
-        $users = User::latest()->paginate(10);
-        return view('users.index', compact('users'));
+        $sort = $request->get('sort', 'nama_asc');
+
+        $users = User::query()
+            ->when($request->filled('search'), function ($q) use ($request) {
+                $s = $request->string('search');
+                $q->where(fn ($w) => $w->where('name', 'like', "%{$s}%")->orWhere('email', 'like', "%{$s}%"));
+            })
+            ->when($request->filled('role'), fn ($q) => $q->where('role', $request->role))
+            ->when($sort === 'nama_desc', fn ($q) => $q->orderByDesc('name'))
+            ->when($sort === 'terbaru', fn ($q) => $q->latest())
+            ->when(! in_array($sort, ['nama_desc', 'terbaru']), fn ($q) => $q->orderBy('name'))
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('users.index', compact('users', 'sort'));
     }
 
     /**
@@ -63,7 +76,7 @@ class UserController extends Controller
     {
         $rules = [
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'email' => 'required|string|email|max:255|unique:users,email,'.$user->id,
             'role' => 'required|in:super_admin,admin,relawan',
         ];
 
@@ -112,26 +125,30 @@ class UserController extends Controller
             'file' => 'required|file|max:5120',
         ], [
             'file.required' => 'File CSV wajib diunggah.',
-            'file.max'      => 'Ukuran file maksimal 5MB.',
+            'file.max' => 'Ukuran file maksimal 5MB.',
         ]);
 
         $ext = strtolower($request->file('file')->getClientOriginalExtension());
-        if (!in_array($ext, ['csv', 'txt'])) {
+        if (! in_array($ext, ['csv', 'txt'])) {
             return back()->withErrors(['file' => 'File harus berformat CSV (.csv atau .txt).']);
         }
 
         $handle = fopen($request->file('file')->getRealPath(), 'r');
 
         $bom = fread($handle, 3);
-        if ($bom !== "\xEF\xBB\xBF") rewind($handle);
+        if ($bom !== "\xEF\xBB\xBF") {
+            rewind($handle);
+        }
 
         // Auto-detect delimiter (comma vs semicolon vs tab — Excel Indonesia pakai semicolon)
         $firstLine = fgets($handle);
-        if (!$firstLine) return back()->with('error', 'File CSV kosong atau tidak valid.');
+        if (! $firstLine) {
+            return back()->with('error', 'File CSV kosong atau tidak valid.');
+        }
         $delimiter = ',';
         $counts = [
-            ','  => substr_count($firstLine, ','),
-            ';'  => substr_count($firstLine, ';'),
+            ',' => substr_count($firstLine, ','),
+            ';' => substr_count($firstLine, ';'),
             "\t" => substr_count($firstLine, "\t"),
         ];
         arsort($counts);
@@ -140,42 +157,57 @@ class UserController extends Controller
         fseek($handle, -strlen($firstLine), SEEK_CUR);
 
         $header = fgetcsv($handle, 0, $delimiter);
-        if (!$header) return back()->with('error', 'File CSV kosong atau tidak valid.');
-
-        $header = array_map(fn($h) => strtolower(trim($h)), $header);
-        foreach (['name', 'email', 'password', 'role'] as $col) {
-            if (!in_array($col, $header))
-                return back()->with('error', "Kolom wajib \"{$col}\" tidak ditemukan di header CSV.");
+        if (! $header) {
+            return back()->with('error', 'File CSV kosong atau tidak valid.');
         }
 
-        $valid      = [];
-        $invalid    = [];
-        $baris      = 1;
+        $header = array_map(fn ($h) => strtolower(trim($h)), $header);
+        foreach (['name', 'email', 'password', 'role'] as $col) {
+            if (! in_array($col, $header)) {
+                return back()->with('error', "Kolom wajib \"{$col}\" tidak ditemukan di header CSV.");
+            }
+        }
+
+        $valid = [];
+        $invalid = [];
+        $baris = 1;
         $emailsSeen = [];
 
         while (($row = fgetcsv($handle, 0, $delimiter)) !== false) {
             $baris++;
-            if (empty(array_filter($row))) continue;
+            if (empty(array_filter($row))) {
+                continue;
+            }
 
             $data = array_combine($header, array_pad($row, count($header), ''));
 
-            $name      = trim($data['name']      ?? '');
-            $email     = strtolower(trim($data['email']     ?? ''));
-            $password  = trim($data['password']  ?? '');
-            $role      = trim($data['role']      ?? 'relawan');
-            $provinsi  = trim($data['provinsi']  ?? '');
+            $name = trim($data['name'] ?? '');
+            $email = strtolower(trim($data['email'] ?? ''));
+            $password = trim($data['password'] ?? '');
+            $role = trim($data['role'] ?? 'relawan');
+            $provinsi = trim($data['provinsi'] ?? '');
             $kabupaten = trim($data['kabupaten'] ?? '');
             $kecamatan = trim($data['kecamatan'] ?? '');
-            $desa      = trim($data['desa']      ?? '');
+            $desa = trim($data['desa'] ?? '');
 
             $errors = [];
-            if (empty($name))                                              $errors[] = 'Nama kosong';
-            if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = 'Email tidak valid';
-            if (strlen($password) < 8)                                     $errors[] = 'Password minimal 8 karakter';
-            if (!in_array($role, ['super_admin', 'admin', 'relawan']))     $errors[] = "Role \"{$role}\" tidak dikenal";
-            if (!empty($email) && isset($emailsSeen[$email]))              $errors[] = 'Email duplikat dalam file';
-            elseif (!empty($email) && filter_var($email, FILTER_VALIDATE_EMAIL) && User::where('email', $email)->exists())
-                                                                            $errors[] = 'Email sudah terdaftar';
+            if (empty($name)) {
+                $errors[] = 'Nama kosong';
+            }
+            if (empty($email) || ! filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $errors[] = 'Email tidak valid';
+            }
+            if (strlen($password) < 8) {
+                $errors[] = 'Password minimal 8 karakter';
+            }
+            if (! in_array($role, ['super_admin', 'admin', 'relawan'])) {
+                $errors[] = "Role \"{$role}\" tidak dikenal";
+            }
+            if (! empty($email) && isset($emailsSeen[$email])) {
+                $errors[] = 'Email duplikat dalam file';
+            } elseif (! empty($email) && filter_var($email, FILTER_VALIDATE_EMAIL) && User::where('email', $email)->exists()) {
+                $errors[] = 'Email sudah terdaftar';
+            }
 
             if ($errors) {
                 $invalid[] = ['baris' => $baris, 'name' => $name ?: '-', 'email' => $email ?: '-', 'role' => $role, 'errors' => $errors];
@@ -194,7 +226,7 @@ class UserController extends Controller
 
     public function importConfirm(): View|RedirectResponse
     {
-        $valid   = session('import_valid',   []);
+        $valid = session('import_valid', []);
         $invalid = session('import_invalid', []);
 
         if (empty($valid) && empty($invalid)) {
@@ -216,14 +248,14 @@ class UserController extends Controller
         foreach ($valid as $data) {
             if (User::where('email', $data['email'])->doesntExist()) {
                 User::create([
-                    'name'      => $data['name'],
-                    'email'     => $data['email'],
-                    'password'  => Hash::make($data['password']),
-                    'role'      => $data['role'],
-                    'provinsi'  => $data['provinsi'] ?: null,
+                    'name' => $data['name'],
+                    'email' => $data['email'],
+                    'password' => Hash::make($data['password']),
+                    'role' => $data['role'],
+                    'provinsi' => $data['provinsi'] ?: null,
                     'kabupaten' => $data['kabupaten'] ?: null,
                     'kecamatan' => $data['kecamatan'] ?: null,
-                    'desa'      => $data['desa'] ?: null,
+                    'desa' => $data['desa'] ?: null,
                 ]);
                 $berhasil++;
             }
@@ -241,14 +273,14 @@ class UserController extends Controller
     public function downloadTemplate(): StreamedResponse
     {
         $headers = [
-            'Content-Type'        => 'text/csv; charset=UTF-8',
+            'Content-Type' => 'text/csv; charset=UTF-8',
             'Content-Disposition' => 'attachment; filename="template_import_user.csv"',
         ];
 
         return response()->stream(function () {
             $output = fopen('php://output', 'w');
             // BOM agar Excel baca UTF-8 dengan benar
-            fputs($output, "\xEF\xBB\xBF");
+            fwrite($output, "\xEF\xBB\xBF");
 
             // Header kolom
             fputcsv($output, ['name', 'email', 'password', 'role', 'provinsi', 'kabupaten', 'kecamatan', 'desa']);
@@ -261,6 +293,4 @@ class UserController extends Controller
             fclose($output);
         }, 200, $headers);
     }
-
-
 }

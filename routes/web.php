@@ -2,40 +2,46 @@
 
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\ChangeRequestController;
-use App\Http\Controllers\GeoJsonController;
 use App\Http\Controllers\ClubController;
-use App\Http\Controllers\ExportController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DiskusiController;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\ExportController;
+use App\Http\Controllers\GeoJsonController;
 use App\Http\Controllers\KalenderController;
 use App\Http\Controllers\KampungController;
+use App\Http\Controllers\KehadiranController;
 use App\Http\Controllers\KomponenSyaratController;
+use App\Http\Controllers\LaporanRelawanController;
 use App\Http\Controllers\LeaderboardController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PartisipasiController;
 use App\Http\Controllers\PengumumanController;
-use App\Http\Controllers\ProfilController;
 use App\Http\Controllers\PrasaranaController;
+use App\Http\Controllers\ProfilController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\RelawanController;
 use App\Http\Controllers\TalentaController;
 use App\Http\Controllers\TenagaAhliController;
-use App\Http\Controllers\RelawanController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WilayahController;
+use App\Models\CheckinKampung;
+use App\Models\Club;
+use App\Models\Event;
+use App\Models\Prasarana;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     $stats = [
-        'totalPrasarana' => \App\Models\Prasarana::validated()->count(),
-        'totalClubs' => \App\Models\Club::validated()->where('aktif', true)->count(),
-        'totalEvents' => \App\Models\Event::validated()->count(),
-        'totalPartisipasi' => \App\Models\CheckinKampung::whereHas('kampung', fn($q) => $q->where('status_validasi', 'validated'))->count(),
+        'totalPrasarana' => Prasarana::validated()->count(),
+        'totalClubs' => Club::validated()->where('aktif', true)->count(),
+        'totalEvents' => Event::validated()->count(),
+        'totalPartisipasi' => CheckinKampung::whereHas('kampung', fn ($q) => $q->where('status_validasi', 'validated'))->count(),
     ];
 
-    $latestPrasarana = \App\Models\Prasarana::validated()->latest()->take(3)->get();
-    $upcomingEvents = \App\Models\Event::validated()->akanDatang()->take(3)->get();
-    $activeClubs = \App\Models\Club::validated()->aktif()->with('prasarana')->take(3)->get();
+    $latestPrasarana = Prasarana::validated()->latest()->take(3)->get();
+    $upcomingEvents = Event::validated()->akanDatang()->take(3)->get();
+    $activeClubs = Club::validated()->aktif()->with('prasarana')->take(3)->get();
 
     return view('welcome', compact('stats', 'latestPrasarana', 'upcomingEvents', 'activeClubs'));
 });
@@ -48,7 +54,7 @@ Route::get('/api/geojson/indonesia-provinces', [GeoJsonController::class, 'provi
 Route::get('/api/kabupaten/{province_id}', [WilayahController::class, 'getKabupaten']);
 Route::get('/api/kecamatan/{regency_id}', [WilayahController::class, 'getKecamatan']);
 Route::get('/api/desa/{district_id}', [WilayahController::class, 'getDesa']);
-Route::get('/api/kehadiran/autocomplete-nama', [\App\Http\Controllers\KehadiranController::class, 'autocompleteNama']);
+Route::get('/api/kehadiran/autocomplete-nama', [KehadiranController::class, 'autocompleteNama']);
 
 /* ============================================================
    AKSES PUBLIK (Tanpa Login)
@@ -147,10 +153,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // User Management Routes (Super Admin only)
     Route::middleware(['App\Http\Middleware\CheckRole:super_admin'])->group(function () {
         Route::resource('users', UserController::class)->except(['show']);
-        Route::get('/users/import/form',     [UserController::class, 'importForm'])->name('users.import.form');
+        Route::get('/users/import/form', [UserController::class, 'importForm'])->name('users.import.form');
         Route::get('/users/import/template', [UserController::class, 'downloadTemplate'])->name('users.import.template');
         Route::post('/users/import/preview', [UserController::class, 'importPreview'])->name('users.import.preview');
-        Route::get('/users/import/confirm',  [UserController::class, 'importConfirm'])->name('users.import.confirm');
+        Route::get('/users/import/confirm', [UserController::class, 'importConfirm'])->name('users.import.confirm');
         Route::post('/users/import/confirm', [UserController::class, 'importConfirmStore'])->name('users.import.confirm.store');
     });
 
@@ -161,11 +167,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Export Routes (Admin & Super Admin)
     Route::middleware(['App\Http\Middleware\CheckRole:admin'])->prefix('export')->name('export.')->group(function () {
-        Route::get('/prasarana',   [ExportController::class, 'prasarana'])->name('prasarana');
-        Route::get('/clubs',       [ExportController::class, 'clubs'])->name('clubs');
-        Route::get('/events',      [ExportController::class, 'events'])->name('events');
+        Route::get('/prasarana', [ExportController::class, 'prasarana'])->name('prasarana');
+        Route::get('/clubs', [ExportController::class, 'clubs'])->name('clubs');
+        Route::get('/events', [ExportController::class, 'events'])->name('events');
         Route::get('/partisipasi', [ExportController::class, 'partisipasi'])->name('partisipasi');
         Route::get('/leaderboard', [ExportController::class, 'leaderboard'])->name('leaderboard');
+    });
+
+    // Laporan Relawan (Admin & Super Admin)
+    Route::middleware(['App\Http\Middleware\CheckRole:admin'])->prefix('laporan-relawan')->name('laporan-relawan.')->group(function () {
+        Route::get('/', [LaporanRelawanController::class, 'index'])->name('index');
+        Route::get('/rekap/pdf', [LaporanRelawanController::class, 'rekapPdf'])->name('rekap-pdf');
+        Route::get('/{relawan}', [LaporanRelawanController::class, 'show'])->name('show');
+        Route::get('/{relawan}/pdf', [LaporanRelawanController::class, 'pdf'])->name('pdf');
     });
 
     // Daftar Relawan (All authenticated users)
@@ -183,14 +197,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Kampung Olahraga (Admin & Relawan)
     Route::middleware(['App\Http\Middleware\CheckRole:admin,relawan'])->group(function () {
         Route::resource('kampung', KampungController::class);
-        Route::patch('/kampung/{kampung}/validate',        [KampungController::class, 'validate'])->name('kampung.validate');
-        Route::patch('/kampung/{kampung}/reject',          [KampungController::class, 'reject'])->name('kampung.reject');
+        Route::patch('/kampung/{kampung}/validate', [KampungController::class, 'validate'])->name('kampung.validate');
+        Route::patch('/kampung/{kampung}/reject', [KampungController::class, 'reject'])->name('kampung.reject');
         Route::patch('/kampung/{kampung}/cancel-validate', [KampungController::class, 'cancelValidate'])->name('kampung.cancel-validate');
 
-        Route::post('/kampung/{kampung}/fasil',                [KampungController::class, 'attachFasil'])->name('kampung.fasil.attach');
-        Route::delete('/kampung/{kampung}/fasil/{prasarana}',  [KampungController::class, 'detachFasil'])->name('kampung.fasil.detach');
-        Route::post('/kampung/{kampung}/klub',                 [KampungController::class, 'attachKlub'])->name('kampung.klub.attach');
-        Route::delete('/kampung/{kampung}/klub/{club}',        [KampungController::class, 'detachKlub'])->name('kampung.klub.detach');
+        Route::post('/kampung/{kampung}/fasil', [KampungController::class, 'attachFasil'])->name('kampung.fasil.attach');
+        Route::delete('/kampung/{kampung}/fasil/{prasarana}', [KampungController::class, 'detachFasil'])->name('kampung.fasil.detach');
+        Route::post('/kampung/{kampung}/klub', [KampungController::class, 'attachKlub'])->name('kampung.klub.attach');
+        Route::delete('/kampung/{kampung}/klub/{club}', [KampungController::class, 'detachKlub'])->name('kampung.klub.detach');
     });
 
     // Komponen Syarat (Admin only)
@@ -227,9 +241,9 @@ Route::post('/partisipasi/{partisipasi}/daftar', [PartisipasiController::class, 
 /* ============================================================
    KAMPUNG OLAHRAGA — QR CHECK-IN PUBLIK (Tanpa Login)
    ============================================================ */
-Route::get('/qr/{token}',        [KampungController::class, 'checkinForm'])->name('kampung.checkin.form');
-Route::post('/qr/{token}',       [KampungController::class, 'checkinStore'])->name('kampung.checkin.store');
+Route::get('/qr/{token}', [KampungController::class, 'checkinForm'])->name('kampung.checkin.form');
+Route::post('/qr/{token}', [KampungController::class, 'checkinStore'])->name('kampung.checkin.store');
 Route::get('/qr/{token}/sukses', [KampungController::class, 'checkinSukses'])->name('kampung.checkin.sukses');
-Route::get('/api/jenis-olahraga',[KampungController::class, 'apiJenisOlahraga'])->name('api.jenis-olahraga');
+Route::get('/api/jenis-olahraga', [KampungController::class, 'apiJenisOlahraga'])->name('api.jenis-olahraga');
 
 require __DIR__.'/auth.php';

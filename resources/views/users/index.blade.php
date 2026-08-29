@@ -30,6 +30,41 @@
                 </div>
             @endif
 
+            {{-- Filter & Pencarian --}}
+            <div class="bg-white shadow-sm sm:rounded-lg p-4 mb-4">
+                <form method="GET" action="{{ route('users.index') }}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                    <div class="lg:col-span-2">
+                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Cari</label>
+                        <input type="text" name="search" value="{{ request('search') }}" placeholder="Nama atau email"
+                               class="w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Role</label>
+                        <select name="role" class="w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <option value="">Semua Role</option>
+                            <option value="super_admin" @selected(request('role') === 'super_admin')>Super Admin</option>
+                            <option value="admin" @selected(request('role') === 'admin')>Admin</option>
+                            <option value="relawan" @selected(request('role') === 'relawan')>Relawan</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Urutkan</label>
+                        <select name="sort" class="w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <option value="nama_asc"  @selected($sort === 'nama_asc')>Nama (A-Z)</option>
+                            <option value="nama_desc" @selected($sort === 'nama_desc')>Nama (Z-A)</option>
+                            <option value="terbaru"   @selected($sort === 'terbaru')>Terbaru ditambahkan</option>
+                        </select>
+                    </div>
+                    <div class="sm:col-span-2 lg:col-span-4 flex gap-2">
+                        <button type="submit" class="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 transition">Terapkan</button>
+                        @if(request()->hasAny(['search', 'role']) || $sort !== 'nama_asc')
+                            <a href="{{ route('users.index') }}" class="px-4 py-2 bg-gray-100 text-gray-600 text-sm font-medium rounded-md hover:bg-gray-200 transition">Reset</a>
+                        @endif
+                        <span class="ml-auto self-center text-xs text-gray-400">{{ $users->total() }} pengguna</span>
+                    </div>
+                </form>
+            </div>
+
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
                     <div class="overflow-x-auto">

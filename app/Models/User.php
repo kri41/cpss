@@ -4,13 +4,14 @@ namespace App\Models;
 
 use App\Models\Concerns\HasSlug;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable, HasSlug;
+    use HasFactory, HasSlug, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -87,6 +88,22 @@ class User extends Authenticatable
     }
 
     /**
+     * Relasi ke Klub/Komunitas yang didaftarkan
+     */
+    public function clubs(): HasMany
+    {
+        return $this->hasMany(Club::class);
+    }
+
+    /**
+     * Relasi ke Kampung Olahraga yang didaftarkan
+     */
+    public function kampungOlahraga(): HasMany
+    {
+        return $this->hasMany(KampungOlahraga::class);
+    }
+
+    /**
      * Relasi ke Talenta
      */
     public function talenta(): HasMany
@@ -145,7 +162,7 @@ class User extends Authenticatable
     /**
      * Relasi ke Badges (lencana)
      */
-    public function badges(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    public function badges(): BelongsToMany
     {
         return $this->belongsToMany(Badge::class, 'user_badges')
             ->withPivot('earned_at')
@@ -194,7 +211,7 @@ class User extends Authenticatable
         }
 
         // Hanya admin yang bisa validasi
-        if (!$this->isAdmin() || $this->role === 'relawan') {
+        if (! $this->isAdmin() || $this->role === 'relawan') {
             return false;
         }
 
@@ -208,14 +225,14 @@ class User extends Authenticatable
     public function isSameWilayah($model): bool
     {
         // Cocokkan kabupaten
-        if (!empty($this->kabupaten) && !empty($model->kabupaten)) {
+        if (! empty($this->kabupaten) && ! empty($model->kabupaten)) {
             if (strtolower(trim($this->kabupaten)) !== strtolower(trim($model->kabupaten))) {
                 return false;
             }
         }
 
         // Cocokkan kecamatan (jika keduanya ada)
-        if (!empty($this->kecamatan) && !empty($model->kecamatan)) {
+        if (! empty($this->kecamatan) && ! empty($model->kecamatan)) {
             if (strtolower(trim($this->kecamatan)) !== strtolower(trim($model->kecamatan))) {
                 return false;
             }
@@ -230,10 +247,10 @@ class User extends Authenticatable
      */
     public function scopeToOwnWilayah($query)
     {
-        if (!empty($this->kabupaten)) {
+        if (! empty($this->kabupaten)) {
             $query->whereRaw('LOWER(TRIM(kabupaten)) = ?', [strtolower(trim($this->kabupaten))]);
         }
-        if (!empty($this->kecamatan)) {
+        if (! empty($this->kecamatan)) {
             $query->whereRaw('LOWER(TRIM(kecamatan)) = ?', [strtolower(trim($this->kecamatan))]);
         }
 
