@@ -81,28 +81,27 @@ body {
 .identity {
     display: table;
     width: 100%;
-    background: #f8fafc;
+    background: #ffffff;
     border: 1px solid #e2e8f0;
-    border-left: 4px solid #2563eb;
-    border-radius: 6px;
+    border-radius: 7px;
     padding: 12px 16px;
     margin-bottom: 15px;
 }
 .identity .id-main { display: table-cell; vertical-align: middle; }
-.identity .id-side { display: table-cell; vertical-align: middle; text-align: right; width: 170px; }
+.identity .id-side { display: table-cell; vertical-align: middle; text-align: right; width: 150px; }
 .identity .id-name { font-size: 14px; font-weight: bold; color: #0f172a; }
 .identity .id-sub  { font-size: 9px; color: #64748b; margin-top: 2px; }
 .identity .id-chip {
     display: inline-block;
-    background: #dbeafe;
-    color: #1e40af;
+    background: #dcfce7;
+    color: #166534;
     font-size: 7.5px;
     font-weight: bold;
     letter-spacing: 0.4px;
     padding: 2px 8px;
     border-radius: 20px;
 }
-.identity .id-rank       { font-size: 21px; font-weight: bold; color: #1e3a8a; line-height: 1; }
+.identity .id-rank       { font-size: 21px; font-weight: bold; color: #1e293b; line-height: 1; }
 .identity .id-rank-label { font-size: 8px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.4px; margin-top: 3px; }
 
 /* ============ BARIS KPI ============ */

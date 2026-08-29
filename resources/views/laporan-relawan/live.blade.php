@@ -47,20 +47,18 @@
     </div>
 
     {{-- ===== IDENTITAS ===== --}}
-    <div class="bg-white rounded-2xl shadow-lg border border-white/40 overflow-hidden">
-        <div class="h-14 bg-gradient-to-r from-blue-700 to-sky-500"></div>
-        <div class="px-6 pb-6">
-            <div class="flex flex-col sm:flex-row sm:items-end gap-4 -mt-7">
-                <div class="w-16 h-16 rounded-2xl border-4 border-white shadow-md bg-gradient-to-br from-blue-500 to-sky-400 flex items-center justify-center text-white font-bold text-2xl shrink-0">
-                    {{ strtoupper(substr($relawan->name, 0, 1)) }}
-                </div>
-                <div class="pb-0.5">
-                    <h1 class="text-xl font-bold text-gray-900">{{ $relawan->name }}</h1>
-                    <p class="text-xs text-gray-500 mt-0.5">
-                        <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-semibold">Relawan</span>
-                        <span class="ml-2">{{ collect([$relawan->kecamatan, $relawan->kabupaten])->filter()->implode(', ') ?: 'Wilayah belum diatur' }}</span>
-                        <span class="ml-2">&middot; Bergabung {{ $idDate($relawan->created_at, 'MMM YYYY') }}</span>
-                    </p>
+    <div class="bg-white rounded-2xl shadow-lg border border-white/40 p-5 sm:p-6">
+        <div class="flex items-center gap-4">
+            <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-sky-500 flex items-center justify-center text-white font-bold text-xl sm:text-2xl shrink-0">
+                {{ strtoupper(substr($relawan->name, 0, 1)) }}
+            </div>
+            <div class="min-w-0">
+                <h1 class="text-lg sm:text-xl font-bold text-gray-900 leading-tight">{{ $relawan->name }}</h1>
+                <div class="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1.5 text-xs text-gray-500">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-semibold">Relawan</span>
+                    <span>{{ collect([$relawan->kecamatan, $relawan->kabupaten])->filter()->implode(', ') ?: 'Wilayah belum diatur' }}</span>
+                    <span class="text-gray-300">&bull;</span>
+                    <span>Bergabung {{ $idDate($relawan->created_at, 'MMM YYYY') }}</span>
                 </div>
             </div>
         </div>

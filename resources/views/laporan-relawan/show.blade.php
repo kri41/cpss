@@ -37,29 +37,28 @@
         @endif
 
         {{-- ===== HEADER ===== --}}
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <div class="h-16 bg-gradient-to-r from-blue-700 to-sky-500"></div>
-            <div class="px-6 pb-6">
-                <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 -mt-8">
-                    <div class="flex items-end gap-4">
-                        <div class="w-20 h-20 rounded-2xl border-4 border-white shadow-md bg-gradient-to-br from-blue-500 to-sky-400 flex items-center justify-center text-white font-bold text-3xl shrink-0">
-                            {{ strtoupper(substr($relawan->name, 0, 1)) }}
-                        </div>
-                        <div class="pb-1">
-                            <h1 class="text-xl font-bold text-gray-900">{{ $relawan->name }}</h1>
-                            <p class="text-sm text-gray-500">{{ $relawan->email }}</p>
-                            <p class="text-xs text-gray-400 mt-0.5">
-                                {{ collect([$relawan->desa, $relawan->kecamatan, $relawan->kabupaten])->filter()->implode(', ') ?: 'Wilayah belum diatur' }}
-                                &middot; Bergabung {{ $relawan->created_at->locale('id')->isoFormat('D MMM YYYY') }}
-                            </p>
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-6">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div class="flex items-center gap-4 min-w-0">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-sky-500 flex items-center justify-center text-white font-bold text-2xl shrink-0">
+                        {{ strtoupper(substr($relawan->name, 0, 1)) }}
+                    </div>
+                    <div class="min-w-0">
+                        <h1 class="text-lg sm:text-xl font-bold text-gray-900 leading-tight truncate">{{ $relawan->name }}</h1>
+                        <p class="text-sm text-gray-500 truncate">{{ $relawan->email }}</p>
+                        <div class="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1 text-xs text-gray-400">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-semibold">Relawan</span>
+                            <span>{{ collect([$relawan->desa, $relawan->kecamatan, $relawan->kabupaten])->filter()->implode(', ') ?: 'Wilayah belum diatur' }}</span>
+                            <span class="text-gray-300">&bull;</span>
+                            <span>Bergabung {{ $relawan->created_at->locale('id')->isoFormat('D MMM YYYY') }}</span>
                         </div>
                     </div>
-                    <a href="{{ route('laporan-relawan.pdf', $relawan) }}"
-                       class="pb-1 inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition shrink-0">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                        Unduh Laporan PDF
-                    </a>
                 </div>
+                <a href="{{ route('laporan-relawan.pdf', $relawan) }}"
+                   class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                    Unduh Laporan PDF
+                </a>
             </div>
         </div>
 
