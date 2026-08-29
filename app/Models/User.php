@@ -66,7 +66,11 @@ class User extends Authenticatable implements MustVerifyEmail
         // (mis. pendaftar baru) tetap ikut dapat token.
         static::creating(function (User $user) {
             if (($user->role ?? 'relawan') === 'relawan' && empty($user->public_report_token)) {
-                $user->public_report_token = static::generateReportToken();
+                try {
+                    $user->public_report_token = static::generateReportToken();
+                } catch (\Throwable) {
+                    // kolom belum ada (migrasi belum dijalankan) — lewati saja
+                }
             }
         });
     }
@@ -91,13 +95,21 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /** Pastikan relawan punya token (untuk data lama yang role-nya baru diubah). */
-    public function ensurePublicReportToken(): string
+    public function ensurePublicReportToken(): ?string
     {
-        if (empty($this->public_report_token)) {
-            $this->forceFill(['public_report_token' => static::generateReportToken()])->save();
+        if (! empty($this->public_report_token)) {
+            return $this->public_report_token;
         }
 
-        return $this->public_report_token;
+        try {
+            $this->forceFill(['public_report_token' => static::generateReportToken()])->save();
+
+            return $this->public_report_token;
+        } catch (\Throwable $e) {
+            report($e); // mis. kolom belum ada — jangan sampai menggagalkan halaman
+
+            return null;
+        }
     }
 
     public function regeneratePublicReportToken(): string

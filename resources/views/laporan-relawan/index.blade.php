@@ -139,6 +139,7 @@
 
                             {{-- Aksi --}}
                             <div class="flex flex-wrap gap-2 shrink-0">
+                                @if($r->publicReportUrl())
                                 <button type="button"
                                         data-live-url="{{ $r->publicReportUrl() }}"
                                         @click="navigator.clipboard.writeText($event.currentTarget.dataset.liveUrl); copied = true; setTimeout(() => copied = false, 2000)"
@@ -148,6 +149,7 @@
                                     <span x-show="!copied">Salin Link Live</span>
                                     <span x-show="copied" x-cloak>✓ Tersalin</span>
                                 </button>
+                                @endif
                                 <a href="{{ route('laporan-relawan.show', $r) }}"
                                    class="px-3 py-2 text-xs font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg transition">Detail</a>
                                 <a href="{{ route('laporan-relawan.pdf', $r) }}"

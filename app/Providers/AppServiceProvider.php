@@ -49,9 +49,19 @@ class AppServiceProvider extends ServiceProvider
 
     /**
      * Timpa konfigurasi mailer dari tabel settings (menu Pengaturan) bila diisi.
-     * Aman dijalankan sebelum migrasi (Setting::raw() menangkap error DB).
+     * Dibungkus try/catch penuh supaya boot() tidak pernah menggagalkan request
+     * (mis. tabel settings / cache belum siap saat deploy).
      */
     private function applyRuntimeMailConfig(): void
+    {
+        try {
+            $this->doApplyRuntimeMailConfig();
+        } catch (\Throwable $e) {
+            report($e);
+        }
+    }
+
+    private function doApplyRuntimeMailConfig(): void
     {
         $mailer = Setting::get('mail_mailer');
 

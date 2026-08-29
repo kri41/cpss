@@ -56,13 +56,18 @@ class Setting extends Model
     /** Seluruh setting sebagai array key => value mentah (nilai tersimpan apa adanya). */
     public static function raw(): array
     {
-        return Cache::rememberForever('app_settings', function () {
-            try {
-                return static::query()->pluck('value', 'key')->all();
-            } catch (\Throwable) {
-                return [];
-            }
-        });
+        try {
+            return Cache::rememberForever('app_settings', function () {
+                try {
+                    return static::query()->pluck('value', 'key')->all();
+                } catch (\Throwable) {
+                    return [];
+                }
+            });
+        } catch (\Throwable) {
+            // driver cache / tabel belum siap
+            return [];
+        }
     }
 
     /** Ambil satu nilai (otomatis dekripsi bila perlu), fallback ke DEFAULTS lalu $default. */
