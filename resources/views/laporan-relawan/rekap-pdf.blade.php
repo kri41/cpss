@@ -14,16 +14,7 @@
 @php $pdfFooterLeft = 'Rekapitulasi Kinerja Relawan'; @endphp
 
 {{-- ===== LETTERHEAD ===== --}}
-<div class="letterhead">
-    <div class="lh-brand">
-        <span class="brand-mark">DATARAGA</span>
-        <div class="brand-tag">Cloud Participatory Sport Sensing &mdash; Kamu Gerak, Indonesia Tahu</div>
-    </div>
-    <div class="lh-meta">
-        <div class="m-label">Rekap Peringkat Relawan</div>
-        <div class="m-value">{{ now()->locale('id')->isoFormat('D MMMM YYYY') }}</div>
-    </div>
-</div>
+@include('pdf.partials.letterhead', ['docType' => 'Rekap Peringkat Relawan'])
 
 {{-- ===== JUDUL ===== --}}
 <div class="report-band">

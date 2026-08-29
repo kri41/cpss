@@ -38,6 +38,7 @@ body {
 }
 .letterhead .lh-brand { display: table-cell; vertical-align: middle; }
 .letterhead .lh-meta  { display: table-cell; vertical-align: middle; text-align: right; width: 210px; }
+.letterhead .lh-logo  { height: 58px; width: auto; }
 .brand-mark {
     display: inline-block;
     background: #1e3a8a;

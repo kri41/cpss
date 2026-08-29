@@ -36,16 +36,7 @@
 @endphp
 
 {{-- ===== LETTERHEAD ===== --}}
-<div class="letterhead">
-    <div class="lh-brand">
-        <span class="brand-mark">DATARAGA</span>
-        <div class="brand-tag">Cloud Participatory Sport Sensing &mdash; Kamu Gerak, Indonesia Tahu</div>
-    </div>
-    <div class="lh-meta">
-        <div class="m-label">Laporan Kinerja Relawan</div>
-        <div class="m-value">{{ $idDate(now()) }}</div>
-    </div>
-</div>
+@include('pdf.partials.letterhead', ['docType' => 'Laporan Kinerja Relawan'])
 
 {{-- ===== JUDUL ===== --}}
 <div class="report-band">

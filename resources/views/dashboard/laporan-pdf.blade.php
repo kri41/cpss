@@ -25,16 +25,7 @@
 @endphp
 
 {{-- ===== LETTERHEAD ===== --}}
-<div class="letterhead">
-    <div class="lh-brand">
-        <span class="brand-mark">DATARAGA</span>
-        <div class="brand-tag">Sistem Informasi Olahraga Daerah &mdash; Kamu Gerak, Indonesia Tahu</div>
-    </div>
-    <div class="lh-meta">
-        <div class="m-label">{{ $isRelawan ? 'Laporan Data Pribadi' : 'Laporan Keseluruhan Data' }}</div>
-        <div class="m-value">{{ now()->locale('id')->isoFormat('D MMMM YYYY') }}</div>
-    </div>
-</div>
+@include('pdf.partials.letterhead', ['docType' => $isRelawan ? 'Laporan Data Pribadi' : 'Laporan Keseluruhan Data'])
 
 {{-- ===== JUDUL ===== --}}
 <div class="report-band">
