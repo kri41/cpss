@@ -13,7 +13,14 @@
 
     <div class="py-6">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            
+
+            @if(session('success'))
+                <div class="mb-6 flex items-start gap-3 p-4 bg-green-50 border border-green-200 rounded-2xl text-sm text-green-800">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500 shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+                    <span>{{ session('success') }}</span>
+                </div>
+            @endif
+
             <!-- Welcome Banner -->
             <div class="mb-8 bg-gradient-to-r from-blue-600 to-sky-500 rounded-2xl p-6 sm:p-8 text-white shadow-lg">
                 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">

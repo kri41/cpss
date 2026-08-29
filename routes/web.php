@@ -20,7 +20,9 @@ use App\Http\Controllers\PengumumanController;
 use App\Http\Controllers\PrasaranaController;
 use App\Http\Controllers\ProfilController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PublicReportController;
 use App\Http\Controllers\RelawanController;
+use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\TalentaController;
 use App\Http\Controllers\TenagaAhliController;
 use App\Http\Controllers\UserController;
@@ -158,6 +160,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/users/import/preview', [UserController::class, 'importPreview'])->name('users.import.preview');
         Route::get('/users/import/confirm', [UserController::class, 'importConfirm'])->name('users.import.confirm');
         Route::post('/users/import/confirm', [UserController::class, 'importConfirmStore'])->name('users.import.confirm.store');
+
+        // Pengaturan aplikasi (server email, isi email verifikasi)
+        Route::get('/pengaturan', [SettingsController::class, 'edit'])->name('settings.edit');
+        Route::put('/pengaturan', [SettingsController::class, 'update'])->name('settings.update');
+        Route::post('/pengaturan/test-email', [SettingsController::class, 'testMail'])->name('settings.test-email');
     });
 
     // Audit Log Routes (Admin & Super Admin)
@@ -180,6 +187,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/rekap/pdf', [LaporanRelawanController::class, 'rekapPdf'])->name('rekap-pdf');
         Route::get('/{relawan}', [LaporanRelawanController::class, 'show'])->name('show');
         Route::get('/{relawan}/pdf', [LaporanRelawanController::class, 'pdf'])->name('pdf');
+        Route::post('/{relawan}/ganti-link', [LaporanRelawanController::class, 'regenerateToken'])->name('regenerate-token');
     });
 
     // Daftar Relawan (All authenticated users)
@@ -245,5 +253,13 @@ Route::get('/qr/{token}', [KampungController::class, 'checkinForm'])->name('kamp
 Route::post('/qr/{token}', [KampungController::class, 'checkinStore'])->name('kampung.checkin.store');
 Route::get('/qr/{token}/sukses', [KampungController::class, 'checkinSukses'])->name('kampung.checkin.sukses');
 Route::get('/api/jenis-olahraga', [KampungController::class, 'apiJenisOlahraga'])->name('api.jenis-olahraga');
+
+/* ============================================================
+   LIVE REPORT RELAWAN — LINK PUBLIK (Tanpa Login, token unik)
+   ============================================================ */
+Route::get('/r/{token}', [PublicReportController::class, 'show'])
+    ->where('token', '[A-Za-z0-9]{20,64}')->name('public-report.show');
+Route::get('/r/{token}/pdf', [PublicReportController::class, 'pdf'])
+    ->where('token', '[A-Za-z0-9]{20,64}')->name('public-report.pdf');
 
 require __DIR__.'/auth.php';

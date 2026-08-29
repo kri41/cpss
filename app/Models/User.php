@@ -3,13 +3,16 @@
 namespace App\Models;
 
 use App\Models\Concerns\HasSlug;
+use App\Notifications\VerifyEmailNotification;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory, HasSlug, Notifiable;
 
@@ -30,6 +33,7 @@ class User extends Authenticatable
         'google_id',
         'avatar',
         'email_verified_at',
+        'public_report_token',
     ];
 
     /**
@@ -53,6 +57,59 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        // Relawan baru langsung dapat token link Live Report.
+        // Role default aplikasi = 'relawan', jadi user tanpa role eksplisit
+        // (mis. pendaftar baru) tetap ikut dapat token.
+        static::creating(function (User $user) {
+            if (($user->role ?? 'relawan') === 'relawan' && empty($user->public_report_token)) {
+                $user->public_report_token = static::generateReportToken();
+            }
+        });
+    }
+
+    /**
+     * Kirim email verifikasi dengan template yang bisa diubah di menu Pengaturan.
+     */
+    public function sendEmailVerificationNotification(): void
+    {
+        $this->notify(new VerifyEmailNotification);
+    }
+
+    /* ================= LIVE REPORT (link publik) ================= */
+
+    public static function generateReportToken(): string
+    {
+        do {
+            $token = Str::random(48);
+        } while (static::where('public_report_token', $token)->exists());
+
+        return $token;
+    }
+
+    /** Pastikan relawan punya token (untuk data lama yang role-nya baru diubah). */
+    public function ensurePublicReportToken(): string
+    {
+        if (empty($this->public_report_token)) {
+            $this->forceFill(['public_report_token' => static::generateReportToken()])->save();
+        }
+
+        return $this->public_report_token;
+    }
+
+    public function regeneratePublicReportToken(): string
+    {
+        $this->forceFill(['public_report_token' => static::generateReportToken()])->save();
+
+        return $this->public_report_token;
+    }
+
+    public function publicReportUrl(): ?string
+    {
+        return $this->public_report_token ? url('/r/'.$this->public_report_token) : null;
     }
 
     /**

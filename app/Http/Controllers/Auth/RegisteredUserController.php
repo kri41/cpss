@@ -30,6 +30,11 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        // Honeypot: field tersembunyi yang hanya diisi bot
+        if (filled($request->input('website'))) {
+            abort(422);
+        }
+
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
@@ -42,7 +47,13 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        event(new Registered($user));
+        // Kirim email verifikasi — jangan sampai kegagalan SMTP menggagalkan pendaftaran.
+        // Pendaftar tetap bisa "Kirim ulang" dari halaman verifikasi.
+        try {
+            event(new Registered($user));
+        } catch (\Throwable $e) {
+            report($e);
+        }
 
         Auth::login($user);
 

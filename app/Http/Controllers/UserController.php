@@ -54,6 +54,8 @@ class UserController extends Controller
         ]);
 
         $validated['password'] = Hash::make($validated['password']);
+        // Dibuat manual oleh super admin -> anggap sudah terverifikasi
+        $validated['email_verified_at'] = now();
 
         User::create($validated);
 
@@ -256,6 +258,7 @@ class UserController extends Controller
                     'kabupaten' => $data['kabupaten'] ?: null,
                     'kecamatan' => $data['kecamatan'] ?: null,
                     'desa' => $data['desa'] ?: null,
+                    'email_verified_at' => now(),
                 ]);
                 $berhasil++;
             }

@@ -96,6 +96,12 @@
             <form method="POST" action="{{ route('register') }}" class="space-y-4">
                 @csrf
 
+                {{-- Honeypot anti-bot: jangan diisi --}}
+                <div aria-hidden="true" style="position:absolute;left:-9999px;top:-9999px;height:0;width:0;overflow:hidden">
+                    <label>Website</label>
+                    <input type="text" name="website" tabindex="-1" autocomplete="off" value="">
+                </div>
+
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1.5">Nama Lengkap</label>
                     <div class="relative">
@@ -145,8 +151,12 @@
                 <div class="pt-1">
                     <button type="submit"
                         class="w-full py-3.5 bg-teal-600 text-white font-black rounded-2xl hover:bg-teal-700 shadow-lg hover:shadow-teal-500/30 transition-all active:scale-[0.98] text-base tracking-wide">
-                        Daftar &amp; Langsung Masuk
+                        Daftar Akun
                     </button>
+                    <p class="text-xs text-gray-400 text-center mt-2">
+                        <i class="fas fa-envelope-circle-check mr-1"></i>
+                        Kami akan mengirim tautan verifikasi ke email kamu untuk mengaktifkan akun.
+                    </p>
                 </div>
             </form>
 
