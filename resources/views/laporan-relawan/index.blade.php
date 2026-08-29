@@ -93,7 +93,8 @@
                         $totalKontribusi = collect($kontribusi)->sum('total');
                         $peringkat = ($relawan->currentPage() - 1) * $relawan->perPage() + $loop->iteration;
                     @endphp
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md hover:border-blue-100 transition">
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md hover:border-blue-100 transition"
+                         x-data="{ copied: false }">
                         <div class="flex flex-col lg:flex-row lg:items-center gap-4">
 
                             {{-- Identitas --}}
@@ -137,7 +138,16 @@
                             </div>
 
                             {{-- Aksi --}}
-                            <div class="flex gap-2 shrink-0">
+                            <div class="flex flex-wrap gap-2 shrink-0">
+                                <button type="button"
+                                        data-live-url="{{ $r->publicReportUrl() }}"
+                                        @click="navigator.clipboard.writeText($event.currentTarget.dataset.liveUrl); copied = true; setTimeout(() => copied = false, 2000)"
+                                        class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg transition"
+                                        :class="copied ? 'text-emerald-700 bg-emerald-50' : 'text-teal-700 bg-teal-50 hover:bg-teal-100'">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 010 5.656l-3 3a4 4 0 01-5.656-5.656l1.5-1.5M10.172 13.828a4 4 0 010-5.656l3-3a4 4 0 015.656 5.656l-1.5 1.5"/></svg>
+                                    <span x-show="!copied">Salin Link Live</span>
+                                    <span x-show="copied" x-cloak>✓ Tersalin</span>
+                                </button>
                                 <a href="{{ route('laporan-relawan.show', $r) }}"
                                    class="px-3 py-2 text-xs font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg transition">Detail</a>
                                 <a href="{{ route('laporan-relawan.pdf', $r) }}"

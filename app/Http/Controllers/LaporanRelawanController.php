@@ -56,6 +56,9 @@ class LaporanRelawanController extends Controller
 
         $relawan = $query->paginate(15)->withQueryString();
 
+        // Pastikan tiap relawan di halaman ini punya token link Live Report
+        $relawan->getCollection()->each->ensurePublicReportToken();
+
         // Ringkasan agregat semua relawan (bukan hanya halaman ini)
         $agg = [
             'total_relawan' => User::where('role', 'relawan')->count(),
