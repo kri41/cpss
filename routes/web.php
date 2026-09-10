@@ -204,6 +204,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/lokasi-sasaran', [AsesmenPakarController::class, 'lokasiSasaran'])->name('lokasi');
         Route::get('/lokasi-sasaran/csv', [AsesmenPakarController::class, 'lokasiSasaranCsv'])->name('lokasi.csv');
         Route::get('/lokasi-sasaran/pdf', [AsesmenPakarController::class, 'lokasiSasaranPdf'])->name('lokasi.pdf');
+        Route::get('/borang/pdf', [AsesmenPakarController::class, 'borangPdf'])->name('borang.pdf');
 
         Route::get('/banding', [AsesmenPakarController::class, 'banding'])->name('banding');
         Route::get('/banding/csv', [AsesmenPakarController::class, 'bandingCsv'])->name('banding.csv');

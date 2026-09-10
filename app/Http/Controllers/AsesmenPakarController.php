@@ -83,6 +83,27 @@ class AsesmenPakarController extends Controller
     }
 
     /**
+     * Borang audit kosong — polos, tanpa logo/warna ("konvensional").
+     * Satu halaman per prasarana, diisi tangan oleh asesor di lapangan.
+     */
+    public function borangPdf(Request $request): Response
+    {
+        [$rows] = $this->lokasiQuery($request);
+        $jenisOlahraga = JenisOlahraga::where('aktif', true)->orderBy('nama')->get();
+        $ratingLabels = Prasarana::RATING_LABELS;
+        $kondisi = AsesmenPakar::KONDISI;
+        $akses = AsesmenPakar::AKSES;
+
+        $pdf = Pdf::loadView('asesmen-pakar.borang-pdf', compact('rows', 'jenisOlahraga', 'ratingLabels', 'kondisi', 'akses'))
+            ->setPaper('a4', 'portrait');
+
+        return response($pdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="borang-audit-kosong_'.now()->format('Ymd').'.pdf"',
+        ]);
+    }
+
+    /**
      * Query prasarana untuk daftar lokasi sasaran. HANYA identitas + lokasi +
      * kategori — TIDAK memuat kolom kondisi/aksesibilitas agar asesor blind.
      */
