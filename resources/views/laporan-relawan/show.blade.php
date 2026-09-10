@@ -302,18 +302,19 @@
                         <p class="text-xl font-extrabold text-gray-900 mt-0.5">{{ $riset['jumlah_entri'] }}</p>
                         <p class="text-[11px] text-gray-400">{{ $riset['jumlah_terukur'] }} terukur &middot; {{ $riset['jumlah_estimasi'] }} estimasi</p>
                     </div>
-                    <div class="rounded-xl bg-gray-50 border border-gray-100 p-3">
-                        <p class="text-[11px] text-gray-500 uppercase tracking-wide">Total Durasi Input</p>
-                        <p class="text-xl font-extrabold text-gray-900 mt-0.5">{{ $fmtMenit($riset['total_detik']) }}</p>
+                    <div class="rounded-xl bg-blue-50 border border-blue-100 p-3">
+                        <p class="text-[11px] text-blue-600 uppercase tracking-wide">Total Durasi Input</p>
+                        <p class="text-xl font-extrabold text-blue-800 mt-0.5">{{ $fmtMenit($riset['total_detik']) }}</p>
+                        <p class="text-[11px] text-blue-400">jumlah durasi semua formulir</p>
                     </div>
                     <div class="rounded-xl bg-gray-50 border border-gray-100 p-3">
                         <p class="text-[11px] text-gray-500 uppercase tracking-wide">Rata-rata / Entri</p>
                         <p class="text-xl font-extrabold text-gray-900 mt-0.5">{{ $fmtMenit($riset['rata_detik']) }}</p>
                     </div>
-                    <div class="rounded-xl bg-blue-50 border border-blue-100 p-3">
-                        <p class="text-[11px] text-blue-600 uppercase tracking-wide">Total Alur Kerja</p>
-                        <p class="text-xl font-extrabold text-blue-800 mt-0.5">{{ $fmtMenit($riset['workflow_detik']) }}</p>
-                        <p class="text-[11px] text-blue-400">entri pertama → laporan terakhir</p>
+                    <div class="rounded-xl bg-gray-50 border border-gray-100 p-3">
+                        <p class="text-[11px] text-gray-500 uppercase tracking-wide">Total Alur Kerja</p>
+                        <p class="text-xl font-extrabold text-gray-900 mt-0.5">{{ $riset['workflow_detik'] ? $fmtMenit($riset['workflow_detik']) : '—' }}</p>
+                        <p class="text-[11px] text-gray-400">{{ $riset['workflow_detik'] ? 'entri pertama → laporan (1 sesi)' : 'laporan belum dibuat dalam 1 sesi input' }}</p>
                     </div>
                 </div>
 

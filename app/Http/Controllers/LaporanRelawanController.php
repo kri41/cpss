@@ -211,7 +211,9 @@ class LaporanRelawanController extends Controller
     {
         $relawan = User::where('role', 'relawan')->orderBy('name')->get();
 
-        $baris = $relawan->map(function (User $u) {
+        $menit = fn ($d) => $d !== null && $d !== '' ? number_format($d / 60, 2, '.', '') : '';
+
+        $baris = $relawan->map(function (User $u) use ($menit) {
             $d = $this->report->durasi($u);
 
             return [
@@ -221,20 +223,23 @@ class LaporanRelawanController extends Controller
                 $d['jumlah_terukur'],
                 $d['jumlah_estimasi'],
                 $d['total_detik'],
-                number_format($d['total_detik'] / 60, 2, '.', ''),
+                $menit($d['total_detik']),
                 $d['rata_detik'],
+                $d['input_span_detik'],
+                $menit($d['input_span_detik']),
                 $d['entri_pertama_at']?->format('Y-m-d H:i:s'),
                 $d['entri_terakhir_at']?->format('Y-m-d H:i:s'),
                 $d['laporan_terakhir_at']?->format('Y-m-d H:i:s'),
                 $d['workflow_detik'] ?? '',
-                $d['workflow_detik'] ? number_format($d['workflow_detik'] / 60, 2, '.', '') : '',
+                $menit($d['workflow_detik']),
             ];
         });
 
         return $this->streamCsv('riset_rekap-per-relawan_'.now()->format('Ymd-Hi').'.csv',
             ['relawan', 'email', 'jumlah_entri', 'entri_terukur', 'entri_estimasi',
                 'total_durasi_input_detik', 'total_durasi_input_menit', 'rata2_per_entri_detik',
-                'entri_pertama', 'entri_terakhir', 'laporan_terakhir',
+                'rentang_input_detik', 'rentang_input_menit',
+                'entri_pertama', 'entri_terakhir', 'laporan_terakhir_sesi',
                 'total_alur_kerja_detik', 'total_alur_kerja_menit'],
             $baris
         );
@@ -264,9 +269,9 @@ class LaporanRelawanController extends Controller
         return response()->streamDownload(function () use ($header, $rows) {
             $out = fopen('php://output', 'w');
             fwrite($out, "\xEF\xBB\xBF"); // BOM agar Excel membaca UTF-8
-            fputcsv($out, $header);
+            fputcsv($out, $header, ',', '"', '');
             foreach ($rows as $row) {
-                fputcsv($out, $row);
+                fputcsv($out, $row, ',', '"', '');
             }
             fclose($out);
         }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);

@@ -133,26 +133,47 @@ class RelawanReportService
 
         $entriPertama = $entri->first()?->mulai_input_at;
         $entriTerakhir = $entri->last()?->selesai_input_at;
-        $laporanTerakhir = $laporan->last()?->dibuat_at;
 
-        $workflowDetik = ($entriPertama && $laporanTerakhir && $laporanTerakhir->gt($entriPertama))
-            ? $entriPertama->diffInSeconds($laporanTerakhir)
+        // Rentang fase input (entri pertama dibuka -> entri terakhir disimpan)
+        $inputSpanDetik = ($entriPertama && $entriTerakhir && $entriTerakhir->gt($entriPertama))
+            ? (int) round($entriPertama->diffInSeconds($entriTerakhir, false))
+            : $entri->sum('durasi_detik');
+
+        // "Total alur kerja" hanya bermakna bila SELURUH proses (entri pertama →
+        // laporan) berada dalam satu sesi kerja: laporan <= 6 jam setelah entri
+        // terakhir, dan rentang total <= 8 jam. Kalau tidak, dianggap null.
+        $laporanSesi = $entriTerakhir
+            ? $laporan->filter(fn ($l) => $l->dibuat_at
+                && $l->dibuat_at->gte($entriTerakhir)
+                && abs($l->dibuat_at->diffInHours($entriTerakhir, false)) <= 6)
+            : collect();
+        $laporanTerakhir = $laporanSesi->last()?->dibuat_at;
+
+        $workflowDetik = ($entriPertama && $laporanTerakhir)
+            ? (int) round($entriPertama->diffInSeconds($laporanTerakhir, false))
             : null;
+        if ($workflowDetik !== null && ($workflowDetik <= 0 || $workflowDetik > 8 * 3600)) {
+            $workflowDetik = null;
+            $laporanTerakhir = null;
+        }
 
         return [
             'entri' => $entri,
             'nama' => $nama,
             'laporan' => $laporan,
+            'laporan_sesi' => $laporanSesi->values(),
             'per_kategori' => $perKategori,
             'jumlah_entri' => $entri->count(),
             'total_detik' => (int) $entri->sum('durasi_detik'),
             'rata_detik' => $entri->count() ? (int) round($entri->avg('durasi_detik')) : 0,
+            'input_span_detik' => (int) $inputSpanDetik,
             'jumlah_terukur' => $entri->where('sumber', 'terukur')->count(),
             'jumlah_estimasi' => $entri->where('sumber', 'estimasi')->count(),
             'entri_pertama_at' => $entriPertama,
             'entri_terakhir_at' => $entriTerakhir,
             'laporan_terakhir_at' => $laporanTerakhir,
             'workflow_detik' => $workflowDetik,
+            'render_ms_terakhir' => $laporanSesi->last()?->render_ms ?? $laporan->last()?->render_ms,
         ];
     }
 }

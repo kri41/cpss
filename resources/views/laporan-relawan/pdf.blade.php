@@ -329,10 +329,10 @@
         <span class="count">{{ $riset['jumlah_entri'] }} entri &middot; {{ $riset['jumlah_terukur'] }} terukur</span>
     </div>
     <div class="kpi-row" style="margin-top:6px">
-        <div class="kpi"><div class="kpi-num">{{ $fmtM($riset['total_detik']) }}</div><div class="kpi-label">Total Durasi Input</div><div class="kpi-sub">&nbsp;</div></div>
+        <div class="kpi accent"><div class="kpi-num">{{ $fmtM($riset['total_detik']) }}</div><div class="kpi-label">Total Durasi Input</div><div class="kpi-sub">&nbsp;</div></div>
         <div class="kpi"><div class="kpi-num">{{ $fmtM($riset['rata_detik']) }}</div><div class="kpi-label">Rata-rata / Entri</div><div class="kpi-sub">&nbsp;</div></div>
-        <div class="kpi accent"><div class="kpi-num">{{ $fmtM($riset['workflow_detik']) }}</div><div class="kpi-label">Total Alur Kerja</div><div class="kpi-sub">entri 1 &rarr; laporan akhir</div></div>
-        <div class="kpi"><div class="kpi-num">{{ $riset['jumlah_estimasi'] }}</div><div class="kpi-label">Entri Estimasi</div><div class="kpi-sub">&nbsp;</div></div>
+        <div class="kpi"><div class="kpi-num">{{ $riset['workflow_detik'] ? $fmtM($riset['workflow_detik']) : '-' }}</div><div class="kpi-label">Total Alur Kerja</div><div class="kpi-sub">1 sesi input+laporan</div></div>
+        <div class="kpi"><div class="kpi-num">{{ $riset['jumlah_terukur'] }}/{{ $riset['jumlah_entri'] }}</div><div class="kpi-label">Entri Terukur</div><div class="kpi-sub">sisanya estimasi</div></div>
     </div>
     @if($riset['entri']->isNotEmpty())
     <table class="data">
