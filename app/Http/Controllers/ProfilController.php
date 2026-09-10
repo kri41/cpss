@@ -9,6 +9,7 @@ use App\Models\Partisipasi;
 use App\Models\PointTransaction;
 use App\Models\Prasarana;
 use App\Models\User;
+use App\Support\RisetLogger;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
@@ -81,12 +82,18 @@ class ProfilController extends Controller
             'partisipasi' => Partisipasi::where('user_id', $user->id)->latest()->get(),
         };
 
-        $pdf = Pdf::loadView('profil.laporan-pdf', compact('user', 'judul', 'jenis', 'items'))
+        $t0 = hrtime(true);
+        $content = Pdf::loadView('profil.laporan-pdf', compact('user', 'judul', 'jenis', 'items'))
             ->setPaper('a4', 'portrait')
-            ->setOption('isPhpEnabled', true);
+            ->setOption('isPhpEnabled', true)
+            ->output();
+        RisetLogger::catatLaporan($jenis, 'pdf', $user->id, (hrtime(true) - $t0) / 1e6);
 
         $filename = $jenis.'_'.str_replace(' ', '_', $user->name).'_'.now()->format('Ymd').'.pdf';
 
-        return $pdf->download($filename);
+        return response($content, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+        ]);
     }
 }

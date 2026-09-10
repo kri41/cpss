@@ -10,6 +10,7 @@ use App\Models\Pengumuman;
 use App\Models\Prasarana;
 use App\Models\Talenta;
 use App\Models\TenagaAhli;
+use App\Support\RisetLogger;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Response;
@@ -105,14 +106,20 @@ class DashboardController extends Controller
             'partisipasi_validated' => $partisipasi->where('status_validasi', 'validated')->count(),
         ];
 
-        $pdf = Pdf::loadView('dashboard.laporan-pdf', compact('user', 'isRelawan', 'stats', 'prasarana', 'events', 'clubs', 'partisipasi'))
+        $t0 = hrtime(true);
+        $content = Pdf::loadView('dashboard.laporan-pdf', compact('user', 'isRelawan', 'stats', 'prasarana', 'events', 'clubs', 'partisipasi'))
             ->setPaper('a4', 'portrait')
-            ->setOption('isPhpEnabled', true);
+            ->setOption('isPhpEnabled', true)
+            ->output();
+        RisetLogger::catatLaporan('dashboard', 'pdf', $isRelawan ? $user->id : null, (hrtime(true) - $t0) / 1e6);
 
         $label = $isRelawan ? str_replace(' ', '_', $user->name) : 'semua_data';
         $filename = 'laporan_dataraga_'.$label.'_'.now()->format('Ymd').'.pdf';
 
-        return $pdf->download($filename);
+        return response($content, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+        ]);
     }
 
     public function laporanCsv(): StreamedResponse
@@ -126,6 +133,8 @@ class DashboardController extends Controller
         $events = $baseScope(Event::with('user')->latest())->get();
         $clubs = $baseScope(Club::with(['user', 'jenisOlahraga'])->latest())->get();
         $partisipasi = $baseScope(Partisipasi::with('user')->latest())->get();
+
+        RisetLogger::catatLaporan('dashboard', 'csv', $isRelawan ? $user->id : null);
 
         $label = $isRelawan ? str_replace(' ', '_', $user->name) : 'semua_data';
         $filename = 'laporan_dataraga_'.$label.'_'.now()->format('Ymd').'.csv';

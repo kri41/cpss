@@ -11,6 +11,7 @@
                 <div class="p-6 text-gray-900">
                     <form method="POST" action="{{ route('events.store') }}" enctype="multipart/form-data">
                         @csrf
+                        @include('partials.waktu-mulai-input')
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <!-- Nama Event -->

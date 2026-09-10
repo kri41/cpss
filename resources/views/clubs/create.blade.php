@@ -12,6 +12,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <form method="POST" action="{{ route('clubs.store') }}" enctype="multipart/form-data" class="space-y-6">
                 @csrf
+                @include('partials.waktu-mulai-input')
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <!-- Informasi Dasar -->

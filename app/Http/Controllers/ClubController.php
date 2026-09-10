@@ -4,16 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Concerns\HandlesChangeRequests;
 use App\Models\Club;
+use App\Models\JadwalLatihan;
 use App\Models\JenisOlahraga;
 use App\Models\PointTransaction;
 use App\Models\Prasarana;
-use App\Models\JadwalLatihan;
 use App\Models\UserNotification;
 use App\Services\GamificationService;
+use App\Support\RisetLogger;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
-use Illuminate\Http\RedirectResponse;
 
 class ClubController extends Controller
 {
@@ -32,7 +33,7 @@ class ClubController extends Controller
             ->latest();
 
         // Guest (publik) hanya lihat yang sudah divalidasi
-        if (!auth()->check()) {
+        if (! auth()->check()) {
             $query->validated();
         }
 
@@ -43,7 +44,7 @@ class ClubController extends Controller
 
         // Filter: search nama
         if ($request->filled('search')) {
-            $query->where('nama_club', 'like', '%' . $request->search . '%');
+            $query->where('nama_club', 'like', '%'.$request->search.'%');
         }
 
         // Filter: kabupaten
@@ -69,13 +70,14 @@ class ClubController extends Controller
             $user->scopeToOwnWilayah($filterQuery);
         }
         $kabupatenList = (clone $filterQuery)->distinct()->orderBy('kabupaten')->pluck('kabupaten')->filter();
-        $kecamatanList = (clone $filterQuery)->when($request->filled('kabupaten'), fn($q) => $q->where('kabupaten', $request->kabupaten))->distinct()->orderBy('kecamatan')->pluck('kecamatan')->filter();
+        $kecamatanList = (clone $filterQuery)->when($request->filled('kabupaten'), fn ($q) => $q->where('kabupaten', $request->kabupaten))->distinct()->orderBy('kecamatan')->pluck('kecamatan')->filter();
 
         $totalClubs = (clone $query)->count();
         $activeClubs = (clone $query)->where('aktif', true)->count();
         $clubsWithPrasarana = (clone $query)->whereNotNull('prasarana_id')->count();
 
         $view = $isDashboard ? 'clubs.index-dashboard' : 'clubs.index';
+
         return view($view, compact('clubs', 'totalClubs', 'activeClubs', 'clubsWithPrasarana', 'kabupatenList', 'kecamatanList'));
     }
 
@@ -86,6 +88,7 @@ class ClubController extends Controller
     {
         $prasarana = Prasarana::with('jenisOlahraga')->get();
         $jenisOlahragaList = JenisOlahraga::where('aktif', true)->orderBy('nama')->get();
+
         return view('clubs.create', compact('prasarana', 'jenisOlahragaList'));
     }
 
@@ -122,6 +125,9 @@ class ClubController extends Controller
 
         $club = Club::create($validated);
 
+        // Riset: catat lama pengisian formulir
+        RisetLogger::catatEntri('clubs', $club->id, $club->user_id, $request->input('_mulai_input'));
+
         // Create default schedule if provided
         if ($request->has('jadwal')) {
             $this->createJadwal($club, $request->jadwal);
@@ -137,12 +143,13 @@ class ClubController extends Controller
     public function show(Club $club): View
     {
         $club->load(['user', 'prasarana.jenisOlahraga', 'jadwalLatihan']);
-        
+
         // Group schedules by day
         $jadwalByHari = $club->jadwalLatihan
             ->where('aktif', true)
-            ->sortBy(function($j) {
+            ->sortBy(function ($j) {
                 $days = ['Senin' => 1, 'Selasa' => 2, 'Rabu' => 3, 'Kamis' => 4, 'Jumat' => 5, 'Sabtu' => 6, 'Minggu' => 7];
+
                 return $days[$j->hari] ?? 8;
             })
             ->groupBy('hari');
@@ -155,7 +162,7 @@ class ClubController extends Controller
      */
     public function edit(Club $club): View
     {
-        if (!auth()->user()->canEdit($club)) {
+        if (! auth()->user()->canEdit($club)) {
             return view('clubs.request-edit', compact('club'));
         }
 
@@ -187,7 +194,7 @@ class ClubController extends Controller
      */
     public function update(Request $request, Club $club): RedirectResponse
     {
-        if (!auth()->user()->canEdit($club)) {
+        if (! auth()->user()->canEdit($club)) {
             abort(403, 'Anda tidak memiliki izin untuk mengedit club ini. Ajukan permintaan akses edit terlebih dahulu.');
         }
 
@@ -237,7 +244,7 @@ class ClubController extends Controller
      */
     public function destroy(Club $club): RedirectResponse
     {
-        if (!auth()->user()->canEdit($club)) {
+        if (! auth()->user()->canEdit($club)) {
             abort(403, 'Anda tidak memiliki izin untuk menghapus club ini.');
         }
 
@@ -257,7 +264,7 @@ class ClubController extends Controller
      */
     public function validateClub(Request $request, Club $club): RedirectResponse
     {
-        if (!auth()->user()->canValidate($club)) {
+        if (! auth()->user()->canValidate($club)) {
             abort(403, 'Anda tidak memiliki izin untuk memvalidasi club ini.');
         }
 
@@ -277,22 +284,23 @@ class ClubController extends Controller
 
         $msg = 'Club berhasil divalidasi.';
         if ($tx) {
-            $msg .= ' +' . $tx->poin . ' poin diberikan ke relawan.';
+            $msg .= ' +'.$tx->poin.' poin diberikan ke relawan.';
 
             UserNotification::create([
                 'user_id' => $club->user_id,
                 'type' => 'poin',
-                'title' => '+' . $tx->poin . ' Poin Diterima',
-                'message' => 'Club "' . $club->nama_club . '" telah divalidasi. Anda mendapatkan ' . $tx->poin . ' poin.',
+                'title' => '+'.$tx->poin.' Poin Diterima',
+                'message' => 'Club "'.$club->nama_club.'" telah divalidasi. Anda mendapatkan '.$tx->poin.' poin.',
                 'data' => ['related_type' => 'club', 'related_id' => $club->id, 'poin' => $tx->poin],
             ]);
         }
 
         $redirect = redirect()->route('dashboard.clubs')->with('success', $msg);
         if ($tx) {
-            $label = $tx->jenis_aksi === 'baru' ? 'Klub baru "' . $club->nama_club . '" divalidasi' : 'Update klub "' . $club->nama_club . '" divalidasi';
+            $label = $tx->jenis_aksi === 'baru' ? 'Klub baru "'.$club->nama_club.'" divalidasi' : 'Update klub "'.$club->nama_club.'" divalidasi';
             $redirect->with('poin_diperoleh', ['poin' => $tx->poin, 'label' => $label]);
         }
+
         return $redirect;
     }
 
@@ -301,7 +309,7 @@ class ClubController extends Controller
      */
     public function rejectClub(Request $request, Club $club): RedirectResponse
     {
-        if (!auth()->user()->canValidate($club)) {
+        if (! auth()->user()->canValidate($club)) {
             abort(403, 'Anda tidak memiliki izin untuk menolak club ini.');
         }
 
@@ -316,7 +324,7 @@ class ClubController extends Controller
             'user_id' => $club->user_id,
             'type' => 'validasi',
             'title' => 'Klub/Komunitas Butuh Perbaikan',
-            'message' => 'Data klub "' . $club->nama_club . '" perlu diperbaiki. Catatan admin: ' . $request->komentar_validasi,
+            'message' => 'Data klub "'.$club->nama_club.'" perlu diperbaiki. Catatan admin: '.$request->komentar_validasi,
             'data' => ['related_type' => 'club', 'related_id' => $club->id],
         ]);
 
@@ -329,7 +337,7 @@ class ClubController extends Controller
      */
     public function cancelValidateClub(Club $club): RedirectResponse
     {
-        if (!auth()->user()->isSuperAdmin()) {
+        if (! auth()->user()->isSuperAdmin()) {
             abort(403, 'Hanya Super Admin yang dapat membatalkan validasi.');
         }
 
@@ -357,7 +365,7 @@ class ClubController extends Controller
     private function createJadwal(Club $club, array $jadwalData): void
     {
         foreach ($jadwalData as $jadwal) {
-            if (!empty($jadwal['hari']) && !empty($jadwal['jam_mulai']) && !empty($jadwal['jam_selesai'])) {
+            if (! empty($jadwal['hari']) && ! empty($jadwal['jam_mulai']) && ! empty($jadwal['jam_selesai'])) {
                 JadwalLatihan::create([
                     'club_id' => $club->id,
                     'hari' => $jadwal['hari'],
@@ -370,4 +378,3 @@ class ClubController extends Controller
         }
     }
 }
-

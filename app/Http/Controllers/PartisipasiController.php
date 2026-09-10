@@ -3,14 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Http\Middleware\AuditLogger;
+use App\Models\JenisOlahraga;
 use App\Models\Kehadiran;
 use App\Models\Partisipasi;
 use App\Models\PointTransaction;
 use App\Models\UserNotification;
 use App\Services\GamificationService;
+use App\Support\RisetLogger;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
-use Illuminate\Http\RedirectResponse;
 
 class PartisipasiController extends Controller
 {
@@ -22,7 +24,7 @@ class PartisipasiController extends Controller
         $partisipasi = Partisipasi::with('user')
             ->latest()
             ->paginate(10);
-        
+
         return view('partisipasi.index', compact('partisipasi'));
     }
 
@@ -55,6 +57,9 @@ class PartisipasiController extends Controller
 
         $partisipasi = Partisipasi::create($validated);
 
+        // Riset: catat lama pengisian formulir
+        RisetLogger::catatEntri('partisipasi', $partisipasi->id, $partisipasi->user_id, $request->input('_mulai_input'));
+
         // Audit Log
         AuditLogger::logCreate('partisipasi', $partisipasi->id, $validated);
 
@@ -68,7 +73,8 @@ class PartisipasiController extends Controller
     public function show(Partisipasi $partisipasi): View
     {
         $partisipasi->load('kehadiran');
-        $jenisOlahraga = \App\Models\JenisOlahraga::where('aktif', true)->orderBy('nama')->pluck('nama');
+        $jenisOlahraga = JenisOlahraga::where('aktif', true)->orderBy('nama')->pluck('nama');
+
         return view('partisipasi.show', compact('partisipasi', 'jenisOlahraga'));
     }
 
@@ -77,7 +83,7 @@ class PartisipasiController extends Controller
      */
     public function edit(Partisipasi $partisipasi): View
     {
-        if (!auth()->user()->canEdit($partisipasi)) {
+        if (! auth()->user()->canEdit($partisipasi)) {
             abort(403, 'Anda tidak memiliki izin untuk mengedit data partisipasi ini.');
         }
 
@@ -89,7 +95,7 @@ class PartisipasiController extends Controller
      */
     public function update(Request $request, Partisipasi $partisipasi): RedirectResponse
     {
-        if (!auth()->user()->canEdit($partisipasi)) {
+        if (! auth()->user()->canEdit($partisipasi)) {
             abort(403, 'Anda tidak memiliki izin untuk mengedit data partisipasi ini.');
         }
 
@@ -121,7 +127,7 @@ class PartisipasiController extends Controller
      */
     public function destroy(Partisipasi $partisipasi): RedirectResponse
     {
-        if (!auth()->user()->canEdit($partisipasi)) {
+        if (! auth()->user()->canEdit($partisipasi)) {
             abort(403, 'Anda tidak memiliki izin untuk menghapus data partisipasi ini.');
         }
 
@@ -142,7 +148,7 @@ class PartisipasiController extends Controller
      */
     public function validatePartisipasi(Request $request, Partisipasi $partisipasi): RedirectResponse
     {
-        if (!auth()->user()->canValidate($partisipasi)) {
+        if (! auth()->user()->canValidate($partisipasi)) {
             abort(403, 'Anda tidak memiliki izin untuk memvalidasi data partisipasi ini.');
         }
 
@@ -165,21 +171,22 @@ class PartisipasiController extends Controller
 
         $msg = 'Data partisipasi berhasil divalidasi.';
         if ($tx) {
-            $msg .= ' +' . $tx->poin . ' poin diberikan ke relawan.';
+            $msg .= ' +'.$tx->poin.' poin diberikan ke relawan.';
 
             UserNotification::create([
                 'user_id' => $partisipasi->user_id,
                 'type' => 'poin',
-                'title' => '+' . $tx->poin . ' Poin Diterima',
-                'message' => 'Laporan partisipasi di "' . ($partisipasi->lokasi_observasi ?? '-') . '" telah divalidasi. Anda mendapatkan ' . $tx->poin . ' poin.',
+                'title' => '+'.$tx->poin.' Poin Diterima',
+                'message' => 'Laporan partisipasi di "'.($partisipasi->lokasi_observasi ?? '-').'" telah divalidasi. Anda mendapatkan '.$tx->poin.' poin.',
                 'data' => ['related_type' => 'partisipasi', 'related_id' => $partisipasi->id, 'poin' => $tx->poin],
             ]);
         }
 
         $redirect = redirect()->route('partisipasi.index')->with('success', $msg);
         if ($tx) {
-            $redirect->with('poin_diperoleh', ['poin' => $tx->poin, 'label' => 'Partisipasi di "' . ($partisipasi->lokasi_observasi ?? '-') . '" divalidasi']);
+            $redirect->with('poin_diperoleh', ['poin' => $tx->poin, 'label' => 'Partisipasi di "'.($partisipasi->lokasi_observasi ?? '-').'" divalidasi']);
         }
+
         return $redirect;
     }
 
@@ -188,7 +195,7 @@ class PartisipasiController extends Controller
      */
     public function cancelValidatePartisipasi(Partisipasi $partisipasi): RedirectResponse
     {
-        if (!auth()->user()->isSuperAdmin()) {
+        if (! auth()->user()->isSuperAdmin()) {
             abort(403, 'Hanya Super Admin yang dapat membatalkan validasi.');
         }
 
@@ -283,6 +290,7 @@ class PartisipasiController extends Controller
     public function showQr(Partisipasi $partisipasi): View
     {
         $qrUrl = route('partisipasi.daftar', $partisipasi);
+
         return view('partisipasi.qr', compact('partisipasi', 'qrUrl'));
     }
 
@@ -291,7 +299,7 @@ class PartisipasiController extends Controller
      */
     public function daftarPublik(Request $request, Partisipasi $partisipasi)
     {
-        $jenisOlahraga = \App\Models\JenisOlahraga::where('aktif', true)->orderBy('nama')->pluck('nama');
+        $jenisOlahraga = JenisOlahraga::where('aktif', true)->orderBy('nama')->pluck('nama');
         if ($request->isMethod('get')) {
             return view('partisipasi.daftar', compact('partisipasi', 'jenisOlahraga'));
         }

@@ -8,11 +8,12 @@ use App\Models\Event;
 use App\Models\PointTransaction;
 use App\Models\UserNotification;
 use App\Services\GamificationService;
+use App\Support\RisetLogger;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
-use Illuminate\Http\RedirectResponse;
 
 class EventController extends Controller
 {
@@ -31,7 +32,7 @@ class EventController extends Controller
             ->latest();
 
         // Guest (publik) hanya lihat yang sudah divalidasi
-        if (!auth()->check()) {
+        if (! auth()->check()) {
             $query->validated();
         }
 
@@ -42,7 +43,7 @@ class EventController extends Controller
 
         // Filter: search nama
         if ($request->filled('search')) {
-            $query->where('nama_event', 'like', '%' . $request->search . '%');
+            $query->where('nama_event', 'like', '%'.$request->search.'%');
         }
 
         // Filter: kabupaten
@@ -68,10 +69,11 @@ class EventController extends Controller
             $user->scopeToOwnWilayah($filterQuery);
         }
         $kabupatenList = (clone $filterQuery)->distinct()->orderBy('kabupaten')->pluck('kabupaten')->filter();
-        $kecamatanList = (clone $filterQuery)->when($request->filled('kabupaten'), fn($q) => $q->where('kabupaten', $request->kabupaten))->distinct()->orderBy('kecamatan')->pluck('kecamatan')->filter();
+        $kecamatanList = (clone $filterQuery)->when($request->filled('kabupaten'), fn ($q) => $q->where('kabupaten', $request->kabupaten))->distinct()->orderBy('kecamatan')->pluck('kecamatan')->filter();
         $tingkatList = ['Desa/Kelurahan', 'Kecamatan', 'Kabupaten/Kota'];
 
         $view = $isDashboard ? 'events.index-dashboard' : 'events.index';
+
         return view($view, compact('events', 'kabupatenList', 'kecamatanList', 'tingkatList'));
     }
 
@@ -110,6 +112,9 @@ class EventController extends Controller
 
         $event = Event::create($validated);
 
+        // Riset: catat lama pengisian formulir
+        RisetLogger::catatEntri('events', $event->id, $event->user_id, $request->input('_mulai_input'));
+
         // Audit Log
         AuditLogger::logCreate('events', $event->id, $validated);
 
@@ -142,7 +147,7 @@ class EventController extends Controller
      */
     public function edit(Event $event): View
     {
-        if (!auth()->user()->canEdit($event)) {
+        if (! auth()->user()->canEdit($event)) {
             return view('events.request-edit', compact('event'));
         }
 
@@ -170,7 +175,7 @@ class EventController extends Controller
      */
     public function update(Request $request, Event $event): RedirectResponse
     {
-        if (!auth()->user()->canEdit($event)) {
+        if (! auth()->user()->canEdit($event)) {
             abort(403, 'Anda tidak memiliki izin untuk mengedit event ini. Ajukan permintaan akses edit terlebih dahulu.');
         }
 
@@ -216,7 +221,7 @@ class EventController extends Controller
      */
     public function destroy(Event $event): RedirectResponse
     {
-        if (!auth()->user()->isAdmin() && !auth()->user()->canEdit($event)) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->canEdit($event)) {
             abort(403, 'Anda tidak memiliki izin untuk menghapus event ini.');
         }
 
@@ -241,7 +246,7 @@ class EventController extends Controller
      */
     public function validateEvent(Request $request, Event $event): RedirectResponse
     {
-        if (!auth()->user()->canValidate($event)) {
+        if (! auth()->user()->canValidate($event)) {
             abort(403, 'Anda tidak memiliki izin untuk memvalidasi event ini.');
         }
 
@@ -260,21 +265,22 @@ class EventController extends Controller
 
         $msg = 'Data event berhasil divalidasi.';
         if ($tx) {
-            $msg .= ' +' . $tx->poin . ' poin diberikan ke relawan.';
+            $msg .= ' +'.$tx->poin.' poin diberikan ke relawan.';
 
             UserNotification::create([
                 'user_id' => $event->user_id,
                 'type' => 'poin',
-                'title' => '+' . $tx->poin . ' Poin Diterima',
-                'message' => 'Event "' . $event->nama_event . '" telah divalidasi. Anda mendapatkan ' . $tx->poin . ' poin.',
+                'title' => '+'.$tx->poin.' Poin Diterima',
+                'message' => 'Event "'.$event->nama_event.'" telah divalidasi. Anda mendapatkan '.$tx->poin.' poin.',
                 'data' => ['related_type' => 'event', 'related_id' => $event->id, 'poin' => $tx->poin],
             ]);
         }
 
         $redirect = redirect()->route('dashboard.events')->with('success', $msg);
         if ($tx) {
-            $redirect->with('poin_diperoleh', ['poin' => $tx->poin, 'label' => 'Event "' . $event->nama_event . '" divalidasi']);
+            $redirect->with('poin_diperoleh', ['poin' => $tx->poin, 'label' => 'Event "'.$event->nama_event.'" divalidasi']);
         }
+
         return $redirect;
     }
 
@@ -283,7 +289,7 @@ class EventController extends Controller
      */
     public function rejectEvent(Request $request, Event $event): RedirectResponse
     {
-        if (!auth()->user()->canValidate($event)) {
+        if (! auth()->user()->canValidate($event)) {
             abort(403, 'Anda tidak memiliki izin untuk menolak event ini.');
         }
 
@@ -298,7 +304,7 @@ class EventController extends Controller
             'user_id' => $event->user_id,
             'type' => 'validasi',
             'title' => 'Event Butuh Perbaikan',
-            'message' => 'Event "' . $event->nama_event . '" perlu diperbaiki. Catatan admin: ' . $request->komentar_validasi,
+            'message' => 'Event "'.$event->nama_event.'" perlu diperbaiki. Catatan admin: '.$request->komentar_validasi,
             'data' => ['related_type' => 'event', 'related_id' => $event->id],
         ]);
 
@@ -311,7 +317,7 @@ class EventController extends Controller
      */
     public function cancelValidateEvent(Event $event): RedirectResponse
     {
-        if (!auth()->user()->isSuperAdmin()) {
+        if (! auth()->user()->isSuperAdmin()) {
             abort(403, 'Hanya Super Admin yang dapat membatalkan validasi.');
         }
 
@@ -336,7 +342,7 @@ class EventController extends Controller
     /**
      * Peta choropleth distribusi event per provinsi.
      */
-    public function peta(Request $request): \Illuminate\View\View
+    public function peta(Request $request): View
     {
         // Jumlah event tervalidasi per kode provinsi
         $provinsiCounts = Event::validated()
@@ -349,9 +355,9 @@ class EventController extends Controller
         $maxCount = $provinsiCounts->max() ?: 1;
 
         // Bila provinsi dipilih, ambil event-nya
-        $selectedKode     = $request->get('provinsi');
-        $selectedNama     = $request->get('nama', '');
-        $selectedEvents   = collect();
+        $selectedKode = $request->get('provinsi');
+        $selectedNama = $request->get('nama', '');
+        $selectedEvents = collect();
 
         if ($selectedKode) {
             $selectedEvents = Event::validated()
@@ -361,7 +367,7 @@ class EventController extends Controller
         }
 
         $isDashboard = request()->is('dashboard/*');
-        $layout      = $isDashboard ? 'layouts.app' : 'layouts.public';
+        $layout = $isDashboard ? 'layouts.app' : 'layouts.public';
 
         return view('events.peta', compact(
             'provinsiCounts', 'maxCount',

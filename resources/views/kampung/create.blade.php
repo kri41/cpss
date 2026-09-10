@@ -25,6 +25,7 @@
 
         <form method="POST" action="{{ route('kampung.store') }}" class="p-5 space-y-4">
             @csrf
+            @include('partials.waktu-mulai-input')
 
             @if($errors->any())
             <div class="p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">

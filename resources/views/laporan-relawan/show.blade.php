@@ -277,6 +277,98 @@
             </div>
         </div>
 
+        {{-- ===== DURASI KERJA (RISET) ===== --}}
+        @isset($riset)
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <div>
+                    <h2 class="text-base font-bold text-gray-900">Durasi Kerja — Data Riset</h2>
+                    <p class="text-xs text-gray-500 mt-0.5">Pengukuran waktu untuk pembandingan alur kerja (konvensional vs aplikasi).</p>
+                </div>
+                <div class="flex gap-2">
+                    <a href="{{ route('laporan-relawan.riset.entri') }}" class="px-3 py-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition">CSV Durasi Entri</a>
+                    <a href="{{ route('laporan-relawan.riset.rekap') }}" class="px-3 py-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition">CSV Rekap</a>
+                </div>
+            </div>
+
+            <div class="p-6 space-y-5">
+                @php
+                    $fmtMenit = fn ($detik) => $detik ? number_format($detik / 60, 1) . ' menit' : '—';
+                @endphp
+
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                    <div class="rounded-xl bg-gray-50 border border-gray-100 p-3">
+                        <p class="text-[11px] text-gray-500 uppercase tracking-wide">Jumlah Entri</p>
+                        <p class="text-xl font-extrabold text-gray-900 mt-0.5">{{ $riset['jumlah_entri'] }}</p>
+                        <p class="text-[11px] text-gray-400">{{ $riset['jumlah_terukur'] }} terukur &middot; {{ $riset['jumlah_estimasi'] }} estimasi</p>
+                    </div>
+                    <div class="rounded-xl bg-gray-50 border border-gray-100 p-3">
+                        <p class="text-[11px] text-gray-500 uppercase tracking-wide">Total Durasi Input</p>
+                        <p class="text-xl font-extrabold text-gray-900 mt-0.5">{{ $fmtMenit($riset['total_detik']) }}</p>
+                    </div>
+                    <div class="rounded-xl bg-gray-50 border border-gray-100 p-3">
+                        <p class="text-[11px] text-gray-500 uppercase tracking-wide">Rata-rata / Entri</p>
+                        <p class="text-xl font-extrabold text-gray-900 mt-0.5">{{ $fmtMenit($riset['rata_detik']) }}</p>
+                    </div>
+                    <div class="rounded-xl bg-blue-50 border border-blue-100 p-3">
+                        <p class="text-[11px] text-blue-600 uppercase tracking-wide">Total Alur Kerja</p>
+                        <p class="text-xl font-extrabold text-blue-800 mt-0.5">{{ $fmtMenit($riset['workflow_detik']) }}</p>
+                        <p class="text-[11px] text-blue-400">entri pertama → laporan terakhir</p>
+                    </div>
+                </div>
+
+                @if($riset['entri']->isNotEmpty())
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm">
+                        <thead class="bg-gray-50 text-[11px] text-gray-500 uppercase tracking-wide">
+                            <tr>
+                                <th class="px-4 py-2.5 text-left w-8">#</th>
+                                <th class="px-3 py-2.5 text-left">Jenis</th>
+                                <th class="px-3 py-2.5 text-left">Nama Entri</th>
+                                <th class="px-3 py-2.5 text-left">Mulai Input</th>
+                                <th class="px-3 py-2.5 text-left">Selesai (Simpan)</th>
+                                <th class="px-3 py-2.5 text-left">Durasi</th>
+                                <th class="px-3 py-2.5 text-left">Sumber</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            @foreach($riset['entri'] as $i => $e)
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-4 py-2.5 text-gray-400">{{ $i + 1 }}</td>
+                                    <td class="px-3 py-2.5 text-gray-600">{{ \App\Models\DurasiEntri::LABEL[$e->entri_type] ?? $e->entri_type }}</td>
+                                    <td class="px-3 py-2.5 font-medium text-gray-900">{{ $riset['nama'][$e->id] ?? '-' }}</td>
+                                    <td class="px-3 py-2.5 text-gray-500 whitespace-nowrap">{{ $e->mulai_input_at?->timezone('Asia/Jakarta')->format('d/m/y H:i:s') }}</td>
+                                    <td class="px-3 py-2.5 text-gray-500 whitespace-nowrap">{{ $e->selesai_input_at?->timezone('Asia/Jakarta')->format('d/m/y H:i:s') }}</td>
+                                    <td class="px-3 py-2.5 font-semibold text-gray-900 whitespace-nowrap">{{ number_format($e->durasi_detik) }} dtk <span class="text-gray-400 font-normal">({{ number_format($e->durasi_detik / 60, 1) }} mnt)</span></td>
+                                    <td class="px-3 py-2.5">
+                                        <span class="inline-flex px-2 py-0.5 rounded-full text-[11px] font-semibold {{ $e->sumber === 'terukur' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700' }}">{{ $e->sumber }}</span>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                @else
+                <p class="text-sm text-gray-400 italic">Belum ada data durasi. Data akan terekam otomatis saat relawan menambah entri baru; data lama bisa diisi estimasi via <code class="text-xs">php artisan cpss:backfill-durasi-entri</code>.</p>
+                @endif
+
+                @if($riset['laporan']->isNotEmpty())
+                <div>
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Riwayat Pembuatan Laporan</p>
+                    <div class="flex flex-wrap gap-2">
+                        @foreach($riset['laporan'] as $lap)
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs bg-gray-50 border border-gray-200 text-gray-700">
+                                {{ $lap->jenis }} ({{ $lap->format }})
+                                <span class="text-gray-400">{{ $lap->dibuat_at?->timezone('Asia/Jakarta')->format('d/m/y H:i') }}</span>
+                            </span>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
+            </div>
+        </div>
+        @endisset
+
     </div>
 </div>
 @endsection

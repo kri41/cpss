@@ -321,6 +321,54 @@
     @endif
 </div>
 
+{{-- ===== DURASI KERJA (RISET) ===== --}}
+@isset($riset)
+@php $fmtM = fn ($d) => $d ? number_format($d / 60, 1) . ' mnt' : '-'; @endphp
+<div class="section">
+    <div class="section-head">Durasi Kerja &mdash; Data Riset
+        <span class="count">{{ $riset['jumlah_entri'] }} entri &middot; {{ $riset['jumlah_terukur'] }} terukur</span>
+    </div>
+    <div class="kpi-row" style="margin-top:6px">
+        <div class="kpi"><div class="kpi-num">{{ $fmtM($riset['total_detik']) }}</div><div class="kpi-label">Total Durasi Input</div><div class="kpi-sub">&nbsp;</div></div>
+        <div class="kpi"><div class="kpi-num">{{ $fmtM($riset['rata_detik']) }}</div><div class="kpi-label">Rata-rata / Entri</div><div class="kpi-sub">&nbsp;</div></div>
+        <div class="kpi accent"><div class="kpi-num">{{ $fmtM($riset['workflow_detik']) }}</div><div class="kpi-label">Total Alur Kerja</div><div class="kpi-sub">entri 1 &rarr; laporan akhir</div></div>
+        <div class="kpi"><div class="kpi-num">{{ $riset['jumlah_estimasi'] }}</div><div class="kpi-label">Entri Estimasi</div><div class="kpi-sub">&nbsp;</div></div>
+    </div>
+    @if($riset['entri']->isNotEmpty())
+    <table class="data">
+        <thead><tr>
+            <th class="col-no">#</th>
+            <th style="width:74px">Jenis</th>
+            <th>Nama Entri</th>
+            <th style="width:82px">Mulai</th>
+            <th style="width:82px">Selesai</th>
+            <th class="num" style="width:56px">Durasi</th>
+            <th style="width:48px">Sumber</th>
+        </tr></thead>
+        <tbody>
+        @foreach($riset['entri'] as $i => $e)
+            <tr>
+                <td class="col-no">{{ $i + 1 }}</td>
+                <td>{{ \App\Models\DurasiEntri::LABEL[$e->entri_type] ?? $e->entri_type }}</td>
+                <td>{{ $riset['nama'][$e->id] ?? '-' }}</td>
+                <td>{{ $e->mulai_input_at?->timezone('Asia/Jakarta')->format('d/m H:i') }}</td>
+                <td>{{ $e->selesai_input_at?->timezone('Asia/Jakarta')->format('d/m H:i') }}</td>
+                <td class="num">{{ number_format($e->durasi_detik / 60, 1) }} m</td>
+                <td><span class="{{ $e->sumber === 'terukur' ? 'pill pill-green' : 'pill pill-amber' }}">{{ $e->sumber }}</span></td>
+            </tr>
+        @endforeach
+        </tbody>
+    </table>
+    @else
+        <div class="empty">Belum ada data durasi.</div>
+    @endif
+    <div class="note">
+        "Terukur" = tercatat langsung dari sistem (waktu formulir dibuka &rarr; disimpan).
+        "Estimasi" = perkiraan untuk data lama sebelum instrumentasi.
+    </div>
+</div>
+@endisset
+
 @include('pdf.partials.footer-script')
 
 </body>

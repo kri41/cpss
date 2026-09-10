@@ -9,10 +9,11 @@ use App\Models\PointTransaction;
 use App\Models\Prasarana;
 use App\Models\UserNotification;
 use App\Services\GamificationService;
+use App\Support\RisetLogger;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
-use Illuminate\Http\RedirectResponse;
 
 class PrasaranaController extends Controller
 {
@@ -31,7 +32,7 @@ class PrasaranaController extends Controller
             ->latest();
 
         // Guest (publik) hanya lihat yang sudah divalidasi
-        if (!auth()->check()) {
+        if (! auth()->check()) {
             $query->validated();
         }
 
@@ -42,7 +43,7 @@ class PrasaranaController extends Controller
 
         // Filter: search nama
         if ($request->filled('search')) {
-            $query->where('nama_fasilitas', 'like', '%' . $request->search . '%');
+            $query->where('nama_fasilitas', 'like', '%'.$request->search.'%');
         }
 
         // Filter: kabupaten
@@ -68,10 +69,11 @@ class PrasaranaController extends Controller
             $user->scopeToOwnWilayah($filterQuery);
         }
         $kabupatenList = (clone $filterQuery)->distinct()->orderBy('kabupaten')->pluck('kabupaten')->filter();
-        $kecamatanList = (clone $filterQuery)->when($request->filled('kabupaten'), fn($q) => $q->where('kabupaten', $request->kabupaten))->distinct()->orderBy('kecamatan')->pluck('kecamatan')->filter();
+        $kecamatanList = (clone $filterQuery)->when($request->filled('kabupaten'), fn ($q) => $q->where('kabupaten', $request->kabupaten))->distinct()->orderBy('kecamatan')->pluck('kecamatan')->filter();
         $kategoriList = JenisOlahraga::where('aktif', true)->orderBy('nama')->get();
 
         $view = $isDashboard ? 'prasarana.index-dashboard' : 'prasarana.index';
+
         return view($view, compact('prasarana', 'kabupatenList', 'kecamatanList', 'kategoriList'));
     }
 
@@ -143,10 +145,13 @@ class PrasaranaController extends Controller
                 $fotoPaths[] = $file->store('prasarana', 'public');
             }
         }
-        $validated['foto_tambahan'] = !empty($fotoPaths) ? $fotoPaths : null;
+        $validated['foto_tambahan'] = ! empty($fotoPaths) ? $fotoPaths : null;
 
         $prasarana = Prasarana::create($validated);
         $prasarana->jenisOlahraga()->sync($jenisOlahragaIds);
+
+        // Riset: catat lama pengisian formulir
+        RisetLogger::catatEntri('prasarana', $prasarana->id, $prasarana->user_id, $request->input('_mulai_input'));
 
         // Audit Log
         AuditLogger::logCreate('prasarana', $prasarana->id, $validated);
@@ -170,7 +175,7 @@ class PrasaranaController extends Controller
      */
     public function edit(Prasarana $prasarana): View
     {
-        if (!auth()->user()->canEdit($prasarana)) {
+        if (! auth()->user()->canEdit($prasarana)) {
             return view('prasarana.request-edit', compact('prasarana'));
         }
 
@@ -200,7 +205,7 @@ class PrasaranaController extends Controller
      */
     public function update(Request $request, Prasarana $prasarana): RedirectResponse
     {
-        if (!auth()->user()->canEdit($prasarana)) {
+        if (! auth()->user()->canEdit($prasarana)) {
             abort(403, 'Anda tidak memiliki izin untuk mengedit data prasarana ini. Ajukan permintaan akses edit terlebih dahulu.');
         }
 
@@ -262,7 +267,7 @@ class PrasaranaController extends Controller
         $toDelete = $request->input('hapus_foto_tambahan', []);
         foreach ($toDelete as $path) {
             Storage::disk('public')->delete($path);
-            $existingFoto = array_values(array_filter($existingFoto, fn($p) => $p !== $path));
+            $existingFoto = array_values(array_filter($existingFoto, fn ($p) => $p !== $path));
         }
 
         // Handle upload foto tambahan baru
@@ -272,7 +277,7 @@ class PrasaranaController extends Controller
                 $existingFoto[] = $file->store('prasarana', 'public');
             }
         }
-        $validated['foto_tambahan'] = !empty($existingFoto) ? array_values($existingFoto) : null;
+        $validated['foto_tambahan'] = ! empty($existingFoto) ? array_values($existingFoto) : null;
 
         $prasarana->update($validated);
         $prasarana->jenisOlahraga()->sync($jenisOlahragaIds);
@@ -289,7 +294,7 @@ class PrasaranaController extends Controller
      */
     public function destroy(Prasarana $prasarana): RedirectResponse
     {
-        if (!auth()->user()->isAdmin() && !auth()->user()->canEdit($prasarana)) {
+        if (! auth()->user()->isAdmin() && ! auth()->user()->canEdit($prasarana)) {
             abort(403, 'Anda tidak memiliki izin untuk menghapus data prasarana ini.');
         }
 
@@ -315,7 +320,7 @@ class PrasaranaController extends Controller
      */
     public function validatePrasarana(Request $request, Prasarana $prasarana): RedirectResponse
     {
-        if (!auth()->user()->canValidate($prasarana)) {
+        if (! auth()->user()->canValidate($prasarana)) {
             abort(403, 'Anda tidak memiliki izin untuk memvalidasi data prasarana ini.');
         }
 
@@ -335,23 +340,24 @@ class PrasaranaController extends Controller
 
         $msg = 'Data prasarana berhasil divalidasi.';
         if ($tx) {
-            $msg .= ' +' . $tx->poin . ' poin diberikan ke relawan.';
+            $msg .= ' +'.$tx->poin.' poin diberikan ke relawan.';
 
             // Notifikasi ke relawan
             UserNotification::create([
                 'user_id' => $prasarana->user_id,
                 'type' => 'poin',
-                'title' => '+' . $tx->poin . ' Poin Diterima',
-                'message' => 'Laporan prasarana "' . $prasarana->nama_fasilitas . '" telah divalidasi. Anda mendapatkan ' . $tx->poin . ' poin.',
+                'title' => '+'.$tx->poin.' Poin Diterima',
+                'message' => 'Laporan prasarana "'.$prasarana->nama_fasilitas.'" telah divalidasi. Anda mendapatkan '.$tx->poin.' poin.',
                 'data' => ['related_type' => 'prasarana', 'related_id' => $prasarana->id, 'poin' => $tx->poin],
             ]);
         }
 
         $redirect = redirect()->route('dashboard.prasarana')->with('success', $msg);
         if ($tx) {
-            $label = $tx->jenis_aksi === 'baru' ? 'Prasarana baru "' . $prasarana->nama_fasilitas . '" divalidasi' : 'Update prasarana "' . $prasarana->nama_fasilitas . '" divalidasi';
+            $label = $tx->jenis_aksi === 'baru' ? 'Prasarana baru "'.$prasarana->nama_fasilitas.'" divalidasi' : 'Update prasarana "'.$prasarana->nama_fasilitas.'" divalidasi';
             $redirect->with('poin_diperoleh', ['poin' => $tx->poin, 'label' => $label]);
         }
+
         return $redirect;
     }
 
@@ -362,7 +368,7 @@ class PrasaranaController extends Controller
      */
     public function rejectPrasarana(Request $request, Prasarana $prasarana): RedirectResponse
     {
-        if (!auth()->user()->canValidate($prasarana)) {
+        if (! auth()->user()->canValidate($prasarana)) {
             abort(403, 'Anda tidak memiliki izin untuk menolak data prasarana ini.');
         }
 
@@ -377,7 +383,7 @@ class PrasaranaController extends Controller
             'user_id' => $prasarana->user_id,
             'type' => 'validasi',
             'title' => 'Prasarana Butuh Perbaikan',
-            'message' => 'Laporan prasarana "' . $prasarana->nama_fasilitas . '" perlu diperbaiki. Catatan admin: ' . $request->komentar_validasi,
+            'message' => 'Laporan prasarana "'.$prasarana->nama_fasilitas.'" perlu diperbaiki. Catatan admin: '.$request->komentar_validasi,
             'data' => ['related_type' => 'prasarana', 'related_id' => $prasarana->id],
         ]);
 
@@ -390,7 +396,7 @@ class PrasaranaController extends Controller
      */
     public function cancelValidatePrasarana(Prasarana $prasarana): RedirectResponse
     {
-        if (!auth()->user()->isSuperAdmin()) {
+        if (! auth()->user()->isSuperAdmin()) {
             abort(403, 'Hanya Super Admin yang dapat membatalkan validasi.');
         }
 
@@ -413,4 +419,3 @@ class PrasaranaController extends Controller
             ->with('success', 'Validasi prasarana dibatalkan. Poin relawan telah ditarik.');
     }
 }
-

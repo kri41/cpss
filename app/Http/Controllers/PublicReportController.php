@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Services\RelawanReportService;
+use App\Support\RisetLogger;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
@@ -27,11 +28,20 @@ class PublicReportController extends Controller
     {
         $relawan = $this->resolve($token);
 
-        $pdf = Pdf::loadView('laporan-relawan.pdf', $this->report->build($relawan))
-            ->setPaper('a4', 'portrait')
-            ->setOption('isPhpEnabled', true);
+        // Catatan: data durasi riset TIDAK disertakan pada PDF publik (privasi).
+        $data = $this->report->build($relawan);
 
-        return $pdf->download('laporan-relawan_'.str($relawan->name)->slug().'_'.now()->format('Ymd').'.pdf');
+        $t0 = hrtime(true);
+        $content = Pdf::loadView('laporan-relawan.pdf', $data)
+            ->setPaper('a4', 'portrait')
+            ->setOption('isPhpEnabled', true)
+            ->output();
+        RisetLogger::catatLaporan('live', 'pdf', $relawan->id, (hrtime(true) - $t0) / 1e6);
+
+        return response($content, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="laporan-relawan_'.str($relawan->name)->slug().'_'.now()->format('Ymd').'.pdf"',
+        ]);
     }
 
     private function resolve(string $token): User

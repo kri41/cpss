@@ -185,6 +185,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware(['App\Http\Middleware\CheckRole:admin'])->prefix('laporan-relawan')->name('laporan-relawan.')->group(function () {
         Route::get('/', [LaporanRelawanController::class, 'index'])->name('index');
         Route::get('/rekap/pdf', [LaporanRelawanController::class, 'rekapPdf'])->name('rekap-pdf');
+
+        // Ekspor data riset (pengukuran waktu — analisis disertasi)
+        Route::get('/riset/entri.csv', [LaporanRelawanController::class, 'risetEntriCsv'])->name('riset.entri');
+        Route::get('/riset/laporan.csv', [LaporanRelawanController::class, 'risetLaporanCsv'])->name('riset.laporan');
+        Route::get('/riset/rekap.csv', [LaporanRelawanController::class, 'risetRekapCsv'])->name('riset.rekap');
+
         Route::get('/{relawan}', [LaporanRelawanController::class, 'show'])->name('show');
         Route::get('/{relawan}/pdf', [LaporanRelawanController::class, 'pdf'])->name('pdf');
         Route::post('/{relawan}/ganti-link', [LaporanRelawanController::class, 'regenerateToken'])->name('regenerate-token');

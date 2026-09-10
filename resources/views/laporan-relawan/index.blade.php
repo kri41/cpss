@@ -5,11 +5,36 @@
                 <h2 class="text-2xl font-bold text-gray-900">Laporan Relawan</h2>
                 <p class="text-sm text-gray-500 mt-1">Rekap kinerja, poin, dan kontribusi tiap relawan penggerak olahraga.</p>
             </div>
-            <a href="{{ route('laporan-relawan.rekap-pdf') }}"
-               class="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition shadow-sm shrink-0">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                Rekap PDF Semua Relawan
-            </a>
+            <div class="flex flex-wrap items-center gap-2 shrink-0" x-data="{ riset: false }">
+                <a href="{{ route('laporan-relawan.rekap-pdf') }}"
+                   class="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    Rekap PDF
+                </a>
+                <div class="relative">
+                    <button type="button" @click="riset = !riset" @click.away="riset = false"
+                            class="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-xl transition shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                        Data Riset (CSV)
+                        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </button>
+                    <div x-show="riset" x-cloak x-transition
+                         class="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-gray-100 py-1 z-20">
+                        <a href="{{ route('laporan-relawan.riset.rekap') }}" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">
+                            <span class="font-semibold">Rekap per Relawan</span><br>
+                            <span class="text-xs text-gray-400">total durasi input + total alur kerja</span>
+                        </a>
+                        <a href="{{ route('laporan-relawan.riset.entri') }}" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">
+                            <span class="font-semibold">Durasi Entri (per baris)</span><br>
+                            <span class="text-xs text-gray-400">satu baris = satu formulir yang diisi</span>
+                        </a>
+                        <a href="{{ route('laporan-relawan.riset.laporan') }}" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">
+                            <span class="font-semibold">Pembuatan Laporan</span><br>
+                            <span class="text-xs text-gray-400">catatan tiap laporan diunduh</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
     </x-slot>
 

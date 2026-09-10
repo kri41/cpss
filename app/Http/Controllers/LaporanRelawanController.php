@@ -2,14 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DurasiEntri;
+use App\Models\PembuatanLaporan;
 use App\Models\PointTransaction;
 use App\Models\User;
 use App\Services\RelawanReportService;
+use App\Support\RisetLogger;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class LaporanRelawanController extends Controller
 {
@@ -86,6 +90,7 @@ class LaporanRelawanController extends Controller
         $data['liveUrl'] = $relawan->ensurePublicReportToken()
             ? $relawan->publicReportUrl()
             : null;
+        $data['riset'] = $this->report->durasi($relawan);
 
         return view('laporan-relawan.show', $data);
     }
@@ -97,13 +102,12 @@ class LaporanRelawanController extends Controller
     {
         abort_unless($relawan->isRelawan(), 404);
 
-        $pdf = Pdf::loadView('laporan-relawan.pdf', $this->report->build($relawan))
-            ->setPaper('a4', 'portrait')
-            ->setOption('isPhpEnabled', true);
+        $data = $this->report->build($relawan);
+        $data['riset'] = $this->report->durasi($relawan);
 
         $filename = 'laporan-relawan_'.str($relawan->name)->slug().'_'.now()->format('Ymd').'.pdf';
 
-        return $pdf->download($filename);
+        return $this->unduhPdf('laporan-relawan.pdf', $data, $filename, 'laporan-relawan', $relawan->id);
     }
 
     /* ================================================================
@@ -138,10 +142,133 @@ class LaporanRelawanController extends Controller
             'kontribusi' => $relawan->sum(fn ($r) => $r->prasarana_count + $r->clubs_count + $r->events_count + $r->partisipasi_count + $r->kampung_olahraga_count),
         ];
 
-        $pdf = Pdf::loadView('laporan-relawan.rekap-pdf', compact('relawan', 'agg'))
-            ->setPaper('a4', 'portrait')
-            ->setOption('isPhpEnabled', true);
+        return $this->unduhPdf('laporan-relawan.rekap-pdf', compact('relawan', 'agg'), 'rekap-relawan_'.now()->format('Ymd').'.pdf', 'rekap-relawan');
+    }
 
-        return $pdf->download('rekap-relawan_'.now()->format('Ymd').'.pdf');
+    /* ================================================================
+       EKSPOR DATA RISET (pengukuran waktu — untuk analisis disertasi)
+       ================================================================ */
+
+    /** Satu baris per entri data: lama pengisian formulir. */
+    public function risetEntriCsv(): StreamedResponse
+    {
+        $rows = DurasiEntri::with('user')
+            ->whereHas('user', fn ($q) => $q->where('role', 'relawan'))
+            ->orderBy('user_id')->orderBy('selesai_input_at')
+            ->get();
+
+        // Resolusi nama entitas per tipe
+        $nama = [];
+        foreach ($rows->groupBy('entri_type') as $type => $g) {
+            $model = DurasiEntri::MODEL[$type] ?? null;
+            $kolom = DurasiEntri::KOLOM_NAMA[$type] ?? null;
+            if (! $model) {
+                continue;
+            }
+            $items = $model::whereIn('id', $g->pluck('entri_id')->unique())->get()->keyBy('id');
+            foreach ($g as $r) {
+                $nama[$r->id] = $items->get($r->entri_id)?->{$kolom} ?? '(data dihapus)';
+            }
+        }
+
+        return $this->streamCsv('riset_durasi-entri_'.now()->format('Ymd-Hi').'.csv',
+            ['relawan', 'email', 'jenis', 'entri_id', 'nama_entri', 'mulai_input', 'selesai_input', 'durasi_detik', 'durasi_menit', 'sumber'],
+            $rows->map(fn ($r) => [
+                $r->user?->name,
+                $r->user?->email,
+                DurasiEntri::LABEL[$r->entri_type] ?? $r->entri_type,
+                $r->entri_id,
+                $nama[$r->id] ?? '',
+                $r->mulai_input_at?->format('Y-m-d H:i:s'),
+                $r->selesai_input_at?->format('Y-m-d H:i:s'),
+                $r->durasi_detik,
+                number_format($r->durasi_detik / 60, 2, '.', ''),
+                $r->sumber,
+            ])
+        );
+    }
+
+    /** Satu baris per laporan yang dihasilkan. */
+    public function risetLaporanCsv(): StreamedResponse
+    {
+        $rows = PembuatanLaporan::with(['pembuat', 'subjek'])->orderBy('dibuat_at')->get();
+
+        return $this->streamCsv('riset_pembuatan-laporan_'.now()->format('Ymd-Hi').'.csv',
+            ['pembuat', 'jenis', 'relawan_subjek', 'format', 'dibuat_pada', 'render_ms'],
+            $rows->map(fn ($r) => [
+                $r->pembuat?->name ?? '(tautan publik)',
+                $r->jenis,
+                $r->subjek?->name ?? '',
+                $r->format,
+                $r->dibuat_at?->format('Y-m-d H:i:s'),
+                $r->render_ms,
+            ])
+        );
+    }
+
+    /** Rekap per relawan: total durasi input + total waktu alur kerja. */
+    public function risetRekapCsv(): StreamedResponse
+    {
+        $relawan = User::where('role', 'relawan')->orderBy('name')->get();
+
+        $baris = $relawan->map(function (User $u) {
+            $d = $this->report->durasi($u);
+
+            return [
+                $u->name,
+                $u->email,
+                $d['jumlah_entri'],
+                $d['jumlah_terukur'],
+                $d['jumlah_estimasi'],
+                $d['total_detik'],
+                number_format($d['total_detik'] / 60, 2, '.', ''),
+                $d['rata_detik'],
+                $d['entri_pertama_at']?->format('Y-m-d H:i:s'),
+                $d['entri_terakhir_at']?->format('Y-m-d H:i:s'),
+                $d['laporan_terakhir_at']?->format('Y-m-d H:i:s'),
+                $d['workflow_detik'] ?? '',
+                $d['workflow_detik'] ? number_format($d['workflow_detik'] / 60, 2, '.', '') : '',
+            ];
+        });
+
+        return $this->streamCsv('riset_rekap-per-relawan_'.now()->format('Ymd-Hi').'.csv',
+            ['relawan', 'email', 'jumlah_entri', 'entri_terukur', 'entri_estimasi',
+                'total_durasi_input_detik', 'total_durasi_input_menit', 'rata2_per_entri_detik',
+                'entri_pertama', 'entri_terakhir', 'laporan_terakhir',
+                'total_alur_kerja_detik', 'total_alur_kerja_menit'],
+            $baris
+        );
+    }
+
+    /* ================================================================
+       HELPER
+       ================================================================ */
+
+    private function unduhPdf(string $view, array $data, string $filename, string $jenisLog, ?int $subjekId = null): Response
+    {
+        $t0 = hrtime(true);
+        $content = Pdf::loadView($view, $data)
+            ->setPaper('a4', 'portrait')
+            ->setOption('isPhpEnabled', true)
+            ->output();
+        RisetLogger::catatLaporan($jenisLog, 'pdf', $subjekId, (hrtime(true) - $t0) / 1e6);
+
+        return response($content, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+        ]);
+    }
+
+    private function streamCsv(string $filename, array $header, iterable $rows): StreamedResponse
+    {
+        return response()->streamDownload(function () use ($header, $rows) {
+            $out = fopen('php://output', 'w');
+            fwrite($out, "\xEF\xBB\xBF"); // BOM agar Excel membaca UTF-8
+            fputcsv($out, $header);
+            foreach ($rows as $row) {
+                fputcsv($out, $row);
+            }
+            fclose($out);
+        }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
     }
 }

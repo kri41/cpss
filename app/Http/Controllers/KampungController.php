@@ -11,6 +11,7 @@ use App\Models\PointTransaction;
 use App\Models\Prasarana;
 use App\Models\UserNotification;
 use App\Services\GamificationService;
+use App\Support\RisetLogger;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -24,11 +25,11 @@ class KampungController extends Controller
         $user = auth()->user();
 
         $query = KampungOlahraga::with('user')->latest();
-        if (!$user->isAdmin()) {
+        if (! $user->isAdmin()) {
             $query->where('user_id', $user->id);
         }
 
-        $kampungList  = $query->paginate(15);
+        $kampungList = $query->paginate(15);
         $totalPending = KampungOlahraga::where('status_validasi', 'pending')->count();
 
         return view('kampung.index', compact('kampungList', 'totalPending'));
@@ -43,19 +44,22 @@ class KampungController extends Controller
     {
         $validated = $request->validate([
             'nama_kampung' => 'required|string|max:255',
-            'alamat'       => 'nullable|string',
-            'provinsi'     => 'nullable|string|max:255',
-            'kabupaten'    => 'nullable|string|max:255',
-            'kecamatan'    => 'nullable|string|max:255',
-            'desa'         => 'nullable|string|max:255',
-            'rt'           => 'nullable|string|max:5',
-            'rw'           => 'nullable|string|max:5',
-            'latitude'     => 'nullable|numeric|between:-90,90',
-            'longitude'    => 'nullable|numeric|between:-180,180',
+            'alamat' => 'nullable|string',
+            'provinsi' => 'nullable|string|max:255',
+            'kabupaten' => 'nullable|string|max:255',
+            'kecamatan' => 'nullable|string|max:255',
+            'desa' => 'nullable|string|max:255',
+            'rt' => 'nullable|string|max:5',
+            'rw' => 'nullable|string|max:5',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
         ]);
 
         $validated['user_id'] = auth()->id();
-        KampungOlahraga::create($validated);
+        $kampung = KampungOlahraga::create($validated);
+
+        // Riset: catat lama pengisian formulir
+        RisetLogger::catatEntri('kampung_olahraga', $kampung->id, $kampung->user_id, $request->input('_mulai_input'));
 
         return redirect()->route('kampung.index')
             ->with('success', 'Kampung Olahraga berhasil didaftarkan. Menunggu verifikasi admin.');
@@ -67,8 +71,8 @@ class KampungController extends Controller
 
         $kampung->load(['user', 'checkins.jenisOlahraga', 'fasil', 'klubKomunitas']);
 
-        $komponenList  = KomponenSyarat::where('aktif', true)->orderBy('urutan')->get();
-        $totalCheckin  = $kampung->checkins()->count();
+        $komponenList = KomponenSyarat::where('aktif', true)->orderBy('urutan')->get();
+        $totalCheckin = $kampung->checkins()->count();
         $recentCheckins = $kampung->checkins()->with('jenisOlahraga')->latest()->limit(20)->get();
 
         // QR per-fasil (bukan lagi per-kampung)
@@ -87,7 +91,7 @@ class KampungController extends Controller
 
         // Kandidat fasil & klub/komunitas yang bisa didaftarkan ke kampung ini (se-wilayah, belum terdaftar)
         $candidateFasil = collect();
-        $candidateKlub  = collect();
+        $candidateKlub = collect();
         if ($this->canManageRegistrations($kampung)) {
             $candidateFasil = Prasarana::validated()
                 ->sameWilayahAs($kampung)
@@ -127,7 +131,7 @@ class KampungController extends Controller
             'qr_token' => $prasarana->qr_token ?? Prasarana::generateQrToken(),
         ]);
 
-        return back()->with('success', 'Fasil "' . $prasarana->nama_fasilitas . '" berhasil didaftarkan ke kampung ini.');
+        return back()->with('success', 'Fasil "'.$prasarana->nama_fasilitas.'" berhasil didaftarkan ke kampung ini.');
     }
 
     public function detachFasil(KampungOlahraga $kampung, Prasarana $prasarana): RedirectResponse
@@ -137,7 +141,7 @@ class KampungController extends Controller
 
         $prasarana->update(['kampung_olahraga_id' => null, 'qr_token' => null]);
 
-        return back()->with('success', 'Fasil "' . $prasarana->nama_fasilitas . '" dilepas dari kampung ini. QR-nya dinonaktifkan.');
+        return back()->with('success', 'Fasil "'.$prasarana->nama_fasilitas.'" dilepas dari kampung ini. QR-nya dinonaktifkan.');
     }
 
     public function attachKlub(Request $request, KampungOlahraga $kampung): RedirectResponse
@@ -152,7 +156,7 @@ class KampungController extends Controller
 
         $kampung->klubKomunitas()->syncWithoutDetaching([$club->id]);
 
-        return back()->with('success', 'Klub/Komunitas "' . $club->nama_club . '" berhasil didaftarkan ke kampung ini.');
+        return back()->with('success', 'Klub/Komunitas "'.$club->nama_club.'" berhasil didaftarkan ke kampung ini.');
     }
 
     public function detachKlub(KampungOlahraga $kampung, Club $club): RedirectResponse
@@ -161,12 +165,13 @@ class KampungController extends Controller
 
         $kampung->klubKomunitas()->detach($club->id);
 
-        return back()->with('success', 'Klub/Komunitas "' . $club->nama_club . '" dilepas dari kampung ini.');
+        return back()->with('success', 'Klub/Komunitas "'.$club->nama_club.'" dilepas dari kampung ini.');
     }
 
     public function edit(KampungOlahraga $kampung): View
     {
         $this->authorizeAccess($kampung);
+
         return view('kampung.edit', compact('kampung'));
     }
 
@@ -176,15 +181,15 @@ class KampungController extends Controller
 
         $validated = $request->validate([
             'nama_kampung' => 'required|string|max:255',
-            'alamat'       => 'nullable|string',
-            'provinsi'     => 'nullable|string|max:255',
-            'kabupaten'    => 'nullable|string|max:255',
-            'kecamatan'    => 'nullable|string|max:255',
-            'desa'         => 'nullable|string|max:255',
-            'rt'           => 'nullable|string|max:5',
-            'rw'           => 'nullable|string|max:5',
-            'latitude'     => 'nullable|numeric|between:-90,90',
-            'longitude'    => 'nullable|numeric|between:-180,180',
+            'alamat' => 'nullable|string',
+            'provinsi' => 'nullable|string|max:255',
+            'kabupaten' => 'nullable|string|max:255',
+            'kecamatan' => 'nullable|string|max:255',
+            'desa' => 'nullable|string|max:255',
+            'rt' => 'nullable|string|max:5',
+            'rw' => 'nullable|string|max:5',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
         ]);
 
         $kampung->update($validated);
@@ -197,6 +202,7 @@ class KampungController extends Controller
     {
         $this->authorizeAccess($kampung);
         $kampung->delete();
+
         return redirect()->route('kampung.index')
             ->with('success', 'Kampung Olahraga berhasil dihapus.');
     }
@@ -207,7 +213,7 @@ class KampungController extends Controller
 
         $kampung->update([
             'status_validasi' => 'validated',
-            'catatan_admin'   => null,
+            'catatan_admin' => null,
         ]);
 
         $kode = GamificationService::resolveKodeAktivitas('kampung_baru', $kampung->user_id, 'kampung_olahraga', $kampung->id);
@@ -215,7 +221,7 @@ class KampungController extends Controller
 
         $msg = 'Kampung Olahraga berhasil diverifikasi. QR fasil yang terdaftar kini aktif.';
         if ($tx) {
-            $msg .= ' +' . $tx->poin . ' poin diberikan ke relawan.';
+            $msg .= ' +'.$tx->poin.' poin diberikan ke relawan.';
         }
 
         return back()->with('success', $msg);
@@ -229,7 +235,7 @@ class KampungController extends Controller
 
         $kampung->update([
             'status_validasi' => 'rejected',
-            'catatan_admin'   => $request->catatan_admin,
+            'catatan_admin' => $request->catatan_admin,
         ]);
 
         if ($kampung->user_id) {
@@ -237,7 +243,7 @@ class KampungController extends Controller
                 'user_id' => $kampung->user_id,
                 'type' => 'validasi',
                 'title' => 'Kampung Olahraga Butuh Perbaikan',
-                'message' => 'Kampung Olahraga "' . $kampung->nama_kampung . '" perlu diperbaiki. Catatan admin: ' . $request->catatan_admin,
+                'message' => 'Kampung Olahraga "'.$kampung->nama_kampung.'" perlu diperbaiki. Catatan admin: '.$request->catatan_admin,
                 'data' => ['related_type' => 'kampung_olahraga', 'related_id' => $kampung->id],
             ]);
         }
@@ -281,12 +287,12 @@ class KampungController extends Controller
         $kampung = $fasil->kampungOlahraga;
 
         $request->validate([
-            'nama_peserta'        => 'required|string|max:255',
-            'umur'                => 'required|integer|min:1|max:120',
-            'club_id'             => 'nullable|integer|exists:clubs,id',
-            'jenis_olahraga_id'   => 'nullable|integer|exists:jenis_olahraga,id',
+            'nama_peserta' => 'required|string|max:255',
+            'umur' => 'required|integer|min:1|max:120',
+            'club_id' => 'nullable|integer|exists:clubs,id',
+            'jenis_olahraga_id' => 'nullable|integer|exists:jenis_olahraga,id',
             'jenis_olahraga_baru' => 'nullable|string|max:100',
-            'foto'                => 'nullable|image|max:10240',
+            'foto' => 'nullable|image|max:10240',
         ]);
 
         $club = null;
@@ -296,19 +302,19 @@ class KampungController extends Controller
         }
 
         // Resolve jenis olahraga: auto dari klub jika dipilih, manual jika "Belum bergabung"
-        $jenisId   = null;
+        $jenisId = null;
         $jenisnama = null;
 
         if ($club) {
-            $jenisId   = $club->jenis_olahraga_id;
+            $jenisId = $club->jenis_olahraga_id;
             $jenisnama = $club->jenisOlahraga?->nama;
         } elseif (filled($request->jenis_olahraga_id)) {
-            $jenisId   = $request->jenis_olahraga_id;
+            $jenisId = $request->jenis_olahraga_id;
             $jenisnama = JenisOlahraga::find($jenisId)?->nama;
         } elseif (filled($request->jenis_olahraga_baru)) {
-            $nama      = trim($request->jenis_olahraga_baru);
-            $jenis     = JenisOlahraga::firstOrCreate(['nama' => $nama], ['aktif' => true]);
-            $jenisId   = $jenis->id;
+            $nama = trim($request->jenis_olahraga_baru);
+            $jenis = JenisOlahraga::firstOrCreate(['nama' => $nama], ['aktif' => true]);
+            $jenisId = $jenis->id;
             $jenisnama = $jenis->nama;
         }
 
@@ -320,13 +326,13 @@ class KampungController extends Controller
 
         CheckinKampung::create([
             'kampung_olahraga_id' => $kampung->id,
-            'prasarana_id'        => $fasil->id,
-            'club_id'             => $club?->id,
-            'nama_peserta'        => $request->nama_peserta,
-            'umur'                => $request->umur,
-            'jenis_olahraga_id'   => $jenisId,
+            'prasarana_id' => $fasil->id,
+            'club_id' => $club?->id,
+            'nama_peserta' => $request->nama_peserta,
+            'umur' => $request->umur,
+            'jenis_olahraga_id' => $jenisId,
             'jenis_olahraga_nama' => $jenisnama,
-            'foto'                => $fotoPath,
+            'foto' => $fotoPath,
         ]);
 
         return redirect()->route('kampung.checkin.sukses', $token);
@@ -354,7 +360,7 @@ class KampungController extends Controller
     public function apiJenisOlahraga(Request $request): JsonResponse
     {
         $results = JenisOlahraga::where('aktif', true)
-            ->when($request->q, fn($q) => $q->where('nama', 'like', '%' . $request->q . '%'))
+            ->when($request->q, fn ($q) => $q->where('nama', 'like', '%'.$request->q.'%'))
             ->orderBy('nama')
             ->limit(20)
             ->get(['id', 'nama']);
@@ -367,7 +373,7 @@ class KampungController extends Controller
     private function authorizeAccess(KampungOlahraga $kampung): void
     {
         $user = auth()->user();
-        if (!$user->isAdmin() && $kampung->user_id !== $user->id) {
+        if (! $user->isAdmin() && $kampung->user_id !== $user->id) {
             abort(403);
         }
     }
@@ -375,39 +381,41 @@ class KampungController extends Controller
     private function canManageRegistrations(KampungOlahraga $kampung): bool
     {
         $user = auth()->user();
+
         return $user->isAdmin() || $kampung->user_id === $user->id;
     }
 
     private function compressAndStore($file): string
     {
         $dir = storage_path('app/public/checkin_kampung/');
-        if (!is_dir($dir)) {
+        if (! is_dir($dir)) {
             mkdir($dir, 0755, true);
         }
 
-        $ext      = strtolower($file->getClientOriginalExtension());
-        $filename = 'checkin_' . uniqid() . '.jpg';
-        $dest     = $dir . $filename;
+        $ext = strtolower($file->getClientOriginalExtension());
+        $filename = 'checkin_'.uniqid().'.jpg';
+        $dest = $dir.$filename;
 
         $src = match ($ext) {
-            'png'  => @imagecreatefrompng($file->getRealPath()),
+            'png' => @imagecreatefrompng($file->getRealPath()),
             'webp' => @imagecreatefromwebp($file->getRealPath()),
-            'gif'  => @imagecreatefromgif($file->getRealPath()),
-            default=> @imagecreatefromjpeg($file->getRealPath()),
+            'gif' => @imagecreatefromgif($file->getRealPath()),
+            default => @imagecreatefromjpeg($file->getRealPath()),
         };
 
-        if (!$src) {
+        if (! $src) {
             $file->storeAs('public/checkin_kampung', $filename);
-            return 'checkin_kampung/' . $filename;
+
+            return 'checkin_kampung/'.$filename;
         }
 
         // Resize if too large (max 1024px on any side)
         [$origW, $origH] = [imagesx($src), imagesy($src)];
         $maxDim = 1024;
         if ($origW > $maxDim || $origH > $maxDim) {
-            $ratio  = min($maxDim / $origW, $maxDim / $origH);
-            $newW   = (int) ($origW * $ratio);
-            $newH   = (int) ($origH * $ratio);
+            $ratio = min($maxDim / $origW, $maxDim / $origH);
+            $newW = (int) ($origW * $ratio);
+            $newH = (int) ($origH * $ratio);
             $canvas = imagecreatetruecolor($newW, $newH);
             imagecopyresampled($canvas, $src, 0, 0, 0, 0, $newW, $newH, $origW, $origH);
             imagedestroy($src);
@@ -416,7 +424,7 @@ class KampungController extends Controller
 
         // Binary-search quality to get under 200 KB
         $maxBytes = 200 * 1024;
-        $quality  = 75;
+        $quality = 75;
         for ($q = 85; $q >= 20; $q -= 5) {
             ob_start();
             imagejpeg($src, null, $q);
@@ -430,6 +438,6 @@ class KampungController extends Controller
         imagejpeg($src, $dest, $quality);
         imagedestroy($src);
 
-        return 'checkin_kampung/' . $filename;
+        return 'checkin_kampung/'.$filename;
     }
 }

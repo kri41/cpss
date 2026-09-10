@@ -14,6 +14,7 @@
                 <div class="p-6 sm:p-8">
                     <form method="POST" action="{{ route('prasarana.store') }}" enctype="multipart/form-data" class="space-y-8">
                         @csrf
+                        @include('partials.waktu-mulai-input')
 
                         <!-- Informasi Dasar -->
                         <div>

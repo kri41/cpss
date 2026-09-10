@@ -3,9 +3,11 @@
 namespace App\Services;
 
 use App\Models\Club;
+use App\Models\DurasiEntri;
 use App\Models\Event;
 use App\Models\KampungOlahraga;
 use App\Models\Partisipasi;
+use App\Models\PembuatanLaporan;
 use App\Models\PointTransaction;
 use App\Models\Prasarana;
 use App\Models\User;
@@ -88,5 +90,69 @@ class RelawanReportService
             'totalKontribusi', 'totalValid', 'poinValid', 'poinBulanIni',
             'rank', 'totalRelawan', 'badges', 'kontribusiPertama', 'kontribusiTerakhir',
         );
+    }
+
+    /* ================================================================
+       DATA RISET — pengukuran waktu alur kerja (disertasi)
+       ================================================================ */
+
+    /**
+     * Ringkasan durasi pengisian formulir + pembuatan laporan untuk satu relawan.
+     * Dipakai pada halaman detail, PDF, dan ekspor CSV riset.
+     */
+    public function durasi(User $relawan): array
+    {
+        $entri = DurasiEntri::where('user_id', $relawan->id)
+            ->orderBy('selesai_input_at')
+            ->get();
+
+        // Resolusi nama entitas
+        $nama = [];
+        foreach ($entri->groupBy('entri_type') as $type => $rows) {
+            $model = DurasiEntri::MODEL[$type] ?? null;
+            $kolom = DurasiEntri::KOLOM_NAMA[$type] ?? null;
+            if (! $model) {
+                continue;
+            }
+            $items = $model::whereIn('id', $rows->pluck('entri_id')->unique())->get()->keyBy('id');
+            foreach ($rows as $r) {
+                $nama[$r->id] = $items->get($r->entri_id)?->{$kolom} ?? '(data dihapus)';
+            }
+        }
+
+        $laporan = PembuatanLaporan::where('subjek_user_id', $relawan->id)
+            ->orWhere(fn ($q) => $q->where('user_id', $relawan->id)->whereIn('jenis', ['prasarana', 'events', 'clubs', 'partisipasi', 'dashboard']))
+            ->orderBy('dibuat_at')
+            ->get();
+
+        $perKategori = $entri->groupBy('entri_type')->map(fn ($g) => [
+            'jumlah' => $g->count(),
+            'total_detik' => (int) $g->sum('durasi_detik'),
+            'rata_detik' => (int) round($g->avg('durasi_detik')),
+        ]);
+
+        $entriPertama = $entri->first()?->mulai_input_at;
+        $entriTerakhir = $entri->last()?->selesai_input_at;
+        $laporanTerakhir = $laporan->last()?->dibuat_at;
+
+        $workflowDetik = ($entriPertama && $laporanTerakhir && $laporanTerakhir->gt($entriPertama))
+            ? $entriPertama->diffInSeconds($laporanTerakhir)
+            : null;
+
+        return [
+            'entri' => $entri,
+            'nama' => $nama,
+            'laporan' => $laporan,
+            'per_kategori' => $perKategori,
+            'jumlah_entri' => $entri->count(),
+            'total_detik' => (int) $entri->sum('durasi_detik'),
+            'rata_detik' => $entri->count() ? (int) round($entri->avg('durasi_detik')) : 0,
+            'jumlah_terukur' => $entri->where('sumber', 'terukur')->count(),
+            'jumlah_estimasi' => $entri->where('sumber', 'estimasi')->count(),
+            'entri_pertama_at' => $entriPertama,
+            'entri_terakhir_at' => $entriTerakhir,
+            'laporan_terakhir_at' => $laporanTerakhir,
+            'workflow_detik' => $workflowDetik,
+        ];
     }
 }
