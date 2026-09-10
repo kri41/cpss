@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AsesmenPakarController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\ChangeRequestController;
 use App\Http\Controllers\ClubController;
@@ -194,6 +195,24 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/{relawan}', [LaporanRelawanController::class, 'show'])->name('show');
         Route::get('/{relawan}/pdf', [LaporanRelawanController::class, 'pdf'])->name('pdf');
         Route::post('/{relawan}/ganti-link', [LaporanRelawanController::class, 'regenerateToken'])->name('regenerate-token');
+    });
+
+    // Asesmen Pakar — pembandingan data relawan vs asesor (RM3 Kappa, RM4 efisiensi)
+    Route::middleware(['App\Http\Middleware\CheckRole:admin'])->prefix('asesmen-pakar')->name('asesmen-pakar.')->group(function () {
+        Route::get('/', [AsesmenPakarController::class, 'index'])->name('index');
+
+        Route::get('/lokasi-sasaran', [AsesmenPakarController::class, 'lokasiSasaran'])->name('lokasi');
+        Route::get('/lokasi-sasaran/csv', [AsesmenPakarController::class, 'lokasiSasaranCsv'])->name('lokasi.csv');
+        Route::get('/lokasi-sasaran/pdf', [AsesmenPakarController::class, 'lokasiSasaranPdf'])->name('lokasi.pdf');
+
+        Route::get('/banding', [AsesmenPakarController::class, 'banding'])->name('banding');
+        Route::get('/banding/csv', [AsesmenPakarController::class, 'bandingCsv'])->name('banding.csv');
+
+        Route::get('/tambah', [AsesmenPakarController::class, 'create'])->name('create');
+        Route::post('/', [AsesmenPakarController::class, 'store'])->name('store');
+        Route::get('/{asesmenPakar}/edit', [AsesmenPakarController::class, 'edit'])->name('edit');
+        Route::put('/{asesmenPakar}', [AsesmenPakarController::class, 'update'])->name('update');
+        Route::delete('/{asesmenPakar}', [AsesmenPakarController::class, 'destroy'])->name('destroy');
     });
 
     // Daftar Relawan (All authenticated users)

@@ -126,6 +126,14 @@ class Prasarana extends Model
         return $this->morphMany(ChangeRequest::class, 'changeable');
     }
 
+    /**
+     * Relasi ke hasil asesmen pakar (untuk pembandingan RM3/RM4)
+     */
+    public function asesmenPakar(): HasMany
+    {
+        return $this->hasMany(AsesmenPakar::class);
+    }
+
     public function pendingChangeRequest(): ?ChangeRequest
     {
         return $this->changeRequests()->pending()->latest()->first();
@@ -162,9 +170,9 @@ class Prasarana extends Model
     public function scopeSameWilayahAs($query, KampungOlahraga $kampung)
     {
         return $query
-            ->when($kampung->kabupaten, fn($q) => $q->whereRaw('LOWER(TRIM(kabupaten)) = ?', [strtolower(trim($kampung->kabupaten))]))
-            ->when($kampung->kecamatan, fn($q) => $q->whereRaw('LOWER(TRIM(kecamatan)) = ?', [strtolower(trim($kampung->kecamatan))]))
-            ->when($kampung->desa, fn($q) => $q->whereRaw('LOWER(TRIM(desa)) = ?', [strtolower(trim($kampung->desa))]));
+            ->when($kampung->kabupaten, fn ($q) => $q->whereRaw('LOWER(TRIM(kabupaten)) = ?', [strtolower(trim($kampung->kabupaten))]))
+            ->when($kampung->kecamatan, fn ($q) => $q->whereRaw('LOWER(TRIM(kecamatan)) = ?', [strtolower(trim($kampung->kecamatan))]))
+            ->when($kampung->desa, fn ($q) => $q->whereRaw('LOWER(TRIM(desa)) = ?', [strtolower(trim($kampung->desa))]));
     }
 
     /**
@@ -187,6 +195,7 @@ class Prasarana extends Model
             4 => 'bg-blue-100 text-blue-800',
             5 => 'bg-green-100 text-green-800',
         ];
+
         return $colors[$rating] ?? 'bg-gray-100 text-gray-800';
     }
 
@@ -205,13 +214,13 @@ class Prasarana extends Model
             $this->kondisi_pencahayaan,
             $this->kondisi_kamar_mandi,
         ];
-        
-        $validKondisi = array_filter($kondisi, fn($v) => $v !== null);
-        
+
+        $validKondisi = array_filter($kondisi, fn ($v) => $v !== null);
+
         if (empty($validKondisi)) {
             return 0;
         }
-        
+
         return round(array_sum($validKondisi) / count($validKondisi), 1);
     }
 
@@ -221,10 +230,17 @@ class Prasarana extends Model
     public function getStatusAttribute(): string
     {
         $avg = $this->average_kondisi;
-        
-        if ($avg >= 4) return 'Sangat Baik';
-        if ($avg >= 3) return 'Baik';
-        if ($avg >= 2) return 'Cukup';
+
+        if ($avg >= 4) {
+            return 'Sangat Baik';
+        }
+        if ($avg >= 3) {
+            return 'Baik';
+        }
+        if ($avg >= 2) {
+            return 'Cukup';
+        }
+
         return 'Perlu Perbaikan';
     }
 
@@ -234,10 +250,17 @@ class Prasarana extends Model
     public function getStatusColorAttribute(): string
     {
         $avg = $this->average_kondisi;
-        
-        if ($avg >= 4) return 'bg-green-100 text-green-800';
-        if ($avg >= 3) return 'bg-blue-100 text-blue-800';
-        if ($avg >= 2) return 'bg-yellow-100 text-yellow-800';
+
+        if ($avg >= 4) {
+            return 'bg-green-100 text-green-800';
+        }
+        if ($avg >= 3) {
+            return 'bg-blue-100 text-blue-800';
+        }
+        if ($avg >= 2) {
+            return 'bg-yellow-100 text-yellow-800';
+        }
+
         return 'bg-red-100 text-red-800';
     }
 
@@ -265,7 +288,7 @@ class Prasarana extends Model
      */
     public function scopeKategoriOlahraga($query, $jenisOlahragaId)
     {
-        return $query->whereHas('jenisOlahraga', fn($q) => $q->where('jenis_olahraga.id', $jenisOlahragaId));
+        return $query->whereHas('jenisOlahraga', fn ($q) => $q->where('jenis_olahraga.id', $jenisOlahragaId));
     }
 
     /**
@@ -273,9 +296,9 @@ class Prasarana extends Model
      */
     public function scopeRatingRange($query, $min, $max)
     {
-        return $query->where(function($q) use ($min, $max) {
+        return $query->where(function ($q) use ($min, $max) {
             $q->whereBetween('kondisi_lantai', [$min, $max])
-              ->orWhereBetween('kondisi_lapangan', [$min, $max]);
+                ->orWhereBetween('kondisi_lapangan', [$min, $max]);
         });
     }
 
