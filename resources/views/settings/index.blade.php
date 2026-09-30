@@ -1,15 +1,35 @@
-@extends('layouts.app')
+<x-app-layout>
+    <x-slot name="header">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-900">Pengaturan</h2>
+            <p class="text-sm text-gray-500 mt-1">Konfigurasi server email pengirim dan isi email verifikasi pendaftar.</p>
+        </div>
+    </x-slot>
 
-@section('title', 'Pengaturan - Dataraga')
-
-@section('content')
 <div class="py-6" x-data="{ tab: 'server' }">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
 
-        <div>
-            <h1 class="text-2xl font-bold text-gray-900">Pengaturan</h1>
-            <p class="text-sm text-gray-500 mt-1">Konfigurasi server email pengirim dan isi email verifikasi pendaftar.</p>
-        </div>
+        @if($mailerAktif === 'log')
+            <div class="p-4 bg-amber-50 border border-amber-200 rounded-2xl text-sm text-amber-900">
+                <p class="font-bold mb-1">⚠ Status server email saat ini: mode Log</p>
+                <p class="text-amber-800 leading-relaxed">
+                    Email verifikasi &amp; email selamat datang <strong>tidak benar-benar terkirim</strong> ke pendaftar
+                    &mdash; sistem hanya mencatatnya ke file log server. Ini sebabnya pendaftar baru tidak menerima email verifikasi.
+                    Isi tab <strong>"Server Email"</strong> di bawah dengan data SMTP, pilih Metode Pengiriman &rarr; <strong>SMTP</strong>,
+                    simpan, lalu klik <strong>"Kirim Email Uji"</strong> untuk memastikan.
+                </p>
+            </div>
+        @else
+            <div class="p-4 bg-green-50 border border-green-200 rounded-2xl text-sm text-green-900">
+                <p class="font-bold mb-1">✓ Status server email saat ini: SMTP aktif</p>
+                <p class="text-green-800 leading-relaxed">
+                    Host: <span class="font-mono">{{ $mailHostAktif ?: '—' }}</span>. Email verifikasi dikirim sungguhan.
+                    Bila pendaftar tetap mengaku tidak menerima, klik <strong>"Kirim Email Uji"</strong> di bawah &mdash;
+                    bila gagal, pesan errornya akan tampil di sini (biasanya salah password, port, atau enkripsi).
+                    Sambil menunggu, akun bisa diverifikasi manual dari menu <strong>Users</strong> (tombol centang di kolom Verifikasi).
+                </p>
+            </div>
+        @endif
 
         @if(session('success'))
             <div class="p-3 bg-green-50 border border-green-200 rounded-xl text-sm text-green-700">{{ session('success') }}</div>
@@ -179,4 +199,4 @@
 
     </div>
 </div>
-@endsection
+</x-app-layout>

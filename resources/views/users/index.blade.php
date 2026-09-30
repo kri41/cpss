@@ -32,7 +32,7 @@
 
             {{-- Filter & Pencarian --}}
             <div class="bg-white shadow-sm sm:rounded-lg p-4 mb-4">
-                <form method="GET" action="{{ route('users.index') }}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <form method="GET" action="{{ route('users.index') }}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
                     <div class="lg:col-span-2">
                         <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Cari</label>
                         <input type="text" name="search" value="{{ request('search') }}" placeholder="Nama atau email"
@@ -48,6 +48,14 @@
                         </select>
                     </div>
                     <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Verifikasi</label>
+                        <select name="verifikasi" class="w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <option value="">Semua</option>
+                            <option value="terverifikasi" @selected(request('verifikasi') === 'terverifikasi')>Terverifikasi</option>
+                            <option value="belum" @selected(request('verifikasi') === 'belum')>Belum Verifikasi</option>
+                        </select>
+                    </div>
+                    <div>
                         <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Urutkan</label>
                         <select name="sort" class="w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                             <option value="nama_asc"  @selected($sort === 'nama_asc')>Nama (A-Z)</option>
@@ -55,9 +63,9 @@
                             <option value="terbaru"   @selected($sort === 'terbaru')>Terbaru ditambahkan</option>
                         </select>
                     </div>
-                    <div class="sm:col-span-2 lg:col-span-4 flex gap-2">
+                    <div class="sm:col-span-2 lg:col-span-5 flex gap-2">
                         <button type="submit" class="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 transition">Terapkan</button>
-                        @if(request()->hasAny(['search', 'role']) || $sort !== 'nama_asc')
+                        @if(request()->hasAny(['search', 'role', 'verifikasi']) || $sort !== 'nama_asc')
                             <a href="{{ route('users.index') }}" class="px-4 py-2 bg-gray-100 text-gray-600 text-sm font-medium rounded-md hover:bg-gray-200 transition">Reset</a>
                         @endif
                         <span class="ml-auto self-center text-xs text-gray-400">{{ $users->total() }} pengguna</span>
@@ -74,6 +82,7 @@
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Verifikasi</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">MFA</th>
                                     <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                                 </tr>
@@ -96,6 +105,17 @@
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
+                                            @if($user->hasVerifiedEmail())
+                                                <span class="px-2 inline-flex items-center gap-1 text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800"
+                                                      title="Terverifikasi {{ $user->email_verified_at->timezone('Asia/Jakarta')->locale('id')->isoFormat('D MMM YYYY, HH:mm') }} WIB">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+                                                    Terverifikasi
+                                                </span>
+                                            @else
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-amber-100 text-amber-800">Belum Verifikasi</span>
+                                            @endif
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
                                             @if($user->mfa_enabled)
                                                 <span class="text-green-600">
                                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -108,6 +128,19 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <div class="flex items-center justify-end space-x-2">
+                                                <form action="{{ route('users.toggle-verifikasi', $user) }}" method="POST" class="inline"
+                                                      @if($user->hasVerifiedEmail()) onsubmit="return confirm('Batalkan verifikasi {{ $user->name }}? Pengguna tidak bisa mengakses halaman yang butuh verifikasi sampai diverifikasi ulang.');" @endif>
+                                                    @csrf @method('PATCH')
+                                                    <button type="submit"
+                                                            class="{{ $user->hasVerifiedEmail() ? 'text-amber-600 hover:text-amber-900' : 'text-green-600 hover:text-green-900' }}"
+                                                            title="{{ $user->hasVerifiedEmail() ? 'Batalkan verifikasi' : 'Verifikasi manual' }}">
+                                                        @if($user->hasVerifiedEmail())
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 105.636 5.636a9 9 0 0012.728 12.728zM5.636 5.636l12.728 12.728" /></svg>
+                                                        @else
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12.75l1.5 1.5 4.5-4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                                        @endif
+                                                    </button>
+                                                </form>
                                                 <a href="{{ route('users.edit', $user) }}" class="text-yellow-600 hover:text-yellow-900" title="Edit">
                                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                                                 </a>
@@ -125,7 +158,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                                        <td colspan="6" class="px-6 py-4 text-center text-gray-500">
                                             Tidak ada data pengguna.
                                         </td>
                                     </tr>

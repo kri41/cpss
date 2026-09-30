@@ -30,7 +30,13 @@ class SettingsController extends Controller
         $settings['mail_password'] = '';
         $hasMailPassword = filled(Setting::get('mail_password'));
 
-        return view('settings.index', compact('settings', 'hasMailPassword'));
+        // Mailer yang BENAR-BENAR aktif saat ini (setelah AppServiceProvider
+        // menimpa config dari tabel settings), supaya admin tahu apakah email
+        // verifikasi sungguhan terkirim atau cuma dicatat di log.
+        $mailerAktif = config('mail.default');
+        $mailHostAktif = config('mail.mailers.smtp.host');
+
+        return view('settings.index', compact('settings', 'hasMailPassword', 'mailerAktif', 'mailHostAktif'));
     }
 
     public function update(Request $request): RedirectResponse

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -24,6 +25,13 @@ class UserController extends Controller
                 $q->where(fn ($w) => $w->where('name', 'like', "%{$s}%")->orWhere('email', 'like', "%{$s}%"));
             })
             ->when($request->filled('role'), fn ($q) => $q->where('role', $request->role))
+            ->when($request->filled('verifikasi'), function ($q) use ($request) {
+                if ($request->verifikasi === 'terverifikasi') {
+                    $q->whereNotNull('email_verified_at');
+                } elseif ($request->verifikasi === 'belum') {
+                    $q->whereNull('email_verified_at');
+                }
+            })
             ->when($sort === 'nama_desc', fn ($q) => $q->orderByDesc('name'))
             ->when($sort === 'terbaru', fn ($q) => $q->latest())
             ->when(! in_array($sort, ['nama_desc', 'terbaru']), fn ($q) => $q->orderBy('name'))
@@ -114,6 +122,33 @@ class UserController extends Controller
 
         return redirect()->route('users.index')
             ->with('success', 'Pengguna berhasil dihapus.');
+    }
+
+    /**
+     * Aktifkan/batalkan verifikasi email secara manual (super admin).
+     * Berguna selama pengiriman email verifikasi belum/tidak berfungsi
+     * (mis. SMTP belum dikonfigurasi di menu Pengaturan).
+     */
+    public function toggleVerification(User $user): RedirectResponse
+    {
+        if ($user->hasVerifiedEmail()) {
+            $user->markEmailAsUnverified();
+
+            return redirect()->back()->with('success', "Verifikasi email {$user->name} dibatalkan. Pengguna perlu diverifikasi ulang untuk mengakses halaman yang membutuhkannya.");
+        }
+
+        $user->markEmailAsVerified();
+
+        // Sama seperti verifikasi via link email — picu event supaya email
+        // "selamat datang" (bila aktif) ikut terkirim. Dibungkus try/catch
+        // supaya kegagalan kirim email tidak membatalkan aksi verifikasi.
+        try {
+            event(new Verified($user));
+        } catch (\Throwable $e) {
+            report($e);
+        }
+
+        return redirect()->back()->with('success', "Email {$user->name} ditandai terverifikasi secara manual.");
     }
 
     public function importForm(): View

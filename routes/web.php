@@ -156,6 +156,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // User Management Routes (Super Admin only)
     Route::middleware(['App\Http\Middleware\CheckRole:super_admin'])->group(function () {
         Route::resource('users', UserController::class)->except(['show']);
+        Route::patch('/users/{user}/toggle-verifikasi', [UserController::class, 'toggleVerification'])->name('users.toggle-verifikasi');
         Route::get('/users/import/form', [UserController::class, 'importForm'])->name('users.import.form');
         Route::get('/users/import/template', [UserController::class, 'downloadTemplate'])->name('users.import.template');
         Route::post('/users/import/preview', [UserController::class, 'importPreview'])->name('users.import.preview');
