@@ -111,6 +111,11 @@ class PrasaranaController extends Controller
             'kondisi_ventilasi' => 'nullable|integer|min:1|max:5',
             'kondisi_pencahayaan' => 'nullable|integer|min:1|max:5',
             'kondisi_kamar_mandi' => 'nullable|integer|min:1|max:5',
+            // Komponen kondisi tambahan (manual, di luar 8 kolom baku)
+            'kondisi_tambahan_nama' => 'nullable|array',
+            'kondisi_tambahan_nama.*' => 'nullable|string|max:100',
+            'kondisi_tambahan_nilai' => 'nullable|array',
+            'kondisi_tambahan_nilai.*' => 'nullable|integer|min:1|max:5',
             // Akses & Fasilitas
             'akses_disabilitas' => 'boolean',
             'akses_parkir' => 'boolean',
@@ -124,6 +129,8 @@ class PrasaranaController extends Controller
 
         $jenisOlahragaIds = $validated['jenis_olahraga_id'];
         unset($validated['jenis_olahraga_id']);
+
+        $validated['kondisi_tambahan'] = $this->rangkumKondisiTambahan($validated);
 
         $validated['user_id'] = auth()->id();
         $validated['akses_disabilitas'] = $request->boolean('akses_disabilitas', false);
@@ -228,6 +235,11 @@ class PrasaranaController extends Controller
             'kondisi_ventilasi' => 'nullable|integer|min:1|max:5',
             'kondisi_pencahayaan' => 'nullable|integer|min:1|max:5',
             'kondisi_kamar_mandi' => 'nullable|integer|min:1|max:5',
+            // Komponen kondisi tambahan (manual, di luar 8 kolom baku)
+            'kondisi_tambahan_nama' => 'nullable|array',
+            'kondisi_tambahan_nama.*' => 'nullable|string|max:100',
+            'kondisi_tambahan_nilai' => 'nullable|array',
+            'kondisi_tambahan_nilai.*' => 'nullable|integer|min:1|max:5',
             // Akses & Fasilitas
             'akses_disabilitas' => 'boolean',
             'akses_parkir' => 'boolean',
@@ -243,6 +255,8 @@ class PrasaranaController extends Controller
 
         $jenisOlahragaIds = $validated['jenis_olahraga_id'];
         unset($validated['jenis_olahraga_id']);
+
+        $validated['kondisi_tambahan'] = $this->rangkumKondisiTambahan($validated);
 
         $validated['akses_disabilitas'] = $request->boolean('akses_disabilitas', false);
         $validated['akses_parkir'] = $request->boolean('akses_parkir', false);
@@ -287,6 +301,30 @@ class PrasaranaController extends Controller
 
         return redirect()->route('dashboard.prasarana')
             ->with('success', 'Data prasarana berhasil diperbarui.');
+    }
+
+    /**
+     * Rangkai pasangan nama+nilai komponen kondisi tambahan (manual, di luar
+     * 8 kolom baku) jadi array bersih siap simpan ke kolom JSON. Baris yang
+     * namanya kosong atau nilainya belum dipilih dibuang. Juga membuang kedua
+     * key sumbernya dari $validated supaya tidak dikirim mentah ke model.
+     */
+    private function rangkumKondisiTambahan(array &$validated): ?array
+    {
+        $nama = $validated['kondisi_tambahan_nama'] ?? [];
+        $nilai = $validated['kondisi_tambahan_nilai'] ?? [];
+        unset($validated['kondisi_tambahan_nama'], $validated['kondisi_tambahan_nilai']);
+
+        $hasil = [];
+        foreach ($nama as $i => $n) {
+            $n = trim((string) $n);
+            $v = (int) ($nilai[$i] ?? 0);
+            if ($n !== '' && $v >= 1 && $v <= 5) {
+                $hasil[] = ['nama' => $n, 'nilai' => $v];
+            }
+        }
+
+        return $hasil ?: null;
     }
 
     /**

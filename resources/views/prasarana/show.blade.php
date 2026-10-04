@@ -180,30 +180,41 @@
                         ];
                         $ratingLabels = [1 => 'Buruk Sekali', 2 => 'Buruk', 3 => 'Cukup', 4 => 'Baik', 5 => 'Baik Sekali'];
                         $ratingColors = [1 => 'bg-red-100 text-red-700 border-red-200', 2 => 'bg-orange-100 text-orange-700 border-orange-200', 3 => 'bg-yellow-100 text-yellow-700 border-yellow-200', 4 => 'bg-blue-100 text-blue-700 border-blue-200', 5 => 'bg-emerald-100 text-emerald-700 border-emerald-200'];
+
+                        // Hanya komponen yang benar-benar dinilai yang ditampilkan — ini
+                        // opsional (mis. tanah lapang tidak punya ring/net/gawang), jadi
+                        // kosong bukan berarti belum lengkap, tapi memang tidak berlaku.
+                        $komponenTerisi = collect($kondisiList)
+                            ->map(fn ($label, $field) => ['label' => $label, 'nilai' => $prasarana->$field])
+                            ->filter(fn ($k) => $k['nilai'])
+                            ->values();
+                        foreach ($prasarana->kondisi_tambahan ?? [] as $kt) {
+                            if (! empty($kt['nilai'])) {
+                                $komponenTerisi->push(['label' => $kt['nama'], 'nilai' => (int) $kt['nilai']]);
+                            }
+                        }
                     @endphp
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                        @foreach($kondisiList as $field => $label)
-                            @php $val = $prasarana->$field; @endphp
-                            <div class="p-3 rounded-lg border {{ $val ? ($ratingColors[$val] ?? 'bg-gray-50 text-gray-700 border-gray-200') : 'bg-gray-50 text-gray-400 border-gray-100' }}">
-                                <p class="text-xs font-medium opacity-80">{{ $label }}</p>
-                                <div class="flex items-center gap-1 mt-1.5">
-                                    @if($val)
+                    @if($komponenTerisi->isEmpty())
+                        <p class="text-sm text-gray-400 italic">Belum ada komponen kondisi yang dinilai.</p>
+                    @else
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                            @foreach($komponenTerisi as $k)
+                                @php $val = $k['nilai']; @endphp
+                                <div class="p-3 rounded-lg border {{ $ratingColors[$val] ?? 'bg-gray-50 text-gray-700 border-gray-200' }}">
+                                    <p class="text-xs font-medium opacity-80">{{ $k['label'] }}</p>
+                                    <div class="flex items-center gap-1 mt-1.5">
                                         @for($i = 1; $i <= 5; $i++)
                                             <svg class="w-4 h-4 {{ $i <= $val ? 'text-yellow-400' : 'text-gray-200' }}" fill="currentColor" viewBox="0 0 20 20">
                                                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                                             </svg>
                                         @endfor
                                         <span class="ml-1 text-sm font-bold">{{ $val }}</span>
-                                    @else
-                                        <span class="text-xs italic">Belum dinilai</span>
-                                    @endif
-                                </div>
-                                @if($val)
+                                    </div>
                                     <p class="text-xs font-semibold mt-1">{{ $ratingLabels[$val] ?? '' }}</p>
-                                @endif
-                            </div>
-                        @endforeach
-                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
                     <div class="mt-4 flex items-center gap-3 p-4 rounded-lg {{ $prasarana->status_color }}">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />

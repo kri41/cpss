@@ -76,7 +76,8 @@
 
                         <!-- Kondisi Fasilitas (1-5) -->
                         <div>
-                            <h3 class="text-lg font-semibold text-slate-800 mb-4">Kondisi Fasilitas <span class="text-sm font-normal text-slate-500">(1 = Buruk Sekali, 5 = Baik Sekali)</span></h3>
+                            <h3 class="text-lg font-semibold text-slate-800 mb-1">Kondisi Fasilitas <span class="text-sm font-normal text-slate-500">(1 = Buruk Sekali, 5 = Baik Sekali)</span></h3>
+                            <p class="text-xs text-slate-500 mb-4">Opsional — centang hanya komponen yang benar-benar ada di fasilitas ini. Bukan lapangan standar (mis. tanah lapang)? Lewati saja, atau tambahkan komponennya sendiri di bawah.</p>
                             @php
                                 $kondisiList = [
                                     'kondisi_lantai' => 'Lantai',
@@ -90,24 +91,60 @@
                                 ];
                                 $ratingLabels = [1 => 'Buruk Sekali', 2 => 'Buruk', 3 => 'Cukup', 4 => 'Baik', 5 => 'Baik Sekali'];
                             @endphp
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 @foreach($kondisiList as $field => $label)
-                                    <div class="star-rating-group" data-field="{{ $field }}">
-                                        <label class="block text-sm font-medium text-slate-700 mb-2">{{ $label }}</label>
-                                        <div class="flex items-center gap-1">
-                                            @for($i = 1; $i <= 5; $i++)
-                                                <button type="button" data-value="{{ $i }}" class="star-btn p-1 transition-transform hover:scale-110 focus:outline-none">
-                                                    <svg class="w-8 h-8 text-slate-300 star-icon" fill="currentColor" viewBox="0 0 20 20">
-                                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                                                    </svg>
-                                                </button>
-                                            @endfor
-                                            <span class="ml-2 text-sm font-medium text-slate-600 rating-label">Belum dinilai</span>
+                                    @php $adaAwal = old($field) ? true : false; @endphp
+                                    <div class="komponen-group border border-slate-200 rounded-lg p-3" data-field="{{ $field }}">
+                                        <label class="flex items-center gap-2 cursor-pointer">
+                                            <input type="checkbox" class="komponen-toggle w-4 h-4 text-sky-600 border-slate-300 rounded focus:ring-sky-500" {{ $adaAwal ? 'checked' : '' }}>
+                                            <span class="text-sm font-medium text-slate-700">{{ $label }}</span>
+                                        </label>
+                                        <div class="star-rating-group komponen-rating mt-2 {{ $adaAwal ? '' : 'hidden' }}">
+                                            <div class="flex items-center gap-1">
+                                                @for($i = 1; $i <= 5; $i++)
+                                                    <button type="button" data-value="{{ $i }}" class="star-btn p-1 transition-transform hover:scale-110 focus:outline-none">
+                                                        <svg class="w-7 h-7 text-slate-300 star-icon" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                                        </svg>
+                                                    </button>
+                                                @endfor
+                                                <span class="ml-2 text-xs font-medium text-slate-600 rating-label">Belum dinilai</span>
+                                            </div>
+                                            <input type="hidden" name="{{ $field }}" id="{{ $field }}" value="{{ old($field) }}">
                                         </div>
-                                        <input type="hidden" name="{{ $field }}" id="{{ $field }}" value="{{ old($field) }}">
                                         @error($field)<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                                     </div>
                                 @endforeach
+                            </div>
+
+                            <!-- Komponen Lain (manual) -->
+                            <div x-data="komponenTambahan()" class="mt-5 border-t border-slate-100 pt-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h4 class="text-sm font-semibold text-slate-700">Komponen Lain <span class="font-normal text-slate-400">(opsional, isi jika ada bagian fasilitas yang tidak tercantum di atas)</span></h4>
+                                    <button type="button" @click="tambah()" class="text-xs font-semibold text-sky-600 hover:text-sky-800 shrink-0 ml-3">+ Tambah Komponen</button>
+                                </div>
+                                <template x-if="rows.length === 0">
+                                    <p class="text-xs text-slate-400 italic">Belum ada komponen tambahan.</p>
+                                </template>
+                                <div class="space-y-2">
+                                    <template x-for="(row, i) in rows" :key="row.id">
+                                        <div class="flex flex-col sm:flex-row sm:items-center gap-2 p-3 border border-slate-200 rounded-lg">
+                                            <input type="text" name="kondisi_tambahan_nama[]" x-model="row.nama" placeholder="Nama komponen, mis. Tanah Lapang / Pagar Keliling"
+                                                   class="flex-1 rounded-lg border-slate-300 text-sm focus:border-sky-500 focus:ring-sky-500">
+                                            <div class="flex items-center gap-1 shrink-0">
+                                                <template x-for="s in [1,2,3,4,5]" :key="s">
+                                                    <button type="button" @click="row.nilai = s" class="p-0.5">
+                                                        <svg class="w-6 h-6" :class="s <= row.nilai ? 'text-yellow-400' : 'text-slate-300'" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                                        </svg>
+                                                    </button>
+                                                </template>
+                                                <input type="hidden" name="kondisi_tambahan_nilai[]" :value="row.nilai">
+                                            </div>
+                                            <button type="button" @click="hapus(i)" class="text-red-500 hover:text-red-700 text-xs font-semibold shrink-0">Hapus</button>
+                                        </div>
+                                    </template>
+                                </div>
                             </div>
                         </div>
 
@@ -191,6 +228,19 @@
             }
         }
     }
+
+    function komponenTambahan(initial) {
+        initial = initial || [];
+        return {
+            rows: initial.map(r => ({ id: Math.random().toString(36).slice(2), nama: r.nama || '', nilai: r.nilai || 0 })),
+            tambah() {
+                this.rows.push({ id: Math.random().toString(36).slice(2), nama: '', nilai: 0 });
+            },
+            hapus(i) {
+                this.rows.splice(i, 1);
+            }
+        }
+    }
     </script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script>
@@ -269,6 +319,31 @@
 
                 // Init if old value exists
                 if (currentValue > 0) updateStars(currentValue);
+            });
+
+            // --- Toggle "ada/tidak" komponen kondisi baku ---
+            document.querySelectorAll('.komponen-group').forEach(group => {
+                const toggle = group.querySelector('.komponen-toggle');
+                const rating = group.querySelector('.komponen-rating');
+                const hiddenInput = group.querySelector('input[type="hidden"]');
+
+                toggle.addEventListener('change', () => {
+                    if (toggle.checked) {
+                        rating.classList.remove('hidden');
+                    } else {
+                        rating.classList.add('hidden');
+                        hiddenInput.value = '';
+                        rating.querySelectorAll('.star-icon').forEach(icon => {
+                            icon.classList.add('text-slate-300');
+                            icon.classList.remove('text-red-400', 'text-orange-400', 'text-yellow-400', 'text-sky-400', 'text-emerald-400');
+                        });
+                        const label = rating.querySelector('.rating-label');
+                        if (label) {
+                            label.textContent = 'Belum dinilai';
+                            label.className = 'ml-2 text-xs font-medium text-slate-400';
+                        }
+                    }
+                });
             });
         });
     </script>

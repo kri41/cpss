@@ -37,6 +37,7 @@ class Prasarana extends Model
         'kondisi_ventilasi',
         'kondisi_pencahayaan',
         'kondisi_kamar_mandi',
+        'kondisi_tambahan',
         // Akses & Fasilitas
         'akses_disabilitas',
         'akses_parkir',
@@ -68,6 +69,7 @@ class Prasarana extends Model
         'kondisi_ventilasi' => 'integer',
         'kondisi_pencahayaan' => 'integer',
         'kondisi_kamar_mandi' => 'integer',
+        'kondisi_tambahan' => 'array',
     ];
 
     /**
@@ -214,6 +216,12 @@ class Prasarana extends Model
             $this->kondisi_pencahayaan,
             $this->kondisi_kamar_mandi,
         ];
+
+        // Komponen tambahan (manual, di luar 8 kolom baku) ikut masuk rata-rata —
+        // penting untuk fasil yang cuma tanah lapang dkk. tanpa komponen baku sama sekali.
+        foreach ($this->kondisi_tambahan ?? [] as $k) {
+            $kondisi[] = $k['nilai'] ?? null;
+        }
 
         $validKondisi = array_filter($kondisi, fn ($v) => $v !== null);
 
