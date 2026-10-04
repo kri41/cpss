@@ -235,10 +235,12 @@
         scrollWheelZoom: true,
     });
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; OpenStreetMap &amp; CartoDB',
-        subdomains: 'abcd',
-        maxZoom: 19,
+    // CartoDB basemap (light_nolabels) kini mewajibkan API key berbayar —
+    // dipindah ke basemap Esri "Light Gray Canvas": gratis tanpa API key,
+    // terang & polos (tanpa label kota) sehingga cocok untuk choropleth ini.
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+        attribution: '&copy; Esri &mdash; Esri, DeLorme, NAVTEQ',
+        maxZoom: 16,
     }).addTo(map);
 
     const tooltip = document.getElementById('peta-tooltip');
