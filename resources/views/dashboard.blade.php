@@ -39,6 +39,30 @@
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"/></svg>
                             Download CSV
                         </a>
+                        @if(Auth::user()->isRelawan())
+                            @php
+                                $poinSaya = Auth::user()->total_poin ?? 0;
+                                $minPoinLive = \App\Models\User::MIN_POIN_LIVE_REPORT;
+                                $liveUrl = $poinSaya >= $minPoinLive ? Auth::user()->publicReportUrl() : null;
+                            @endphp
+                            @if($liveUrl)
+                                <button type="button" x-data="{ copied: false }"
+                                        data-live-url="{{ $liveUrl }}"
+                                        @click="navigator.clipboard.writeText($event.currentTarget.dataset.liveUrl); copied = true; setTimeout(() => copied = false, 2000)"
+                                        class="flex items-center gap-2 px-5 py-3 border text-white font-semibold rounded-xl transition text-sm backdrop-blur-sm"
+                                        :class="copied ? 'bg-emerald-500/30 border-emerald-300/50' : 'bg-white/20 hover:bg-white/30 border-white/30'">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 010 5.656l-3 3a4 4 0 01-5.656-5.656l1.5-1.5M10.172 13.828a4 4 0 010-5.656l3-3a4 4 0 015.656 5.656l-1.5 1.5"/></svg>
+                                    <span x-show="!copied">Salin Link Live</span>
+                                    <span x-show="copied" x-cloak>✓ Tersalin — tempel di LMS</span>
+                                </button>
+                            @else
+                                <span class="flex items-center gap-2 px-5 py-3 bg-white/10 border border-white/20 text-white/70 font-semibold rounded-xl text-sm cursor-not-allowed"
+                                      title="Kumpulkan {{ $minPoinLive }} poin tervalidasi untuk membuka Link Live pribadimu (bukti aktualisasi). Sekarang: {{ $poinSaya }} poin.">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                                    Link Live ({{ $poinSaya }}/{{ $minPoinLive }} poin)
+                                </span>
+                            @endif
+                        @endif
                     </div>
                 </div>
             </div>

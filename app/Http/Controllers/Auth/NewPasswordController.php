@@ -52,12 +52,18 @@ class NewPasswordController extends Controller
             }
         );
 
+        $pesan = match ($status) {
+            Password::PASSWORD_RESET => 'Kata sandi berhasil diperbarui. Silakan masuk dengan kata sandi baru.',
+            Password::INVALID_TOKEN => 'Tautan atur ulang kata sandi ini tidak valid atau sudah kedaluwarsa. Silakan minta tautan baru.',
+            default => 'Kami tidak menemukan akun dengan email tersebut.',
+        };
+
         // If the password was successfully reset, we will redirect the user back to
         // the application's home authenticated view. If there is an error we can
         // redirect them back to where they came from with their error message.
         return $status == Password::PASSWORD_RESET
-                    ? redirect()->route('login')->with('status', __($status))
+                    ? redirect()->route('login')->with('status', $pesan)
                     : back()->withInput($request->only('email'))
-                        ->withErrors(['email' => __($status)]);
+                        ->withErrors(['email' => $pesan]);
     }
 }

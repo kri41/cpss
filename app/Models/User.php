@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\HasSlug;
+use App\Notifications\ResetPasswordNotification;
 use App\Notifications\VerifyEmailNotification;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -15,6 +16,13 @@ use Illuminate\Support\Str;
 class User extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory, HasSlug, Notifiable;
+
+    /**
+     * Ambang poin tervalidasi minimal sebelum relawan bisa membuka/membagikan
+     * Link Live-nya sendiri dari dashboard (mis. untuk bukti aktualisasi).
+     * Admin tidak terikat batas ini — menu Laporan Relawan selalu bisa akses.
+     */
+    public const MIN_POIN_LIVE_REPORT = 200;
 
     /**
      * The attributes that are mass assignable.
@@ -81,6 +89,14 @@ class User extends Authenticatable implements MustVerifyEmail
     public function sendEmailVerificationNotification(): void
     {
         $this->notify(new VerifyEmailNotification);
+    }
+
+    /**
+     * Kirim email atur ulang kata sandi dengan isi Bahasa Indonesia.
+     */
+    public function sendPasswordResetNotification(#[\SensitiveParameter] $token): void
+    {
+        $this->notify(new ResetPasswordNotification($token));
     }
 
     /* ================= LIVE REPORT (link publik) ================= */
