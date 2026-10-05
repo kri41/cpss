@@ -60,6 +60,32 @@
                 @endforeach
             </div>
 
+            {{-- ===== LINK REKAP LIVE (semua relawan, publik tanpa login) ===== --}}
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5" x-data="{ copied: false }">
+                <div class="flex items-center gap-2 mb-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 010 5.656l-3 3a4 4 0 01-5.656-5.656l1.5-1.5M10.172 13.828a4 4 0 010-5.656l3-3a4 4 0 015.656 5.656l-1.5 1.5"/></svg>
+                    <h3 class="text-sm font-bold text-gray-900">Link Rekap Live &mdash; Status Semua Relawan</h3>
+                </div>
+                <p class="text-xs text-gray-500 mb-3">Salin dan bagikan link ini ke pihak luar (mis. atasan/LMS) untuk melihat siapa saja relawan yang sudah/belum memenuhi ambang poin sertifikasi &mdash; <strong>live</strong>, tanpa perlu login.</p>
+                <div class="flex flex-col sm:flex-row gap-2">
+                    <input type="text" readonly x-ref="rekapLink" value="{{ $rekapLiveUrl }}"
+                           class="flex-1 rounded-lg border-gray-200 bg-gray-50 text-sm text-gray-600 focus:ring-indigo-500 focus:border-indigo-500">
+                    <button type="button"
+                            @click="navigator.clipboard.writeText($refs.rekapLink.value); copied = true; setTimeout(() => copied = false, 2000)"
+                            class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg transition whitespace-nowrap">
+                        <span x-show="!copied">Salin Link</span>
+                        <span x-show="copied" x-cloak>&check; Tersalin</span>
+                    </button>
+                    <a href="{{ $rekapLiveUrl }}" target="_blank" rel="noopener"
+                       class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-semibold rounded-lg transition text-center">Buka</a>
+                    <form method="POST" action="{{ route('laporan-relawan.rekap.regenerate-token') }}"
+                          onsubmit="return confirm('Ganti link Rekap Live? Link lama akan langsung berhenti berfungsi.')">
+                        @csrf
+                        <button type="submit" class="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-700 text-sm font-semibold rounded-lg transition whitespace-nowrap">Ganti Link</button>
+                    </form>
+                </div>
+            </div>
+
             {{-- ===== FILTER ===== --}}
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
                 <form method="GET" action="{{ route('laporan-relawan.index') }}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">

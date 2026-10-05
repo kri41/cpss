@@ -21,6 +21,7 @@ use App\Http\Controllers\PengumumanController;
 use App\Http\Controllers\PrasaranaController;
 use App\Http\Controllers\ProfilController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PublicRekapController;
 use App\Http\Controllers\PublicReportController;
 use App\Http\Controllers\RelawanController;
 use App\Http\Controllers\SettingsController;
@@ -193,6 +194,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/riset/laporan.csv', [LaporanRelawanController::class, 'risetLaporanCsv'])->name('riset.laporan');
         Route::get('/riset/rekap.csv', [LaporanRelawanController::class, 'risetRekapCsv'])->name('riset.rekap');
 
+        Route::post('/rekap/ganti-link', [LaporanRelawanController::class, 'regenerateRekapToken'])->name('rekap.regenerate-token');
+
         Route::get('/{relawan}', [LaporanRelawanController::class, 'show'])->name('show');
         Route::get('/{relawan}/pdf', [LaporanRelawanController::class, 'pdf'])->name('pdf');
         Route::post('/{relawan}/ganti-link', [LaporanRelawanController::class, 'regenerateToken'])->name('regenerate-token');
@@ -288,5 +291,11 @@ Route::get('/r/{token}', [PublicReportController::class, 'show'])
     ->where('token', '[A-Za-z0-9]{20,64}')->name('public-report.show');
 Route::get('/r/{token}/pdf', [PublicReportController::class, 'pdf'])
     ->where('token', '[A-Za-z0-9]{20,64}')->name('public-report.pdf');
+
+/* ============================================================
+   REKAP LIVE — status SEMUA relawan, link publik tunggal (admin)
+   ============================================================ */
+Route::get('/rekap/{token}', [PublicRekapController::class, 'show'])
+    ->where('token', '[A-Za-z0-9]{20,64}')->name('rekap-live.show');
 
 require __DIR__.'/auth.php';

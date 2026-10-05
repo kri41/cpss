@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Str;
 
 /**
  * Penyimpanan konfigurasi aplikasi yang bisa diubah lewat menu Pengaturan
@@ -109,5 +110,28 @@ class Setting extends Model
     public static function flushCache(): void
     {
         Cache::forget('app_settings');
+    }
+
+    /**
+     * Token tunggal untuk "Rekap Live" — satu link publik (tanpa login) yang
+     * menampilkan status SEMUA relawan (sudah/belum memenuhi ambang poin).
+     * Dibuat otomatis saat pertama kali dibutuhkan, bisa diganti admin.
+     */
+    public static function rekapLiveToken(): string
+    {
+        $token = static::get('rekap_live_token');
+        if (! $token) {
+            $token = static::regenerateRekapLiveToken();
+        }
+
+        return $token;
+    }
+
+    public static function regenerateRekapLiveToken(): string
+    {
+        $token = Str::random(48);
+        static::put('rekap_live_token', $token);
+
+        return $token;
     }
 }

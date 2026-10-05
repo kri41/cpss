@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\DurasiEntri;
 use App\Models\PembuatanLaporan;
 use App\Models\PointTransaction;
+use App\Models\Setting;
 use App\Models\User;
 use App\Services\RelawanReportService;
 use App\Support\RisetLogger;
@@ -76,7 +77,9 @@ class LaporanRelawanController extends Controller
         $filterKabupaten = User::where('role', 'relawan')->whereNotNull('kabupaten')->distinct()->orderBy('kabupaten')->pluck('kabupaten');
         $filterKecamatan = User::where('role', 'relawan')->whereNotNull('kecamatan')->distinct()->orderBy('kecamatan')->pluck('kecamatan');
 
-        return view('laporan-relawan.index', compact('relawan', 'agg', 'filterKabupaten', 'filterKecamatan', 'sort'));
+        $rekapLiveUrl = route('rekap-live.show', Setting::rekapLiveToken());
+
+        return view('laporan-relawan.index', compact('relawan', 'agg', 'filterKabupaten', 'filterKecamatan', 'sort', 'rekapLiveUrl'));
     }
 
     /* ================================================================
@@ -120,6 +123,16 @@ class LaporanRelawanController extends Controller
         $relawan->regeneratePublicReportToken();
 
         return back()->with('success', 'Link laporan publik berhasil diganti. Link lama sudah tidak berlaku.');
+    }
+
+    /* ================================================================
+       GANTI TOKEN LINK REKAP LIVE (status semua relawan, tanpa login)
+       ================================================================ */
+    public function regenerateRekapToken(): RedirectResponse
+    {
+        Setting::regenerateRekapLiveToken();
+
+        return back()->with('success', 'Link Rekap Live berhasil diganti. Link lama sudah tidak berlaku.');
     }
 
     /* ================================================================
