@@ -15,13 +15,16 @@
     $hariSingkat = ['Sen','Sel','Rab','Kam','Jum','Sab','Min'];
 @endphp
 
-<div class="flex flex-col lg:flex-row gap-0 h-full min-h-[calc(100vh-4rem)]">
+{{-- Tinggi kartu DITETAPKAN (bukan min-height) persis seperti panel Peta Event —
+     supaya kalender & panel agenda sama-sama satu layar, dan daftar agenda yang
+     panjang scroll SENDIRI di dalam panelnya, bukan menggulung seluruh halaman. --}}
+<div class="flex flex-col lg:flex-row gap-0" style="height: 680px;">
 
     {{-- ===== PANEL KIRI: KALENDER ===== --}}
-    <div class="flex-1 flex flex-col min-w-0">
+    <div class="flex-1 flex flex-col min-w-0 min-h-0">
 
         {{-- Header --}}
-        <div class="bg-gradient-to-r from-blue-700 via-blue-600 to-sky-500 px-5 py-4 flex items-center justify-between shadow-sm">
+        <div class="shrink-0 bg-gradient-to-r from-blue-700 via-blue-600 to-sky-500 px-5 py-4 flex items-center justify-between shadow-sm">
             <div>
                 <p class="text-blue-200 text-xs font-medium uppercase tracking-widest">Kalender Kegiatan</p>
                 <h2 class="text-white text-2xl font-extrabold leading-tight">
@@ -46,7 +49,7 @@
         </div>
 
         {{-- Header Hari --}}
-        <div class="grid grid-cols-7 bg-blue-50 border-b border-blue-100">
+        <div class="shrink-0 grid grid-cols-7 bg-blue-50 border-b border-blue-100">
             @foreach($hariSingkat as $idx => $hari)
             <div class="py-2.5 text-center text-[11px] font-bold uppercase tracking-wider
                 {{ $idx >= 5 ? 'text-red-400' : 'text-blue-600' }}">
@@ -56,7 +59,7 @@
         </div>
 
         {{-- Grid Tanggal --}}
-        <div class="flex-1 grid grid-cols-7 bg-white" style="grid-template-rows: repeat({{ $rows }}, minmax(80px, 1fr));">
+        <div class="flex-1 min-h-0 grid grid-cols-7 bg-white overflow-y-auto" style="grid-template-rows: repeat({{ $rows }}, minmax(80px, 1fr));">
 
             @for($i = 1; $i < $firstDayOfWeek; $i++)
                 <div class="border-b border-r border-gray-100 bg-gray-50/50 {{ $i % 7 === 6 || $i % 7 === 0 ? 'bg-red-50/30' : '' }}"></div>
@@ -108,9 +111,9 @@
     </div>
 
     {{-- ===== PANEL KANAN: EVENT LIST ===== --}}
-    <div class="lg:w-72 xl:w-80 border-l border-gray-100 bg-gray-50/60 flex flex-col">
+    <div class="lg:w-72 xl:w-80 border-l border-gray-100 bg-gray-50/60 flex flex-col min-h-0">
         {{-- Header Panel --}}
-        <div class="px-4 py-4 border-b border-gray-100 bg-white">
+        <div class="px-4 py-4 border-b border-gray-100 bg-white shrink-0">
             <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Agenda Bulan Ini</p>
             <div class="flex items-center gap-2 flex-wrap">
                 <span class="flex items-center gap-1 text-xs text-sky-600 font-medium">
@@ -122,8 +125,8 @@
             </div>
         </div>
 
-        {{-- List --}}
-        <div class="flex-1 overflow-y-auto px-3 py-3 space-y-2">
+        {{-- List — panel header FIX, cuma daftar ini yang scroll --}}
+        <div class="flex-1 min-h-0 overflow-y-auto px-3 py-3 space-y-2">
             @forelse($allItems as $item)
             @php
                 $isPast = isset($item['date']) && $item['date'] < $today;
