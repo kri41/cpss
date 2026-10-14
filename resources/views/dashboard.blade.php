@@ -163,7 +163,7 @@
                     <div class="flex items-center justify-between mb-6">
                         <div>
                             <h3 class="text-lg font-bold text-gray-900">Tren Partisipasi</h3>
-                            <p class="text-sm text-gray-500">6 bulan terakhir</p>
+                            <p class="text-sm text-gray-500">6 bulan terakhir &mdash; observasi manual &amp; check-in Kampung Olahraga</p>
                         </div>
                         <div class="p-2 bg-blue-50 rounded-lg"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" /></svg></div>
                     </div>
@@ -267,17 +267,24 @@
         new Chart(ctxPart, {
             type: 'line',
             data: {
-                labels: {!! json_encode($partisipasiPerBulan->pluck('bulan')->map(function($b) { return \Carbon\Carbon::parse($b)->format('M Y'); })) !!},
+                labels: {!! json_encode($trenPartisipasi->pluck('label')) !!},
                 datasets: [{
-                    label: 'Partisipasi',
-                    data: {!! json_encode($partisipasiPerBulan->pluck('total')) !!},
+                    label: 'Observasi (estimasi orang)',
+                    data: {!! json_encode($trenPartisipasi->pluck('observasi')) !!},
                     borderColor: '#2563eb',
                     backgroundColor: 'rgba(37, 99, 235, 0.1)',
                     borderWidth: 3, fill: true, tension: 0.4,
                     pointBackgroundColor: '#2563eb', pointBorderColor: '#fff', pointBorderWidth: 2, pointRadius: 4
+                }, {
+                    label: 'Check-in Kampung Olahraga',
+                    data: {!! json_encode($trenPartisipasi->pluck('checkin')) !!},
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    borderWidth: 3, fill: true, tension: 0.4,
+                    pointBackgroundColor: '#10b981', pointBorderColor: '#fff', pointBorderWidth: 2, pointRadius: 4
                 }]
             },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } }, x: { grid: { display: false } } } }
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'bottom', labels: { usePointStyle: true, padding: 16, font: { size: 11 } } } }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } }, x: { grid: { display: false } } } }
         });
 
         const ctxFac = document.getElementById('facilityChart').getContext('2d');

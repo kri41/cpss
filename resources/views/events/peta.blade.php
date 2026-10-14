@@ -6,37 +6,38 @@
 <div class="py-6">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        {{-- ===== HEADER ===== --}}
-        <div class="mb-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div>
-                <h1 class="text-2xl font-bold text-gray-900">Peta Distribusi Event</h1>
-                <p class="text-sm text-gray-500 mt-1">Klik provinsi untuk melihat event olahraga di wilayah tersebut</p>
+        {{-- ===== HEADER + LEGENDA (kartu putih — halaman ini dipakai juga di luar login, jadi judulnya tidak boleh mengambang langsung di atas gradien) ===== --}}
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-5">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">Peta Distribusi Event</h1>
+                    <p class="text-sm text-gray-500 mt-1">Klik provinsi untuk melihat event olahraga di wilayah tersebut</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <a href="{{ $isDashboard ? route('dashboard.events') : route('events.index') }}"
+                       class="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                        Tampilan Daftar
+                    </a>
+                </div>
             </div>
-            <div class="flex items-center gap-2">
-                <a href="{{ $isDashboard ? route('dashboard.events') : route('events.index') }}"
-                   class="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition shadow-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
-                    Tampilan Daftar
-                </a>
-            </div>
-        </div>
 
-        {{-- ===== LEGENDA & STATS ===== --}}
-        <div class="flex flex-wrap items-center gap-4 mb-4">
-            <div class="flex items-center gap-1.5 text-xs text-gray-500">
-                <span class="w-4 h-4 rounded border border-gray-200 inline-block" style="background:#f9fafb"></span> Tidak ada event
-            </div>
-            <div class="flex items-center gap-1.5 text-xs text-gray-500">
-                <span class="w-4 h-4 rounded inline-block" style="background:#bbf7d0"></span> 1–3
-            </div>
-            <div class="flex items-center gap-1.5 text-xs text-gray-500">
-                <span class="w-4 h-4 rounded inline-block" style="background:#4ade80"></span> 4–8
-            </div>
-            <div class="flex items-center gap-1.5 text-xs text-gray-500">
-                <span class="w-4 h-4 rounded inline-block" style="background:#16a34a"></span> 9–15
-            </div>
-            <div class="flex items-center gap-1.5 text-xs text-gray-500">
-                <span class="w-4 h-4 rounded inline-block" style="background:#14532d"></span> &gt; 15
+            <div class="flex flex-wrap items-center gap-4 mt-4 pt-4 border-t border-gray-100">
+                <div class="flex items-center gap-1.5 text-xs text-gray-500">
+                    <span class="w-4 h-4 rounded border border-gray-200 inline-block" style="background:#f9fafb"></span> Tidak ada event
+                </div>
+                <div class="flex items-center gap-1.5 text-xs text-gray-500">
+                    <span class="w-4 h-4 rounded inline-block" style="background:#bbf7d0"></span> 1–3
+                </div>
+                <div class="flex items-center gap-1.5 text-xs text-gray-500">
+                    <span class="w-4 h-4 rounded inline-block" style="background:#4ade80"></span> 4–8
+                </div>
+                <div class="flex items-center gap-1.5 text-xs text-gray-500">
+                    <span class="w-4 h-4 rounded inline-block" style="background:#16a34a"></span> 9–15
+                </div>
+                <div class="flex items-center gap-1.5 text-xs text-gray-500">
+                    <span class="w-4 h-4 rounded inline-block" style="background:#14532d"></span> &gt; 15
+                </div>
             </div>
         </div>
 
@@ -54,9 +55,11 @@
                 </div>
             </div>
 
-            {{-- PANEL EVENT --}}
+            {{-- PANEL EVENT — tinggi disamakan persis dengan peta (bukan min-height) supaya
+                 daftar event yang panjang scroll SENDIRI di dalam panel, bukan menggulung
+                 seluruh halaman. --}}
             <div class="lg:col-span-1">
-                <div id="event-panel" class="bg-white rounded-2xl shadow-sm border border-gray-100 h-full flex flex-col" style="min-height: 520px;">
+                <div id="event-panel" class="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col" style="height: 520px;">
                     @if($selectedKode && $selectedNama)
                         <div class="p-4 border-b border-gray-100 flex items-center justify-between">
                             <div>

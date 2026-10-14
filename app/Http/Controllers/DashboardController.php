@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AuditLog;
+use App\Models\CheckinKampung;
 use App\Models\Club;
 use App\Models\Event;
 use App\Models\Partisipasi;
@@ -35,7 +36,12 @@ class DashboardController extends Controller
             'total_tenaga_ahli' => TenagaAhli::count(),
         ];
 
-        // Data partisipasi per bulan (6 bulan terakhir) - MySQL compatible
+        // Tren partisipasi 6 bulan terakhir — digabung dari DUA sumber supaya
+        // tidak "0 terus" padahal sebenarnya ada aktivitas: (1) observasi manual
+        // (Partisipasi::estimasi_jumlah_orang, bisa kosong lama tidak diisi), dan
+        // (2) check-in QR nyata di Kampung Olahraga (CheckinKampung, per orang).
+        // Keduanya ditampilkan sebagai 2 garis terpisah (bukan dijumlah) karena
+        // satuannya beda: estimasi kerumunan vs hitungan individu check-in riil.
         $partisipasiPerBulan = Partisipasi::select(
             DB::raw("DATE_FORMAT(tanggal_observasi, '%Y-%m') as bulan"),
             DB::raw('SUM(estimasi_jumlah_orang) as total')
@@ -44,6 +50,25 @@ class DashboardController extends Controller
             ->groupBy('bulan')
             ->orderBy('bulan')
             ->get();
+
+        $checkinPerBulan = CheckinKampung::select(
+            DB::raw("DATE_FORMAT(created_at, '%Y-%m') as bulan"),
+            DB::raw('COUNT(*) as total')
+        )
+            ->where('created_at', '>=', now()->subMonths(6))
+            ->groupBy('bulan')
+            ->orderBy('bulan')
+            ->get();
+
+        $bulanRange = collect(range(5, 0))->map(fn ($i) => now()->subMonths($i)->format('Y-m'));
+        $partisipasiMap = $partisipasiPerBulan->pluck('total', 'bulan');
+        $checkinMap = $checkinPerBulan->pluck('total', 'bulan');
+        $trenPartisipasi = $bulanRange->map(fn ($b) => [
+            'bulan' => $b,
+            'label' => Carbon::createFromFormat('Y-m', $b)->locale('id')->isoFormat('MMM YYYY'),
+            'observasi' => (int) ($partisipasiMap[$b] ?? 0),
+            'checkin' => (int) ($checkinMap[$b] ?? 0),
+        ])->values();
 
         // Event yang akan datang
         $upcomingEvents = Event::akanDatang()
@@ -75,6 +100,7 @@ class DashboardController extends Controller
         return view('dashboard', compact(
             'stats',
             'partisipasiPerBulan',
+            'trenPartisipasi',
             'upcomingEvents',
             'prasaranaByKondisi',
             'partisipasiByUsia',
