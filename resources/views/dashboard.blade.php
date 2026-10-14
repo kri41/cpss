@@ -174,7 +174,7 @@
                     <div class="flex items-center justify-between mb-6">
                         <div>
                             <h3 class="text-lg font-bold text-gray-900">Kondisi Prasarana</h3>
-                            <p class="text-sm text-gray-500">Berdasarkan kondisi lantai</p>
+                            <p class="text-sm text-gray-500">Rata-rata seluruh komponen (skala 1-5)</p>
                         </div>
                         <div class="p-2 bg-green-50 rounded-lg"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg></div>
                     </div>
@@ -225,7 +225,7 @@
 
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                     <h3 class="text-lg font-bold text-gray-900 mb-2">Partisipasi by Usia</h3>
-                    <p class="text-sm text-gray-500 mb-6">Distribusi berdasarkan kelompok usia</p>
+                    <p class="text-sm text-gray-500 mb-6">Distribusi usia peserta check-in Kampung Olahraga</p>
                     <div class="h-48"><canvas id="usiaChart"></canvas></div>
                 </div>
             </div>
@@ -291,8 +291,8 @@
         new Chart(ctxFac, {
             type: 'doughnut',
             data: {
-                labels: {!! json_encode($prasaranaByKondisi->pluck('kondisi_lantai')) !!},
-                datasets: [{ data: {!! json_encode($prasaranaByKondisi->pluck('total')) !!}, backgroundColor: ['#10b981', '#f59e0b', '#ef4444'], borderWidth: 0 }]
+                labels: {!! json_encode($prasaranaByKondisi->pluck('label')) !!},
+                datasets: [{ data: {!! json_encode($prasaranaByKondisi->pluck('total')) !!}, backgroundColor: {!! json_encode($prasaranaByKondisi->pluck('warna')) !!}, borderWidth: 0 }]
             },
             options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } } } }
         });

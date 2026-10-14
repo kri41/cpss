@@ -75,16 +75,57 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
-        // Data prasarana berdasarkan kondisi
-        $prasaranaByKondisi = Prasarana::selectRaw('kondisi_lantai, COUNT(*) as total')
-            ->whereNotNull('kondisi_lantai')
-            ->groupBy('kondisi_lantai')
-            ->get();
+        // Data prasarana berdasarkan kondisi — RATA-RATA seluruh komponen
+        // (8 kolom baku + kondisi_tambahan via accessor average_kondisi),
+        // bukan cuma kondisi_lantai saja (bug lama: cuma lihat 1 komponen,
+        // dan warna chart cuma 3 utk 5 skor sehingga legenda salah kaprah).
+        $kondisiWarna = [1 => '#ef4444', 2 => '#f97316', 3 => '#eab308', 4 => '#3b82f6', 5 => '#10b981'];
+        $kondisiCounts = Prasarana::select(
+            'kondisi_lantai', 'kondisi_ring', 'kondisi_net', 'kondisi_gawang',
+            'kondisi_lapangan', 'kondisi_ventilasi', 'kondisi_pencahayaan',
+            'kondisi_kamar_mandi', 'kondisi_tambahan'
+        )->get()
+            ->map(fn ($p) => $p->average_kondisi > 0 ? (int) round($p->average_kondisi) : null)
+            ->filter()
+            ->countBy();
 
-        // Data partisipasi berdasarkan kelompok usia
-        $partisipasiByUsia = Partisipasi::selectRaw('mayoritas_usia, SUM(estimasi_jumlah_orang) as total')
-            ->groupBy('mayoritas_usia')
-            ->get();
+        $prasaranaByKondisi = collect(Prasarana::RATING_LABELS)
+            ->map(fn ($label, $skor) => [
+                'skor' => $skor,
+                'label' => $label,
+                'total' => $kondisiCounts[$skor] ?? 0,
+                'warna' => $kondisiWarna[$skor],
+            ])
+            ->filter(fn ($row) => $row['total'] > 0)
+            ->values();
+
+        // Data partisipasi berdasarkan kelompok usia — dari check-in QR riil
+        // Kampung Olahraga (CheckinKampung::umur per orang), BUKAN
+        // Partisipasi::mayoritas_usia yang jarang diisi (makanya sering kosong).
+        $urutanUsia = ['Anak', 'Remaja', 'Dewasa', 'Lansia'];
+        $usiaCounts = CheckinKampung::whereNotNull('umur')
+            ->get(['umur'])
+            ->map(fn ($c) => match (true) {
+                $c->umur <= 12 => 'Anak',
+                $c->umur <= 17 => 'Remaja',
+                $c->umur <= 59 => 'Dewasa',
+                default => 'Lansia',
+            })
+            ->countBy();
+
+        $partisipasiByUsia = collect($urutanUsia)
+            ->map(fn ($kelompok) => ['mayoritas_usia' => $kelompok, 'total' => $usiaCounts[$kelompok] ?? 0])
+            ->filter(fn ($row) => $row['total'] > 0)
+            ->values();
+
+        // Fallback kalau belum ada satu pun check-in dengan umur terisi:
+        // pakai observasi manual lama supaya chart tidak kosong total.
+        if ($partisipasiByUsia->isEmpty()) {
+            $partisipasiByUsia = Partisipasi::selectRaw('mayoritas_usia, SUM(estimasi_jumlah_orang) as total')
+                ->groupBy('mayoritas_usia')
+                ->get()
+                ->map(fn ($row) => ['mayoritas_usia' => $row->mayoritas_usia, 'total' => (int) $row->total]);
+        }
 
         // Audit logs terbaru (untuk admin)
         $recentAuditLogs = collect();
