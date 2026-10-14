@@ -1,21 +1,18 @@
-@extends('layouts.app')
-
-@section('title', 'Preview Import Pengguna - Dataraga')
-
-@section('content')
-<div class="py-6">
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-
-        {{-- Header --}}
-        <div class="mb-6 flex items-center gap-3">
-            <a href="{{ route('users.import.form') }}" class="p-2 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition">
+<x-app-layout>
+    <x-slot name="header">
+        <div class="flex items-center gap-3">
+            <a href="{{ route('users.import.form') }}" class="p-2 -ml-2 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
             </a>
             <div>
-                <h1 class="text-xl font-bold text-gray-900">Preview Import Pengguna</h1>
+                <h2 class="text-xl font-bold text-gray-900">Preview Import Pengguna</h2>
                 <p class="text-sm text-gray-500 mt-0.5">Tinjau data sebelum disimpan ke database</p>
             </div>
         </div>
+    </x-slot>
+
+<div class="py-6">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {{-- Ringkasan Badge --}}
         <div class="flex flex-wrap gap-3 mb-6">
@@ -163,4 +160,4 @@
 
     </div>
 </div>
-@endsection
+</x-app-layout>

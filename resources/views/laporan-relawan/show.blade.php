@@ -1,8 +1,3 @@
-@extends('layouts.app')
-
-@section('title', 'Laporan ' . $relawan->name . ' - Dataraga')
-
-@section('content')
 @php
     $kategoriMeta = [
         'prasarana'        => ['label' => 'Prasarana',        'bar' => 'bg-blue-500'],
@@ -23,14 +18,16 @@
         default     => 'Menunggu',
     };
 @endphp
-
-<div class="py-6">
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-
+<x-app-layout>
+    <x-slot name="header">
         <a href="{{ route('laporan-relawan.index') }}" class="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 font-medium">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
             Kembali ke Daftar Relawan
         </a>
+    </x-slot>
+
+<div class="py-6">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
 
         @if(session('success'))
             <div class="p-3 bg-green-50 border border-green-200 rounded-xl text-sm text-green-700">{{ session('success') }}</div>
@@ -372,4 +369,4 @@
 
     </div>
 </div>
-@endsection
+</x-app-layout>

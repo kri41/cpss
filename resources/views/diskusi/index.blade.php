@@ -1,22 +1,22 @@
-@extends('layouts.app')
+<x-app-layout>
+    <x-slot name="header">
+        <div class="flex items-center justify-between gap-3 flex-wrap">
+            <div>
+                <h2 class="text-base font-bold text-gray-800">Forum Relawan</h2>
+                <p class="text-xs text-gray-400 mt-0.5">Ruang diskusi untuk relawan &amp; admin di provinsi <strong>{{ $provinsiNama }}</strong>. Halaman ini tidak auto-refresh — muat ulang untuk melihat pesan terbaru.</p>
+            </div>
+            <form method="GET" action="{{ route('diskusi.index') }}">
+                <select name="provinsi" onchange="this.form.submit()" class="rounded-lg border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500 shadow-sm">
+                    @foreach($provinsiList as $prov)
+                        <option value="{{ $prov->kode }}" {{ $provinsi == $prov->kode ? 'selected' : '' }}>{{ $prov->nama }}</option>
+                    @endforeach
+                </select>
+            </form>
+        </div>
+    </x-slot>
 
-@section('title', 'Forum - Dataraga')
-
-@section('content')
+<div class="py-6">
 <div class="max-w-6xl mx-auto px-4 py-4 sm:px-6">
-
-    <div class="mb-4 flex items-center justify-between gap-3 flex-wrap">
-        <h1 class="text-base font-bold text-gray-800">Forum Relawan</h1>
-        <form method="GET" action="{{ route('diskusi.index') }}">
-            <select name="provinsi" onchange="this.form.submit()" class="rounded-lg border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500 shadow-sm">
-                @foreach($provinsiList as $prov)
-                    <option value="{{ $prov->kode }}" {{ $provinsi == $prov->kode ? 'selected' : '' }}>{{ $prov->nama }}</option>
-                @endforeach
-            </select>
-        </form>
-    </div>
-
-    <p class="text-xs text-gray-400 mb-4">Ruang diskusi untuk relawan &amp; admin di provinsi <strong>{{ $provinsiNama }}</strong>. Halaman ini tidak auto-refresh — muat ulang untuk melihat pesan terbaru.</p>
 
     @if(session('success'))
     <div class="mb-4 p-3 bg-green-50 border border-green-200 rounded-xl text-sm text-green-700">{{ session('success') }}</div>
@@ -104,4 +104,5 @@
         </div>
     </div>
 </div>
-@endsection
+</div>
+</x-app-layout>

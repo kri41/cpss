@@ -1,8 +1,3 @@
-@extends('layouts.app')
-
-@section('title', $kampung->nama_kampung . ' - Kampung Olahraga')
-
-@section('content')
 @php
     $skor = $kampung->skorPoin();
     $maxPoin = $komponenList->sum('poin');
@@ -10,17 +5,17 @@
     $isOwner = $kampung->user_id === auth()->id();
     $canManage = $isAdmin || $isOwner;
 @endphp
-
-<div x-data="{ rejectOpen: false, qrOpen: false, qrShown: null, attachFasilOpen: false, attachKlubOpen: false }">
-<div class="max-w-5xl mx-auto px-4 py-4 sm:px-6">
-
-    {{-- Back --}}
-    <div class="mb-4">
+<x-app-layout>
+    <x-slot name="header">
         <a href="{{ route('kampung.index') }}" class="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 font-medium">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
             Kembali
         </a>
-    </div>
+    </x-slot>
+
+<div class="py-6">
+<div x-data="{ rejectOpen: false, qrOpen: false, qrShown: null, attachFasilOpen: false, attachKlubOpen: false }">
+<div class="max-w-5xl mx-auto px-4 py-4 sm:px-6">
 
     @if(session('success'))
     <div class="mb-4 p-3 bg-green-50 border border-green-200 rounded-xl text-sm text-green-700">{{ session('success') }}</div>
@@ -446,6 +441,7 @@
 
 </div>
 {{-- /x-data scope --}}
+</div>
 
 <style>
 @media print {
@@ -453,4 +449,4 @@
     .inline-block { display: block !important; }
 }
 </style>
-@endsection
+</x-app-layout>

@@ -1,18 +1,17 @@
-@extends('layouts.app')
+<x-app-layout>
+    <x-slot name="header">
+        <div class="flex items-center gap-3">
+            <a href="{{ route('dashboard') }}" class="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 font-medium">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                Kembali
+            </a>
+            <h2 class="text-base font-bold text-gray-800">Usulan Perubahan</h2>
+            <span class="text-xs font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-full">{{ $changeRequests->total() }} menunggu</span>
+        </div>
+    </x-slot>
 
-@section('title', 'Usulan Perubahan - Dataraga')
-
-@section('content')
+<div class="py-6">
 <div x-data="{ rejectOpen: false, rejectAction: '' }" class="max-w-4xl mx-auto px-4 py-4 sm:px-6">
-
-    <div class="mb-4 flex items-center gap-3">
-        <a href="{{ route('dashboard') }}" class="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 font-medium">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-            Kembali
-        </a>
-        <h1 class="text-base font-bold text-gray-800">Usulan Perubahan</h1>
-        <span class="text-xs font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-full">{{ $changeRequests->total() }} menunggu</span>
-    </div>
 
     <p class="text-xs text-gray-400 mb-4">Menyetujui permintaan akan membuka kembali akses edit untuk <strong>pemilik asli</strong> data (status kembali "pending", perlu divalidasi ulang setelah pemilik selesai memperbaiki) — bukan mengubah data secara langsung.</p>
 
@@ -96,4 +95,5 @@
         </div>
     </div>
 </div>
-@endsection
+</div>
+</x-app-layout>

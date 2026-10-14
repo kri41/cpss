@@ -1,17 +1,16 @@
-@extends('layouts.app')
+<x-app-layout>
+    <x-slot name="header">
+        <div class="flex items-center gap-3">
+            <a href="{{ route('kampung.index') }}" class="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 font-medium">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                Kembali
+            </a>
+            <h2 class="text-base font-bold text-gray-800">Kelola Komponen Syarat</h2>
+        </div>
+    </x-slot>
 
-@section('title', 'Komponen Syarat Kampung Olahraga - Dataraga')
-
-@section('content')
+<div class="py-6">
 <div x-data="{ editId: null, editData: {} }" class="max-w-4xl mx-auto px-4 py-4 sm:px-6">
-
-    <div class="mb-4 flex items-center gap-3">
-        <a href="{{ route('kampung.index') }}" class="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 font-medium">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-            Kembali
-        </a>
-        <h1 class="text-base font-bold text-gray-800">Kelola Komponen Syarat</h1>
-    </div>
 
     @if(session('success'))
     <div class="mb-4 p-3 bg-green-50 border border-green-200 rounded-xl text-sm text-green-700">{{ session('success') }}</div>
@@ -154,4 +153,5 @@
         </div>
     </div>
 </div>
-@endsection
+</div>
+</x-app-layout>

@@ -1,12 +1,8 @@
-@extends('layouts.app')
-
-@section('content')
-<div class="py-6">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Header -->
-        <div class="mb-6 flex items-start justify-between gap-4">
+<x-app-layout>
+    <x-slot name="header">
+        <div class="flex items-center justify-between gap-4">
             <div>
-                <h1 class="text-2xl font-bold text-gray-900">Leaderboard</h1>
+                <h2 class="text-2xl font-bold text-gray-900">Leaderboard</h2>
                 <p class="mt-1 text-sm text-gray-500">Peringkat kontributor data keolahragaan</p>
             </div>
             @if(auth()->user()?->isAdmin())
@@ -16,6 +12,10 @@
             </a>
             @endif
         </div>
+    </x-slot>
+
+<div class="py-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         <!-- Top-level Tabs -->
         <div class="mb-6 flex gap-2">
@@ -203,4 +203,4 @@
         @endif
     </div>
 </div>
-@endsection
+</x-app-layout>

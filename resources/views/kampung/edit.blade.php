@@ -1,16 +1,13 @@
-@extends('layouts.app')
-
-@section('title', 'Edit Kampung Olahraga - Dataraga')
-
-@section('content')
-<div class="max-w-2xl mx-auto px-4 py-6 sm:px-6">
-
-    <div class="mb-5">
+<x-app-layout>
+    <x-slot name="header">
         <a href="{{ route('kampung.show', $kampung) }}" class="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 font-medium">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
             Kembali
         </a>
-    </div>
+    </x-slot>
+
+<div class="py-6">
+<div class="max-w-2xl mx-auto px-4 py-6 sm:px-6">
 
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-sky-50">
@@ -82,4 +79,5 @@
         </form>
     </div>
 </div>
-@endsection
+</div>
+</x-app-layout>

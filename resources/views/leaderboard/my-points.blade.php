@@ -1,13 +1,11 @@
-@extends('layouts.app')
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="text-2xl font-bold text-gray-900">Poin & Lencana Saya</h2>
+        <p class="mt-1 text-sm text-gray-500">Riwayat transaksi poin dan pencapaian lencana</p>
+    </x-slot>
 
-@section('content')
 <div class="py-6">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Header -->
-        <div class="mb-6">
-            <h1 class="text-2xl font-bold text-gray-900">Poin & Lencana Saya</h1>
-            <p class="mt-1 text-sm text-gray-500">Riwayat transaksi poin dan pencapaian lencana</p>
-        </div>
 
         <!-- Stats Cards -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
@@ -126,4 +124,4 @@
         </div>
     </div>
 </div>
-@endsection
+</x-app-layout>
