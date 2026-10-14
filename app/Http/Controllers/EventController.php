@@ -61,6 +61,23 @@ class EventController extends Controller
             $query->where('tingkat', $request->tingkat);
         }
 
+        // Filter: status validasi
+        if ($request->filled('status')) {
+            $query->where('status_validasi', $request->status);
+        }
+
+        // Statistik — dari SELURUH hasil filter (bukan cuma 10 item di halaman ini).
+        $now = now();
+        $statsItems = (clone $query)->get(['id', 'status_validasi', 'tanggal_mulai', 'tanggal_selesai']);
+        $stats = [
+            'total' => $statsItems->count(),
+            'akan_datang' => $statsItems->filter(fn ($e) => $e->tanggal_mulai > $now)->count(),
+            'berlangsung' => $statsItems->filter(fn ($e) => $e->tanggal_mulai <= $now && (optional($e->tanggal_selesai)->gte($now) ?? true))->count(),
+            'tervalidasi' => $statsItems->where('status_validasi', 'validated')->count(),
+            'pending' => $statsItems->where('status_validasi', 'pending')->count(),
+            'ditolak' => $statsItems->where('status_validasi', 'rejected')->count(),
+        ];
+
         $events = $query->paginate(10)->withQueryString();
 
         // Data untuk dropdown filter
@@ -74,7 +91,7 @@ class EventController extends Controller
 
         $view = $isDashboard ? 'events.index-dashboard' : 'events.index';
 
-        return view($view, compact('events', 'kabupatenList', 'kecamatanList', 'tingkatList'));
+        return view($view, compact('events', 'kabupatenList', 'kecamatanList', 'tingkatList', 'stats'));
     }
 
     /**
@@ -295,10 +312,23 @@ class EventController extends Controller
 
         $request->validate(['komentar_validasi' => 'required|string|min:5']);
 
+        $statusSebelumnya = $event->status_validasi;
+
         $event->update([
             'status_validasi' => 'rejected',
             'komentar_validasi' => $request->komentar_validasi,
         ]);
+
+        // Sudah pernah valid (dan mungkin sudah dapat poin) -> batalkan poinnya.
+        if ($statusSebelumnya === 'validated') {
+            $tx = PointTransaction::where('related_type', 'event')
+                ->where('related_id', $event->id)
+                ->where('status', 'valid')
+                ->first();
+            if ($tx) {
+                GamificationService::batalkanPoin($tx->id, auth()->id(), 'Data ditolak ulang oleh admin: '.$request->komentar_validasi);
+            }
+        }
 
         UserNotification::create([
             'user_id' => $event->user_id,

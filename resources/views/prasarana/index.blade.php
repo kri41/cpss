@@ -7,11 +7,12 @@
 <div class="sticky top-14 z-30 bg-white/90 backdrop-blur border-b border-gray-200/80">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-4">
         @php
-            $items = $prasarana instanceof \Illuminate\Contracts\Pagination\Paginator ? $prasarana->getCollection() : $prasarana;
-            $totalPrasarana = $prasarana instanceof \Illuminate\Contracts\Pagination\Paginator ? $prasarana->total() : $prasarana->count();
-            $avgKondisi = $items->count() > 0 ? round($items->avg('average_kondisi'), 1) : 0;
-            $wilayahTerbanyak = $items->countBy('kabupaten')->sortDesc()->keys()->first() ?? '-';
-            $tervalidasi = $items->where('status_validasi', 'validated')->count();
+            // Statistik dari $stats (dihitung controller atas SELURUH hasil filter,
+            // bukan cuma halaman yang tampil — lihat PrasaranaController::index()).
+            $totalPrasarana = $stats['total'];
+            $avgKondisi = $stats['avg_kondisi'];
+            $wilayahTerbanyak = $stats['wilayah_terbanyak'];
+            $tervalidasi = $stats['tervalidasi'];
         @endphp
 
         <!-- Stats Cards -->

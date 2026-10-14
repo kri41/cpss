@@ -62,6 +62,11 @@ class ClubController extends Controller
             $query->where('aktif', $request->boolean('aktif'));
         }
 
+        // Filter: status validasi
+        if ($request->filled('status')) {
+            $query->where('status_validasi', $request->status);
+        }
+
         $clubs = $query->paginate(10)->withQueryString();
 
         // Data untuk dropdown filter
@@ -72,13 +77,17 @@ class ClubController extends Controller
         $kabupatenList = (clone $filterQuery)->distinct()->orderBy('kabupaten')->pluck('kabupaten')->filter();
         $kecamatanList = (clone $filterQuery)->when($request->filled('kabupaten'), fn ($q) => $q->where('kabupaten', $request->kabupaten))->distinct()->orderBy('kecamatan')->pluck('kecamatan')->filter();
 
+        // Statistik — dari SELURUH hasil filter (bukan cuma 10 item di halaman ini).
         $totalClubs = (clone $query)->count();
         $activeClubs = (clone $query)->where('aktif', true)->count();
         $clubsWithPrasarana = (clone $query)->whereNotNull('prasarana_id')->count();
+        $validatedClubs = (clone $query)->where('status_validasi', 'validated')->count();
+        $pendingClubs = (clone $query)->where('status_validasi', 'pending')->count();
+        $rejectedClubs = (clone $query)->where('status_validasi', 'rejected')->count();
 
         $view = $isDashboard ? 'clubs.index-dashboard' : 'clubs.index';
 
-        return view($view, compact('clubs', 'totalClubs', 'activeClubs', 'clubsWithPrasarana', 'kabupatenList', 'kecamatanList'));
+        return view($view, compact('clubs', 'totalClubs', 'activeClubs', 'clubsWithPrasarana', 'validatedClubs', 'pendingClubs', 'rejectedClubs', 'kabupatenList', 'kecamatanList'));
     }
 
     /**
@@ -315,10 +324,23 @@ class ClubController extends Controller
 
         $request->validate(['komentar_validasi' => 'required|string|min:5']);
 
+        $statusSebelumnya = $club->status_validasi;
+
         $club->update([
             'status_validasi' => 'rejected',
             'komentar_validasi' => $request->komentar_validasi,
         ]);
+
+        // Sudah pernah valid (dan mungkin sudah dapat poin) -> batalkan poinnya.
+        if ($statusSebelumnya === 'validated') {
+            $tx = PointTransaction::where('related_type', 'club')
+                ->where('related_id', $club->id)
+                ->where('status', 'valid')
+                ->first();
+            if ($tx) {
+                GamificationService::batalkanPoin($tx->id, auth()->id(), 'Data ditolak ulang oleh admin: '.$request->komentar_validasi);
+            }
+        }
 
         UserNotification::create([
             'user_id' => $club->user_id,

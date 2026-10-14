@@ -3,13 +3,8 @@
 @section('title', 'Klub Olahraga - Dataraga')
 
 @section('content')
-@php
-    $items = $clubs instanceof \Illuminate\Contracts\Pagination\Paginator ? $clubs->getCollection() : $clubs;
-    $totalClubs = $clubs instanceof \Illuminate\Contracts\Pagination\Paginator ? $clubs->total() : $clubs->count();
-    $activeClubs = $items->where('aktif', true)->count();
-    $clubsWithPrasarana = $items->whereNotNull('prasarana_id')->count();
-    $validatedClubs = $items->where('status_validasi', 'validated')->count();
-@endphp
+{{-- $totalClubs, $activeClubs, $clubsWithPrasarana, $validatedClubs sudah dikirim
+     controller (ClubController::index()), dihitung dari SELURUH hasil filter. --}}
 
 <!-- Sticky Stats & Filter Bar -->
 <div class="sticky top-14 z-30 bg-white/90 backdrop-blur border-b border-gray-200/80">

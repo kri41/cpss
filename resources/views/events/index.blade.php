@@ -4,11 +4,12 @@
 
 @section('content')
 @php
-    $now = now();
-    $totalEvents = $events->count();
-    $upcomingEvents = $events->filter(fn($e) => $e->tanggal_mulai > $now)->count();
-    $ongoingEvents = $events->filter(fn($e) => $e->tanggal_mulai <= $now && (optional($e->tanggal_selesai)->gte($now) ?? true))->count();
-    $validatedEvents = $events->where('status_validasi', 'validated')->count();
+    // Statistik dari $stats (dihitung controller atas SELURUH hasil filter,
+    // bukan cuma halaman yang tampil — lihat EventController::index()).
+    $totalEvents = $stats['total'];
+    $upcomingEvents = $stats['akan_datang'];
+    $ongoingEvents = $stats['berlangsung'];
+    $validatedEvents = $stats['tervalidasi'];
 @endphp
 
 <!-- Sticky Stats & Filter Bar -->

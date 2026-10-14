@@ -61,6 +61,25 @@ class PrasaranaController extends Controller
             $query->kategoriOlahraga($request->kategori);
         }
 
+        // Filter: status validasi
+        if ($request->filled('status')) {
+            $query->where('status_validasi', $request->status);
+        }
+
+        // Statistik ringkas — dihitung dari SELURUH hasil filter (bukan cuma
+        // 10 item di halaman yang sedang tampil), supaya kartu info akurat.
+        $statsItems = (clone $query)->get(['id', 'kabupaten', 'status_validasi',
+            'kondisi_lantai', 'kondisi_ring', 'kondisi_net', 'kondisi_gawang', 'kondisi_lapangan',
+            'kondisi_ventilasi', 'kondisi_pencahayaan', 'kondisi_kamar_mandi', 'kondisi_tambahan']);
+        $stats = [
+            'total' => $statsItems->count(),
+            'avg_kondisi' => $statsItems->count() ? round($statsItems->avg('average_kondisi'), 1) : 0,
+            'wilayah_terbanyak' => $statsItems->countBy('kabupaten')->sortDesc()->keys()->first() ?? '-',
+            'tervalidasi' => $statsItems->where('status_validasi', 'validated')->count(),
+            'pending' => $statsItems->where('status_validasi', 'pending')->count(),
+            'ditolak' => $statsItems->where('status_validasi', 'rejected')->count(),
+        ];
+
         $prasarana = $query->paginate(10)->withQueryString();
 
         // Data untuk dropdown filter (hanya dari data yang visible)
@@ -74,7 +93,7 @@ class PrasaranaController extends Controller
 
         $view = $isDashboard ? 'prasarana.index-dashboard' : 'prasarana.index';
 
-        return view($view, compact('prasarana', 'kabupatenList', 'kecamatanList', 'kategoriList'));
+        return view($view, compact('prasarana', 'kabupatenList', 'kecamatanList', 'kategoriList', 'stats'));
     }
 
     /**
@@ -400,9 +419,12 @@ class PrasaranaController extends Controller
     }
 
     /**
-     * Tandai data butuh perbaikan (ditolak sementara, bukan penghapusan).
-     * Status kembali bisa diedit pemilik lewat aturan canEdit() yang sudah ada
-     * (hanya validated yang terkunci), lalu admin memvalidasi ulang.
+     * Tolak data (butuh perbaikan / ditolak) — bisa dipanggil dari status
+     * pending MAUPUN validated (menolak data yang sebelumnya sudah valid).
+     * Kalau sebelumnya sudah valid, poin yang sudah diberikan ikut dibatalkan
+     * (sama seperti cancel-validate), supaya relawan tidak tetap berpoin atas
+     * data yang sekarang ditolak. Status kembali bisa diedit pemilik lewat
+     * aturan canEdit() yang sudah ada (hanya validated yang terkunci).
      */
     public function rejectPrasarana(Request $request, Prasarana $prasarana): RedirectResponse
     {
@@ -412,10 +434,23 @@ class PrasaranaController extends Controller
 
         $request->validate(['komentar_validasi' => 'required|string|min:5']);
 
+        $statusSebelumnya = $prasarana->status_validasi;
+
         $prasarana->update([
             'status_validasi' => 'rejected',
             'komentar_validasi' => $request->komentar_validasi,
         ]);
+
+        // Sudah pernah valid (dan mungkin sudah dapat poin) -> batalkan poinnya.
+        if ($statusSebelumnya === 'validated') {
+            $tx = PointTransaction::where('related_type', 'prasarana')
+                ->where('related_id', $prasarana->id)
+                ->where('status', 'valid')
+                ->first();
+            if ($tx) {
+                GamificationService::batalkanPoin($tx->id, auth()->id(), 'Data ditolak ulang oleh admin: '.$request->komentar_validasi);
+            }
+        }
 
         UserNotification::create([
             'user_id' => $prasarana->user_id,

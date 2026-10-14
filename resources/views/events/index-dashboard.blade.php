@@ -1,59 +1,43 @@
-@extends('layouts.app')
+<x-app-layout>
+    <x-slot name="header">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+                <h2 class="text-xl font-bold text-gray-900">Event Olahraga</h2>
+                <p class="text-xs text-gray-500 mt-0.5">Event olahraga yang dilaporkan relawan.</p>
+            </div>
+            @if(auth()->user()?->isAdmin() || auth()->user()?->isRelawan())
+            <a href="{{ route('events.create') }}" class="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition shadow-sm shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                Tambah Event
+            </a>
+            @endif
+        </div>
+    </x-slot>
 
-@section('title', 'Event Olahraga - Dataraga')
-
-@section('content')
-@php
-    $now = now();
-    $totalEvents = $events->count();
-    $upcomingEvents = $events->filter(fn($e) => $e->tanggal_mulai > $now)->count();
-    $ongoingEvents = $events->filter(fn($e) => $e->tanggal_mulai <= $now && (optional($e->tanggal_selesai)->gte($now) ?? true))->count();
-    $validatedEvents = $events->where('status_validasi', 'validated')->count();
-@endphp
-
-<div x-data="{ verifyOpen: false, unverifyOpen: false, rejectOpen: false, selected: null }">
-    <!-- Sticky Stats & Filter Bar -->
-    <div class="sticky top-14 lg:top-0 z-30 bg-white/90 backdrop-blur border-b border-gray-200/80">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-4">
-            <!-- Stats Cards -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 mb-2 sm:mb-4">
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-2 sm:p-3 flex items-center gap-2 sm:gap-3">
-                    <div class="p-2 bg-blue-100 rounded-lg text-blue-600"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg></div>
-                    <div>
-                        <p class="text-xs text-gray-500">Total Event</p>
-                        <p class="text-lg font-bold text-gray-900">{{ $totalEvents }}</p>
-                    </div>
-                </div>
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-2 sm:p-3 flex items-center gap-2 sm:gap-3">
-                    <div class="p-2 bg-amber-100 rounded-lg text-amber-600"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
-                    <div>
-                        <p class="text-xs text-gray-500">Akan Datang</p>
-                        <p class="text-lg font-bold text-gray-900">{{ $upcomingEvents }}</p>
-                    </div>
-                </div>
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-2 sm:p-3 flex items-center gap-2 sm:gap-3">
-                    <div class="p-2 bg-green-100 rounded-lg text-green-600"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg></div>
-                    <div>
-                        <p class="text-xs text-gray-500">Berlangsung</p>
-                        <p class="text-lg font-bold text-gray-900">{{ $ongoingEvents }}</p>
-                    </div>
-                </div>
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-2 sm:p-3 flex items-center gap-2 sm:gap-3">
-                    <div class="p-2 bg-emerald-100 rounded-lg text-emerald-600"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
-                    <div>
-                        <p class="text-xs text-gray-500">Tervalidasi</p>
-                        <p class="text-lg font-bold text-gray-900">{{ $validatedEvents }}</p>
-                    </div>
-                </div>
+<div x-data="{ verifyOpen: false, rejectOpen: false, selected: null }">
+    <!-- Ringkasan + Filter (satu bar ramping) -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-5">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5">
+            <!-- Ringkasan inline -->
+            <div class="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm mb-4 pb-4 border-b border-gray-100">
+                <span class="font-bold text-gray-900">{{ $stats['total'] }}<span class="font-normal text-gray-400 ml-1">total</span></span>
+                <span class="text-gray-300">&middot;</span>
+                <span class="font-semibold text-gray-700">{{ $stats['akan_datang'] }}<span class="font-normal text-gray-400 ml-1">akan datang</span></span>
+                <span class="text-gray-300">&middot;</span>
+                <span class="font-semibold text-gray-700">{{ $stats['berlangsung'] }}<span class="font-normal text-gray-400 ml-1">berlangsung</span></span>
+                <span class="text-gray-300">&middot;</span>
+                <span class="inline-flex items-center gap-1 text-emerald-700 font-semibold"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>{{ $stats['tervalidasi'] }} tervalidasi</span>
+                <span class="inline-flex items-center gap-1 text-amber-700 font-semibold"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>{{ $stats['pending'] }} pending</span>
+                <span class="inline-flex items-center gap-1 text-red-700 font-semibold"><span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>{{ $stats['ditolak'] }} ditolak</span>
             </div>
 
             <!-- Filter Row -->
             <form method="GET" action="{{ route('dashboard.events') }}" class="flex flex-wrap items-end gap-2 sm:gap-3">
-                <div class="w-full">
+                <div class="flex-1 min-w-[160px]">
                     <label class="block text-xs font-medium text-gray-500 mb-1">Cari Event</label>
                     <input type="text" name="search" value="{{ request('search') }}" placeholder="Nama event..." class="w-full rounded-lg border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500 shadow-sm">
                 </div>
-                <div class="flex-1 min-w-[calc(50%-4px)] sm:flex-none sm:min-w-0 sm:w-44">
+                <div class="flex-1 min-w-[calc(50%-4px)] sm:flex-none sm:min-w-0 sm:w-40">
                     <label class="block text-xs font-medium text-gray-500 mb-1">Kabupaten</label>
                     <select name="kabupaten" class="w-full rounded-lg border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500 shadow-sm" onchange="this.form.submit()">
                         <option value="">Semua</option>
@@ -62,7 +46,7 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="flex-1 min-w-[calc(50%-4px)] sm:flex-none sm:min-w-0 sm:w-44">
+                <div class="flex-1 min-w-[calc(50%-4px)] sm:flex-none sm:min-w-0 sm:w-40">
                     <label class="block text-xs font-medium text-gray-500 mb-1">Kecamatan</label>
                     <select name="kecamatan" class="w-full rounded-lg border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500 shadow-sm" onchange="this.form.submit()">
                         <option value="">Semua</option>
@@ -71,7 +55,7 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="flex-1 min-w-[calc(50%-4px)] sm:flex-none sm:min-w-0 sm:w-40">
+                <div class="flex-1 min-w-[calc(50%-4px)] sm:flex-none sm:min-w-0 sm:w-36">
                     <label class="block text-xs font-medium text-gray-500 mb-1">Tingkat</label>
                     <select name="tingkat" class="w-full rounded-lg border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500 shadow-sm" onchange="this.form.submit()">
                         <option value="">Semua</option>
@@ -80,15 +64,18 @@
                         @endforeach
                     </select>
                 </div>
+                <div class="flex-1 min-w-[calc(50%-4px)] sm:flex-none sm:min-w-0 sm:w-36">
+                    <label class="block text-xs font-medium text-gray-500 mb-1">Status</label>
+                    <select name="status" class="w-full rounded-lg border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500 shadow-sm" onchange="this.form.submit()">
+                        <option value="">Semua</option>
+                        <option value="validated" {{ request('status') === 'validated' ? 'selected' : '' }}>Tervalidasi</option>
+                        <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Pending</option>
+                        <option value="rejected" {{ request('status') === 'rejected' ? 'selected' : '' }}>Ditolak</option>
+                    </select>
+                </div>
                 <div class="w-full sm:w-auto flex flex-wrap gap-2">
                     <button type="submit" class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition shadow-sm">Filter</button>
                     <a href="{{ route('dashboard.events') }}" class="px-4 py-2 bg-white border border-gray-300 text-gray-600 text-sm font-medium rounded-lg hover:bg-gray-50 transition shadow-sm">Reset</a>
-                    @if(auth()->user()?->isAdmin() || auth()->user()?->isRelawan())
-                    <a href="{{ route('events.create') }}" class="flex items-center gap-1.5 px-4 py-2 bg-blue-700 text-white text-sm font-medium rounded-lg hover:bg-blue-800 transition shadow-sm">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                        Tambah
-                    </a>
-                    @endif
                 </div>
             </form>
         </div>
@@ -118,6 +105,11 @@
                                     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium {{ $event->tingkat === 'Desa/Kelurahan' ? 'bg-green-50 text-green-700' : ($event->tingkat === 'Kecamatan' ? 'bg-blue-50 text-blue-700' : 'bg-sky-50 text-sky-700') }}">{{ $event->tingkat }}</span>
                                     <span class="inline-flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>{{ $event->desa }}, {{ $event->kecamatan }}</span>
                                 </div>
+                                @if($event->status_validasi === 'rejected' && auth()->user()?->isAdmin() && $event->komentar_validasi)
+                                    <p class="mt-2 text-xs text-red-700 bg-red-50 border border-red-100 rounded-lg px-2.5 py-1.5">
+                                        <strong class="font-semibold">Alasan ditolak:</strong> {{ $event->komentar_validasi }}
+                                    </p>
+                                @endif
                             </div>
                         </div>
                         <div class="flex items-center gap-2 self-end sm:self-start shrink-0">
@@ -139,15 +131,20 @@
                                     @if($event->status_validasi === 'pending')
                                         <button @click="selected = {{ $eventData }}, action: '{{ route('events.validate', $event) }}' }; verifyOpen = true" class="p-2 rounded-lg text-emerald-600 hover:bg-emerald-50 transition-colors" title="Verifikasi"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></button>
                                         <button @click="selected = {{ $eventData }}, action: '{{ route('events.reject', $event) }}' }; rejectOpen = true" class="p-2 rounded-lg text-orange-600 hover:bg-orange-50 transition-colors" title="Butuh Perbaikan"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg></button>
+                                        <form method="POST" action="{{ route('events.destroy', $event) }}" onsubmit="return confirm('Hapus data event ini? Tindakan ini tidak bisa dibatalkan.')">
+                                            @csrf @method('DELETE')
+                                            <button type="submit" class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-red-600 transition-colors" title="Hapus"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
+                                        </form>
                                     @elseif($event->status_validasi === 'validated')
-                                        <button @click="selected = {{ $eventData }}, action: '{{ route('events.cancel-validate', $event) }}' }; unverifyOpen = true" class="p-2 rounded-lg text-red-600 hover:bg-red-50 transition-colors" title="Batalkan Verifikasi"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></button>
+                                        {{-- Sudah valid: cukup Detail + Edit (super admin) + Tolak — tanpa hapus. --}}
+                                        <button @click="selected = {{ $eventData }}, action: '{{ route('events.reject', $event) }}' }; rejectOpen = true" class="p-2 rounded-lg text-red-600 hover:bg-red-50 transition-colors" title="Tolak"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
                                     @elseif($event->status_validasi === 'rejected')
                                         <button @click="selected = {{ $eventData }}, action: '{{ route('events.validate', $event) }}' }; verifyOpen = true" class="p-2 rounded-lg text-emerald-600 hover:bg-emerald-50 transition-colors" title="Verifikasi Ulang"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></button>
+                                        <form method="POST" action="{{ route('events.destroy', $event) }}" onsubmit="return confirm('Hapus data event ini? Tindakan ini tidak bisa dibatalkan.')">
+                                            @csrf @method('DELETE')
+                                            <button type="submit" class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-red-600 transition-colors" title="Hapus"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
+                                        </form>
                                     @endif
-                                    <form method="POST" action="{{ route('events.destroy', $event) }}" onsubmit="return confirm('Hapus data event ini? Tindakan ini tidak bisa dibatalkan.')">
-                                        @csrf @method('DELETE')
-                                        <button type="submit" class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-red-600 transition-colors" title="Hapus"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
-                                    </form>
                                 @endif
                             @endauth
                         </div>
@@ -205,35 +202,7 @@
         </div>
     </div>
 
-    <!-- Modal Batalkan Verifikasi -->
-    <div x-show="unverifyOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 backdrop-blur-sm" @click="unverifyOpen = false">
-        <div class="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 p-6" @click.stop>
-            <h3 class="text-lg font-bold text-gray-900 mb-1">Batalkan Verifikasi</h3>
-            <p class="text-sm text-gray-500 mb-4">Data yang akan dibatalkan verifikasinya:</p>
-
-            <!-- Preview Data -->
-            <div class="bg-gray-50 rounded-lg border border-gray-200 p-4 mb-5 space-y-2 text-sm">
-                <div class="flex justify-between"><span class="text-gray-500">Nama Event</span><span class="font-semibold text-gray-900 text-right max-w-[60%]" x-text="selected?.nama"></span></div>
-                <div class="flex justify-between"><span class="text-gray-500">Tanggal Mulai</span><span class="font-medium text-gray-900" x-text="selected?.tanggal"></span></div>
-                <div class="flex justify-between"><span class="text-gray-500">Tanggal Selesai</span><span class="font-medium text-gray-900" x-text="selected?.selesai"></span></div>
-                <div class="flex justify-between"><span class="text-gray-500">Tingkat</span><span class="font-medium text-gray-900" x-text="selected?.tingkat"></span></div>
-                <div class="flex justify-between"><span class="text-gray-500">Wilayah</span><span class="font-medium text-gray-900 text-right max-w-[60%]" x-text="selected?.wilayah"></span></div>
-                <div class="flex justify-between"><span class="text-gray-500">Status Saat Ini</span><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-100">Tervalidasi</span></div>
-            </div>
-
-            <form :action="selected?.action" method="POST">
-                @csrf
-                <input type="hidden" name="_method" value="PATCH">
-                <p class="text-sm text-gray-600 mb-5">Apakah Anda yakin ingin membatalkan verifikasi data ini? Data akan kembali ke status <strong>Pending</strong>.</p>
-                <div class="flex justify-end gap-2">
-                    <button type="button" @click="unverifyOpen = false" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition">Batal</button>
-                    <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition shadow-sm">Batalkan Verifikasi</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal Butuh Perbaikan -->
+    <!-- Modal Butuh Perbaikan / Tolak -->
     <div x-show="rejectOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 backdrop-blur-sm" @click="rejectOpen = false">
         <div class="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 p-6" @click.stop>
             <h3 class="text-lg font-bold text-gray-900 mb-1">Tandai Butuh Perbaikan</h3>
@@ -261,4 +230,4 @@
         </div>
     </div>
 </div>
-@endsection
+</x-app-layout>
