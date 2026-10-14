@@ -6,11 +6,13 @@ use App\Models\AuditLog;
 use App\Models\CheckinKampung;
 use App\Models\Club;
 use App\Models\Event;
+use App\Models\KampungOlahraga;
 use App\Models\Partisipasi;
 use App\Models\Pengumuman;
 use App\Models\Prasarana;
 use App\Models\Talenta;
 use App\Models\TenagaAhli;
+use App\Models\User;
 use App\Support\RisetLogger;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
@@ -27,14 +29,30 @@ class DashboardController extends Controller
     public function index(): View
     {
         // Statistik total
+        $checkinCount = CheckinKampung::count();
         $stats = [
             'total_prasarana' => Prasarana::count(),
+            'prasarana_validated' => Prasarana::validated()->count(),
             'total_clubs' => Club::count(),
-            'total_partisipasi' => Partisipasi::totalPartisipasi(),
+            'clubs_validated' => Club::validated()->count(),
+            'total_kampung' => KampungOlahraga::count(),
+            'kampung_validated' => KampungOlahraga::validated()->count(),
+            // Gabungan observasi manual (estimasi kerumunan) + check-in QR riil
+            // (per orang) — dua-duanya sama-sama mengukur "orang yang berpartisipasi",
+            // cuma beda metode pengumpulan, jadi aman dijumlah jadi satu angka.
+            'total_partisipasi' => Partisipasi::totalPartisipasi() + $checkinCount,
+            'partisipasi_checkin' => $checkinCount,
             'total_events' => Event::count(),
+            'events_validated' => Event::validated()->count(),
             'total_talenta' => Talenta::count(),
             'total_tenaga_ahli' => TenagaAhli::count(),
         ];
+
+        $topRelawan = User::where('role', 'relawan')
+            ->where('total_poin', '>', 0)
+            ->orderByDesc('total_poin')
+            ->take(5)
+            ->get(['id', 'name', 'total_poin']);
 
         // Tren partisipasi 6 bulan terakhir — digabung dari DUA sumber supaya
         // tidak "0 terus" padahal sebenarnya ada aktivitas: (1) observasi manual
@@ -140,6 +158,7 @@ class DashboardController extends Controller
 
         return view('dashboard', compact(
             'stats',
+            'topRelawan',
             'partisipasiPerBulan',
             'trenPartisipasi',
             'upcomingEvents',

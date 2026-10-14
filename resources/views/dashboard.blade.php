@@ -95,7 +95,7 @@
             @endif
 
             <!-- Statistik Cards -->
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4 mb-8">
                 <a href="{{ route('prasarana.index') }}" class="group bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md hover:border-blue-200 transition-all">
                     <div class="flex items-center justify-between mb-3">
                         <div class="p-2 bg-blue-100 rounded-lg group-hover:bg-blue-200 transition-colors">
@@ -104,6 +104,7 @@
                         <span class="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded-full">{{ $stats['total_prasarana'] }}</span>
                     </div>
                     <p class="text-sm font-medium text-gray-600">Prasarana</p>
+                    <p class="text-[11px] text-emerald-600 mt-0.5">{{ $stats['prasarana_validated'] }} tervalidasi</p>
                 </a>
 
                 <a href="{{ route('clubs.index') }}" class="group bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md hover:border-sky-200 transition-all">
@@ -114,6 +115,18 @@
                         <span class="text-xs font-medium text-sky-600 bg-sky-50 px-2 py-1 rounded-full">{{ $stats['total_clubs'] ?? 0 }}</span>
                     </div>
                     <p class="text-sm font-medium text-gray-600">Clubs</p>
+                    <p class="text-[11px] text-emerald-600 mt-0.5">{{ $stats['clubs_validated'] }} tervalidasi</p>
+                </a>
+
+                <a href="{{ route('kampung.index') }}" class="group bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md hover:border-indigo-200 transition-all">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="p-2 bg-indigo-100 rounded-lg group-hover:bg-indigo-200 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+                        </div>
+                        <span class="text-xs font-medium text-indigo-600 bg-indigo-50 px-2 py-1 rounded-full">{{ $stats['total_kampung'] }}</span>
+                    </div>
+                    <p class="text-sm font-medium text-gray-600">Kampung Olahraga</p>
+                    <p class="text-[11px] text-emerald-600 mt-0.5">{{ $stats['kampung_validated'] }} tervalidasi</p>
                 </a>
 
                 <div class="group bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
@@ -124,6 +137,7 @@
                         <span class="text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">{{ number_format($stats['total_partisipasi']) }}</span>
                     </div>
                     <p class="text-sm font-medium text-gray-600">Partisipasi</p>
+                    <p class="text-[11px] text-gray-400 mt-0.5">{{ number_format($stats['partisipasi_checkin']) }} dari check-in QR</p>
                 </div>
 
                 <a href="{{ route('events.index') }}" class="group bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md hover:border-orange-200 transition-all">
@@ -134,6 +148,7 @@
                         <span class="text-xs font-medium text-orange-600 bg-orange-50 px-2 py-1 rounded-full">{{ $stats['total_events'] }}</span>
                     </div>
                     <p class="text-sm font-medium text-gray-600">Events</p>
+                    <p class="text-[11px] text-emerald-600 mt-0.5">{{ $stats['events_validated'] }} tervalidasi</p>
                 </a>
 
                 <a href="{{ route('talenta.index') }}" class="group bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md hover:border-yellow-200 transition-all">
@@ -182,7 +197,7 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
                 <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100">
                     <div class="p-6 border-b border-gray-100">
                         <div class="flex items-center justify-between">
@@ -227,6 +242,37 @@
                     <h3 class="text-lg font-bold text-gray-900 mb-2">Partisipasi by Usia</h3>
                     <p class="text-sm text-gray-500 mb-6">Distribusi usia peserta check-in Kampung Olahraga</p>
                     <div class="h-48"><canvas id="usiaChart"></canvas></div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
+                    <div class="p-6 border-b border-gray-100">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900">Top Relawan</h3>
+                                <p class="text-sm text-gray-500">Berdasarkan total poin</p>
+                            </div>
+                            <div class="p-2 bg-amber-50 rounded-lg"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg></div>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        @if($topRelawan->isNotEmpty())
+                            <ol class="space-y-3">
+                                @foreach($topRelawan as $i => $relawan)
+                                    <li class="flex items-center gap-3">
+                                        <span class="shrink-0 w-6 h-6 flex items-center justify-center rounded-full text-xs font-bold
+                                            {{ $i === 0 ? 'bg-amber-100 text-amber-700' : ($i === 1 ? 'bg-gray-100 text-gray-600' : ($i === 2 ? 'bg-orange-50 text-orange-600' : 'bg-gray-50 text-gray-400')) }}">{{ $i + 1 }}</span>
+                                        <span class="flex-1 min-w-0 text-sm font-medium text-gray-800 truncate">{{ $relawan->name }}</span>
+                                        <span class="shrink-0 text-xs font-semibold text-blue-600">{{ number_format($relawan->total_poin) }} poin</span>
+                                    </li>
+                                @endforeach
+                            </ol>
+                            <a href="{{ route('leaderboard.index') }}" class="mt-5 block text-center text-sm text-blue-600 hover:text-blue-800 font-medium">Lihat Papan Peringkat</a>
+                        @else
+                            <div class="text-center py-6">
+                                <p class="text-sm text-gray-400">Belum ada relawan dengan poin.</p>
+                            </div>
+                        @endif
+                    </div>
                 </div>
             </div>
 
