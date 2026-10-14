@@ -77,6 +77,12 @@ class Club extends Model
         return $this->changeRequests()->pending()->latest()->first();
     }
 
+    /** Usulan perubahan terakhir yang disetujui — dipakai utk badge "Sudah Direvisi". */
+    public function approvedChangeRequest(): ?ChangeRequest
+    {
+        return $this->changeRequests()->where('status', 'approved')->latest('reviewed_at')->first();
+    }
+
     /**
      * Relasi ke Jenis Olahraga (untuk auto-fill saat check-in)
      */
@@ -107,9 +113,9 @@ class Club extends Model
     public function scopeSameWilayahAs($query, KampungOlahraga $kampung)
     {
         return $query
-            ->when($kampung->kabupaten, fn($q) => $q->whereRaw('LOWER(TRIM(kabupaten)) = ?', [strtolower(trim($kampung->kabupaten))]))
-            ->when($kampung->kecamatan, fn($q) => $q->whereRaw('LOWER(TRIM(kecamatan)) = ?', [strtolower(trim($kampung->kecamatan))]))
-            ->when($kampung->desa, fn($q) => $q->whereRaw('LOWER(TRIM(desa)) = ?', [strtolower(trim($kampung->desa))]));
+            ->when($kampung->kabupaten, fn ($q) => $q->whereRaw('LOWER(TRIM(kabupaten)) = ?', [strtolower(trim($kampung->kabupaten))]))
+            ->when($kampung->kecamatan, fn ($q) => $q->whereRaw('LOWER(TRIM(kecamatan)) = ?', [strtolower(trim($kampung->kecamatan))]))
+            ->when($kampung->desa, fn ($q) => $q->whereRaw('LOWER(TRIM(desa)) = ?', [strtolower(trim($kampung->desa))]));
     }
 
     /**
@@ -152,9 +158,10 @@ class Club extends Model
      */
     public function getUmurAttribute()
     {
-        if (!$this->tanggal_berdiri) {
+        if (! $this->tanggal_berdiri) {
             return null;
         }
+
         return $this->tanggal_berdiri->diffInYears(now());
     }
 }

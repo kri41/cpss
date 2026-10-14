@@ -157,17 +157,6 @@
                                     Komponen Syarat
                                 </a>
 
-                                <a href="{{ route('change-requests.index') }}" class="flex items-center justify-between px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 {{ request()->routeIs('change-requests.*') ? 'bg-white/15 text-white' : 'text-white/75 hover:bg-white/10 hover:text-white' }}">
-                                    <span class="flex items-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 {{ request()->routeIs('change-requests.*') ? 'text-sky-300' : 'text-white/40' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                        Usulan Perubahan
-                                    </span>
-                                    @php $pendingChangeRequests = \App\Models\ChangeRequest::where('status','pending')->count(); @endphp
-                                    @if($pendingChangeRequests > 0)
-                                        <span class="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">{{ $pendingChangeRequests }}</span>
-                                    @endif
-                                </a>
-
                                 <a href="{{ route('pengumuman.index') }}" class="flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 {{ request()->routeIs('pengumuman.*') ? 'bg-white/15 text-white' : 'text-white/75 hover:bg-white/10 hover:text-white' }}">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 {{ request()->routeIs('pengumuman.*') ? 'text-sky-300' : 'text-white/40' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
                                     Pengumuman

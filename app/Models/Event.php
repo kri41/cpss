@@ -54,6 +54,12 @@ class Event extends Model
         return $this->changeRequests()->pending()->latest()->first();
     }
 
+    /** Usulan perubahan terakhir yang disetujui — dipakai utk badge "Sudah Direvisi". */
+    public function approvedChangeRequest(): ?ChangeRequest
+    {
+        return $this->changeRequests()->where('status', 'approved')->latest('reviewed_at')->first();
+    }
+
     /**
      * Scope untuk filter berdasarkan tingkat event
      */
@@ -68,7 +74,7 @@ class Event extends Model
     public function scopeAkanDatang($query)
     {
         return $query->where('tanggal_mulai', '>=', now()->format('Y-m-d'))
-                     ->orderBy('tanggal_mulai', 'asc');
+            ->orderBy('tanggal_mulai', 'asc');
     }
 
     /**
@@ -77,10 +83,10 @@ class Event extends Model
     public function scopeBerlangsung($query)
     {
         return $query->where('tanggal_mulai', '<=', now()->format('Y-m-d'))
-                     ->where(function($q) {
-                         $q->whereNull('tanggal_selesai')
-                           ->orWhere('tanggal_selesai', '>=', now()->format('Y-m-d'));
-                     });
+            ->where(function ($q) {
+                $q->whereNull('tanggal_selesai')
+                    ->orWhere('tanggal_selesai', '>=', now()->format('Y-m-d'));
+            });
     }
 
     /**
@@ -97,15 +103,15 @@ class Event extends Model
     public function getStatusAttribute(): string
     {
         $now = now()->format('Y-m-d');
-        
+
         if ($this->tanggal_mulai > $now) {
             return 'Akan Datang';
         }
-        
+
         if ($this->tanggal_selesai && $this->tanggal_selesai < $now) {
             return 'Selesai';
         }
-        
+
         return 'Berlangsung';
     }
 }

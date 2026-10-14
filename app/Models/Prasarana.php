@@ -141,6 +141,12 @@ class Prasarana extends Model
         return $this->changeRequests()->pending()->latest()->first();
     }
 
+    /** Usulan perubahan terakhir yang disetujui — dipakai utk badge "Sudah Direvisi". */
+    public function approvedChangeRequest(): ?ChangeRequest
+    {
+        return $this->changeRequests()->where('status', 'approved')->latest('reviewed_at')->first();
+    }
+
     /**
      * Relasi ke Kampung Olahraga (fasil ini terdaftar di rumah kampung mana)
      */
