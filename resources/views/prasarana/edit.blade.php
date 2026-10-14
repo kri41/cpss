@@ -44,23 +44,9 @@
                         <!-- Lokasi & Peta -->
                         <div>
                             <h3 class="text-lg font-semibold text-slate-800 mb-4">Lokasi</h3>
-                            <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
-                            <div class="mb-4">
-                                <div id="map" class="w-full h-64 rounded-xl border border-slate-200 z-0"></div>
-                                <p class="text-xs text-slate-500 mt-1">Klik pada peta untuk mengisi koordinat latitude dan longitude.</p>
-                            </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <label for="latitude" class="block text-sm font-medium text-slate-700">Latitude</label>
-                                    <input id="latitude" type="number" step="any" name="latitude" value="{{ old('latitude', $prasarana->latitude) }}" class="mt-1 block w-full rounded-lg border-slate-300 focus:border-sky-500 focus:ring-sky-500 shadow-sm" placeholder="-6.123456">
-                                    @error('latitude')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
-                                </div>
-                                <div>
-                                    <label for="longitude" class="block text-sm font-medium text-slate-700">Longitude</label>
-                                    <input id="longitude" type="number" step="any" name="longitude" value="{{ old('longitude', $prasarana->longitude) }}" class="mt-1 block w-full rounded-lg border-slate-300 focus:border-sky-500 focus:ring-sky-500 shadow-sm" placeholder="106.123456">
-                                    @error('longitude')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
-                                </div>
-                            </div>
+                            <x-map-picker :lat="old('latitude', $prasarana->latitude)" :lng="old('longitude', $prasarana->longitude)" />
+                            @error('latitude')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                            @error('longitude')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                             <div class="mt-4">
                                 <label for="alamat" class="block text-sm font-medium text-slate-700">Alamat Lengkap</label>
                                 <textarea id="alamat" name="alamat" rows="2" class="mt-1 block w-full rounded-lg border-slate-300 focus:border-sky-500 focus:ring-sky-500 shadow-sm" placeholder="Jalan, RT/RW, patokan">{{ old('alamat', $prasarana->alamat) }}</textarea>
@@ -269,39 +255,8 @@
         }
     }
     </script>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // --- Leaflet Map ---
-            const defaultLat = parseFloat(document.getElementById('latitude').value) || -6.2;
-            const defaultLng = parseFloat(document.getElementById('longitude').value) || 106.8;
-            const map = L.map('map').setView([defaultLat, defaultLng], 13);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; OpenStreetMap contributors'
-            }).addTo(map);
-
-            let marker = null;
-            const latInput = document.getElementById('latitude');
-            const lngInput = document.getElementById('longitude');
-
-            function setMarker(lat, lng) {
-                if (marker) map.removeLayer(marker);
-                marker = L.marker([lat, lng]).addTo(map);
-            }
-
-            map.on('click', function(e) {
-                const lat = e.latlng.lat.toFixed(6);
-                const lng = e.latlng.lng.toFixed(6);
-                latInput.value = lat;
-                lngInput.value = lng;
-                setMarker(lat, lng);
-            });
-
-            if (latInput.value && lngInput.value) {
-                setMarker(parseFloat(latInput.value), parseFloat(lngInput.value));
-                map.setView([parseFloat(latInput.value), parseFloat(lngInput.value)], 15);
-            }
-
             // --- Star Rating ---
             const ratingLabels = {1: 'Buruk Sekali', 2: 'Buruk', 3: 'Cukup', 4: 'Baik', 5: 'Baik Sekali'};
             const ratingColors = ['', 'text-red-400', 'text-orange-400', 'text-yellow-400', 'text-sky-400', 'text-emerald-400'];

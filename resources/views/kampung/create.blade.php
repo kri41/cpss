@@ -64,18 +64,10 @@
                 </div>
             </div>
 
-            {{-- Koordinat (opsional) --}}
-            <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Latitude <span class="text-xs text-gray-400">(opsional)</span></label>
-                    <input type="number" name="latitude" value="{{ old('latitude') }}" step="0.00000001" placeholder="-7.12345678"
-                        class="w-full rounded-xl border-gray-300 focus:border-blue-500 focus:ring-blue-500 text-sm shadow-sm">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Longitude <span class="text-xs text-gray-400">(opsional)</span></label>
-                    <input type="number" name="longitude" value="{{ old('longitude') }}" step="0.00000001" placeholder="112.98765432"
-                        class="w-full rounded-xl border-gray-300 focus:border-blue-500 focus:ring-blue-500 text-sm shadow-sm">
-                </div>
+            {{-- Koordinat (opsional) — klik peta atau pakai GPS, tidak perlu isi manual --}}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Lokasi di Peta <span class="text-xs text-gray-400">(opsional)</span></label>
+                <x-map-picker :lat="old('latitude')" :lng="old('longitude')" />
             </div>
 
             <div class="pt-2">

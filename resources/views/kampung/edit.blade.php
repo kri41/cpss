@@ -57,17 +57,9 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Latitude</label>
-                    <input type="number" name="latitude" value="{{ old('latitude', $kampung->latitude) }}" step="0.00000001"
-                        class="w-full rounded-xl border-gray-300 focus:border-blue-500 focus:ring-blue-500 text-sm shadow-sm">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Longitude</label>
-                    <input type="number" name="longitude" value="{{ old('longitude', $kampung->longitude) }}" step="0.00000001"
-                        class="w-full rounded-xl border-gray-300 focus:border-blue-500 focus:ring-blue-500 text-sm shadow-sm">
-                </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Lokasi di Peta <span class="text-xs text-gray-400">(opsional)</span></label>
+                <x-map-picker :lat="old('latitude', $kampung->latitude)" :lng="old('longitude', $kampung->longitude)" />
             </div>
 
             <div class="pt-2 flex gap-3">
